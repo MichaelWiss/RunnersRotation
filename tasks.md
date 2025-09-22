@@ -1,6 +1,26 @@
 # VELOCITY Running - Future Tasks & Improvements
 
-## 🔄 Immediate Tasks
+## � Current Sprint
+
+### Component Architecture Issues
+- [x] ~~Restructure component architecture to eliminate spaghetti code~~
+- [x] ~~Create proper Header/Footer layout components with props~~
+- [x] ~~Inline page-specific sections instead of artificial component abstractions~~
+- [x] ~~Fix Featured Runner section to use shared ProductGallery/PurchaseCard components~~
+- [x] ~~Add product.css styles to homepage for proper component rendering~~
+- [x] ~~Create demo product route for testing without Shopify dependency~~
+- [ ] **Fix broken Header and Footer components** (styling, functionality, integration)
+- [ ] Update documentation (done.md, velocity-hydrogen-scaffold.md)
+- [ ] Test and verify all interactive elements work correctly
+
+### Documentation & Project State
+- [x] ~~Updated velocity-hydrogen-scaffold.md for React Router 7 + Hydrogen 2025 stack~~
+- [x] ~~Removed Remix/Oxygen references and fixed import examples~~
+- [ ] Complete documentation updates with recent fixes
+- [ ] Update done.md with component restructure work
+- [ ] Document component sharing patterns and CSS dependencies
+
+## �🔄 Immediate Tasks
 
 ### Content & Assets
 - [ ] Replace placeholder product images with real running shoe photography

@@ -85,16 +85,8 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <Meta />
         <Links />
       </head>
-      <body>
-        {data ? (
-          <div className="PageLayout">
-            <h1>{shop?.name} (skeleton)</h1>
-            <h2>{shop?.description}</h2>
-            {children}
-          </div>
-        ) : (
-          children
-        )}
+      <body className="page-container">
+        {children}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>

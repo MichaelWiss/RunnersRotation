@@ -70,7 +70,7 @@ function handleBotRequest(
           responseHeaders.set('Content-Security-Policy', header);
 
           resolve(
-            new Response(body, {
+            new Response(body as unknown as BodyInit, {
               headers: responseHeaders,
               status: responseStatusCode,
             }),
@@ -120,7 +120,7 @@ function handleBrowserRequest(
           responseHeaders.set('Content-Security-Policy', header);
 
           resolve(
-            new Response(body, {
+            new Response(body as unknown as BodyInit, {
               headers: responseHeaders,
               status: responseStatusCode,
             }),

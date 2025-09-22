@@ -1,4 +1,4 @@
-import {type LinksFunction, type LoaderFunctionArgs, useLoaderData, useNavigate} from 'react-router';
+import {LinksFunction, useNavigate} from 'react-router';
 import {useEffect} from 'react';
 import productStyles from '~/styles/product.css?url';
 import Header from '~/components/Header';
@@ -6,42 +6,14 @@ import Footer from '~/components/Footer';
 import ProductGallery from '~/components/ProductGallery';
 import PurchaseCard from '~/components/PurchaseCard';
 
-export async function loader({params, context}: LoaderFunctionArgs) {
-  const {handle} = params;
-  const {storefront} = context;
-
-  if (!handle) {
-    throw new Error('Expected product handle to be defined');
-  }
-
-  const {product} = await storefront.query(
-    `#graphql
-    query Product( $handle: String!) {
-      product(handle: $handle) {
-        id
-        title
-        descriptionHtml
-      }
-    }`,
-    {variables: {handle}},
-  );
-
-  if (!product?.id) {
-    throw new Response(null, {status: 404});
-  }
-
-  return {product};
-}
-
 export const links: LinksFunction = () => [
   {rel: 'stylesheet', href: productStyles},
 ];
 
-export default function Product() {
+export default function DemoProduct() {
   const navigate = useNavigate();
-  const {product} = useLoaderData<typeof loader>();
 
-  // Interactions: pills toggle, qty +/- and thumbnails update main-img
+  // Product component interactions (same as product page)
   useEffect(() => {
     const onPill = (e: MouseEvent) => {
       const pill = (e.target as HTMLElement).closest('.pill') as HTMLElement | null;

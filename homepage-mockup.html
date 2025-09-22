@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Velocity Running — Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* --- Palette --- */
+    :root{
+      --bg: #f7efe6;
+      --panel: #0b2545;
+      --accent: #e94c26;
+      --muted: #6b3f2f;
+      --card: #fff3e8;
+      --line: #f1d7c7;
+      --cta-hover: #c83b1a;
+      --glass: rgba(11,37,69,0.06);
+      /* sharp corners */
+      --radius: 0px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: linear-gradient(180deg,var(--bg),#f6e9df 60%);
+      color:var(--panel);
+      line-height:1.45;
+      padding:48px;
+    }
+
+    .container{
+      max-width:1200px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: 1fr 380px;
+      gap:40px;
+      align-items:start;
+    }
+
+    .gallery{
+      background:linear-gradient(180deg,var(--card), rgba(233,76,38,0.02));
+      border-radius:0;
+      padding:28px;
+      box-shadow: 0 8px 30px var(--glass);
+      display:flex;
+      gap:28px;
+    }
+
+    .images .main-img{ border-radius:0; }
+    .thumb{ border-radius:0; }
+    .info-grid{ border-radius:0; }
+    .card{ border-radius:0; }
+    .pill{ border-radius:0; }
+    .qty button, .qty input{ border-radius:0; }
+    .add-to-cart{ border-radius:0; }
+    .reviews{ border-radius:0; }
+
+    /* Navigation Header */
+    .header{ position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(247,239,230,0.95); backdrop-filter: blur(20px); border-bottom:1px solid var(--line); }
+    .nav-container{ max-width:1200px; margin:0 auto; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; background:none; }
+    .logo{ font-family:'Playfair Display', serif; font-size:28px; font-weight:700; color:var(--panel); text-decoration:none; font-style:italic; }
+    .nav-menu{ display:flex; gap:16px; border:1px solid var(--line); border-radius:0; overflow:hidden; }
+    .nav-menu a{ display:block; padding:12px 16px; color:var(--panel); text-decoration:none; font-weight:500; }
+    .nav-menu a:hover{ background: rgba(233,76,38,0.08); color:var(--accent); }
+
+    /* Hero Section */
+    .hero-section{ padding:80px 24px; text-align:center; }
+    .hero-card{ background:var(--card); border-radius:0; padding:60px 40px; box-shadow:0 18px 50px rgba(11,37,69,0.06); border:1px solid var(--line); position:relative; }
+    .hero-card::before{ height:4px; background:var(--accent); content:''; position:absolute; top:0; left:0; right:0; }
+    .hero-badge{ border-radius:0; }
+    .hero-title{ font-size:64px; }
+    .hero-subtitle{ font-size:18px; color:var(--muted); }
+
+    /* Footer */
+    .footer{ margin-top:80px; text-align:center; color:var(--muted); font-size:14px; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="nav-container">
+      <a href="#" class="logo">VELOCITY</a>
+      <nav class="nav-menu">
+        <a href="#">Home</a>
+        <a href="#">Shop</a>
+        <a href="#">About</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="hero-section">
+    <div class="hero-card">
+      <div class="hero-badge">New Arrival</div>
+      <h1 class="hero-title">Trail Runner Pro</h1>
+      <p class="hero-subtitle">Engineered for ultimate endurance on rugged terrain.</p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    &copy; 2025 VELOCITY Running. All rights reserved.
+  </footer>
+</body>
+</html>

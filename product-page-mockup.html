@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Velocity Running — Product</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* --- Palette and Sharp Corners --- */
+    :root{
+      --bg: #f7efe6;
+      --panel: #0b2545;
+      --accent: #e94c26;
+      --muted: #6b3f2f;
+      --card: #fff3e8;
+      --line: #f1d7c7;
+      --glass: rgba(11,37,69,0.06);
+      --cta-hover: #c83b1a;
+      --radius: 0px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html,body{height:100%;background: linear-gradient(180deg,var(--bg),#f6e9df 60%);font-family:Inter, system-ui, -apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;color:var(--panel);line-height:1.45;}
+
+    /* Header & Nav from design(3) with sharp corners */
+    .header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(247,239,230,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);}
+    .nav-container{max-width:1200px;margin:0 auto;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;}
+    .logo{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--panel);text-decoration:none;font-style:italic;}
+    .nav-menu{display:flex;gap:16px;border:1px solid var(--line);border-radius:0;overflow:hidden;}
+    .nav-menu a{display:block;padding:12px 16px;color:var(--panel);text-decoration:none;font-weight:500;transition:background .3s ease;}
+    .nav-menu a:hover{background:rgba(233,76,38,0.08);color:var(--accent);}
+
+    /* Layout grid */
+    .container{max-width:1200px;margin:120px auto 80px;padding:0 24px;display:grid;grid-template-columns:1fr 380px;gap:40px;align-items:start;}
+
+    /* Product gallery from design(1) with sharp corners */
+    .product-gallery{background:var(--card-gradient, var(--card));padding:32px;box-shadow:0 8px 30px var(--glass);border:1px solid var(--line);border-radius:0;display:flex;gap:32px;}
+    .gallery-images{width:50%;display:flex;flex-direction:column;gap:16px;}
+    .main-image{flex:1;height:420px;background:linear-gradient(135deg,var(--panel),var(--muted));border:6px solid var(--line);border-radius:0;box-shadow:0 6px 20px rgba(11,37,69,0.12);display:flex;align-items:center;justify-content:center;color:var(--card);font-size:24px;font-weight:800;}
+    .thumb-row{display:flex;gap:12px;}
+    .thumb{flex:1;height:72px;background:linear-gradient(135deg,var(--accent),var(--cta-hover));border:4px solid var(--line);border-radius:0;box-shadow:0 4px 12px rgba(11,37,69,0.06);cursor:pointer;transition:transform .3s ease;}
+    .thumb:hover{transform:scale(1.05);border-color:var(--accent);}
+
+    /* Info & purchase card */
+    .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 20px;padding:14px;border:1px solid var(--line);border-radius:0;background:rgba(233,76,38,0.02);margin-top:8px;}
+    .info-grid b{display:block;font-size:13px;}
+    .info-grid span{font-size:14px;color:var(--muted);}
+
+    .purchase-card{background:var(--card);padding:22px;box-shadow:0 18px 50px rgba(11,37,69,0.06);border:1px solid var(--line);border-radius:0;display:flex;flex-direction:column;gap:12px;position:sticky;top:80px;}
+    .price-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;}
+    .price{font-size:28px;font-weight:800;}
+    .old{font-size:13px;text-decoration:line-through;color:var(--muted);opacity:.9;}
+    .selectors{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
+    .pill{padding:8px 12px;border:2px solid transparent;background:linear-gradient(90deg,#ffe9dd,#fff1e6);font-weight:600;cursor:pointer;font-size:14px;color:var(--panel);border-radius:0;transition:box-shadow .3s ease;}
+    .pill.active,.pill:focus{outline:none;box-shadow:0 6px 18px rgba(233,76,38,0.12);border-color:var(--accent);}
+    .qty{display:flex;align-items:center;gap:8px;margin-top:6px;}
+    .qty button{width:40px;height:40px;border:none;background:var(--panel);color:var(--card);font-weight:700;cursor:pointer;border-radius:0;transition:background .3s ease;}
+    .qty input{width:56px;height:40px;border:1px solid var(--line);text-align:center;background:var(--card);border-radius:0;}
+    .add-to-cart{width:100%;padding:14px 16px;border:none;background:linear-gradient(90deg,var(--accent),#ff7a4a);color:var(--card);font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 10px 30px rgba(232,88,52,0.18);border-radius:0;transition:transform .14s ease;}
+    .add-to-cart:hover{transform:translateY(-2px);box-shadow:0 18px 48px rgba(200,60,30,0.2);background:linear-gradient(90deg,var(--cta-hover),#ff6b3a);}
+
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="nav-container">
+      <a href="#" class="logo">VELOCITY</a>
+      <nav class="nav-menu">
+        <a href="#">Home</a>
+        <a href="#">Shop</a>
+        <a href="#">About</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="product-gallery">
+      <div class="gallery-images">
+        <div class="main-image">Product Image</div>
+        <div class="thumb-row">
+          <div class="thumb"></div>
+          <div class="thumb"></div>
+          <div class="thumb"></div>
+        </div>
+      </div>
+      <div>
+        <h1>Trail Runner Pro</h1>
+        <p class="subtitle" style="color:var(--muted);margin:16px 0;">Engineered for ultimate endurance on rugged terrain.</p>
+        <div class="info-grid">
+          <b>Weight</b><span>240g</span>
+          <b>Stack Height</b><span>30mm</span>
+          <b>Drop</b><span>8mm</span>
+          <b>Material</b><span>Vegan Leather</span>
+        </div>
+      </div>
+    </section>
+    <aside class="purchase-card">
+      <div class="price-row"><div class="price">$180</div><div class="old">$200</div></div>
+      <div class="selectors">
+        <div style="font-weight:600;">Size</div>
+        <div style="display:flex;gap:8px;"><div class="pill">8</div><div class="pill active">9</div><div class="pill">10</div></div>
+      </div>
+      <div class="qty">
+        <button>-</button>
+        <input type="number" value="1" min="1" />
+        <button>+</button>
+      </div>
+      <button class="add-to-cart">Add to Cart</button>
+    </aside>
+  </main>
+</body>
+</html>

@@ -1,24 +1,59 @@
-# VELOCITY Running - Future Tasks & Improvements
+# VELOCITY Running - Modern Hydrogen Architecture Migration
 
-## � Current Sprint
+## 🔧 Current Sprint: Server/Client Component Rebuild
 
-### Component Architecture Issues
-- [x] ~~Restructure component architecture to eliminate spaghetti code~~
-- [x] ~~Create proper Header/Footer layout components with props~~
-- [x] ~~Inline page-specific sections instead of artificial component abstractions~~
-- [x] ~~Fix Featured Runner section to use shared ProductGallery/PurchaseCard components~~
-- [x] ~~Add product.css styles to homepage for proper component rendering~~
-- [x] ~~Create demo product route for testing without Shopify dependency~~
-- [ ] **Fix broken Header and Footer components** (styling, functionality, integration)
-- [ ] Update documentation (done.md, velocity-hydrogen-scaffold.md)
-- [ ] Test and verify all interactive elements work correctly
+### Architecture Migration (IN PROGRESS)
+- [x] ~~Identified mixed server/client component issues~~
+- [x] ~~Defined proper server/client component architecture~~
+- [x] ~~Created component conversion mapping and file structure plan~~
+- [ ] **Rebuild Header as Header.client.tsx + AnnouncementBar.server.tsx**
+- [ ] **Convert homepage to index.server.tsx with proper component split**
+- [ ] **Split ProductGallery/PurchaseCard into server/client components**
+- [ ] **Implement TypeScript interfaces for all components**
+- [ ] **Test exact mockup visual matching with new architecture**
 
-### Documentation & Project State
+### Component Conversion Progress
+```
+Header System:
+  Header.tsx (mixed) → Header.client.tsx + AnnouncementBar.server.tsx
+  Status: Planning → Implementation
+
+Homepage System:
+  _index.tsx (mixed) → index.server.tsx + HeroSection.server.tsx + SectionHeader.server.tsx
+  Status: Planning → Implementation
+
+Product System:
+  ProductGallery.tsx → ProductGallery.server.tsx
+  PurchaseCard.tsx → PurchaseCard.client.tsx
+  Status: Planning → Implementation
+```
+
+### New Components to Create
+- [ ] `AnnouncementBar.server.tsx` - Static promo content
+- [ ] `HeroSection.server.tsx` - Hero content from mockup
+- [ ] `SectionHeader.server.tsx` - Reusable section titles
+- [ ] `ProductShowcase.server.tsx` - Layout coordinator
+- [ ] `ProductDetails.server.tsx` - Product information
+- [ ] `Button.client.tsx` - Interactive buttons
+- [ ] `Badge.server.tsx` - Static labels
+- [ ] `Price.server.tsx` - Money formatting
+- [ ] `QuantitySelector.client.tsx` - Quantity controls
+- [ ] `AddToCartButton.client.tsx` - Cart mutations
+
+## 📋 Architecture Requirements Completed
+- [x] ~~Requirements.md updated with server/client architecture plan~~
+- [x] ~~Component mapping defined (mixed → server/client split)~~
+- [x] ~~File structure blueprint created with conversion targets~~
+- [x] ~~TypeScript interface requirements documented~~
+- [x] ~~Visual fidelity requirements defined (exact mockup matching)~~
+
+## 🔄 Previous Sprint Completed Work
+- [x] ~~Restructured component architecture to eliminate spaghetti code~~
+- [x] ~~Created proper Header/Footer layout components with props~~
+- [x] ~~Fixed Featured Runner section to use shared ProductGallery/PurchaseCard components~~
+- [x] ~~Added product.css styles to homepage for proper component rendering~~
+- [x] ~~Created demo product route for testing without Shopify dependency~~
 - [x] ~~Updated velocity-hydrogen-scaffold.md for React Router 7 + Hydrogen 2025 stack~~
-- [x] ~~Removed Remix/Oxygen references and fixed import examples~~
-- [ ] Complete documentation updates with recent fixes
-- [ ] Update done.md with component restructure work
-- [ ] Document component sharing patterns and CSS dependencies
 
 ## �🔄 Immediate Tasks
 

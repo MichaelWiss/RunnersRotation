@@ -1,29 +1,4 @@
-import {useNavigate} from 'react-router';
-import {useEffect} from 'react';
-
 export default function Footer() {
-  const navigate = useNavigate();
-
-  // Footer navigation click handler
-  useEffect(() => {
-    const clickHandler = (e: MouseEvent) => {
-      const footerLink = (e.target as HTMLElement).closest('.footer-links a') as HTMLAnchorElement | null;
-      
-      if (footerLink) {
-        const text = footerLink.textContent?.trim().toLowerCase();
-        if (!text) return;
-        e.preventDefault();
-        if (text.includes('faq')) return navigate('/faqs');
-        if (text.includes('career')) return navigate('/careers');
-        if (text.includes('run club')) return navigate('/run-club');
-        if (text.includes('blog')) return navigate('/blog');
-        if (text.includes('sustain')) return navigate('/sustainability');
-      }
-    };
-    document.addEventListener('click', clickHandler);
-    return () => document.removeEventListener('click', clickHandler);
-  }, [navigate]);
-
   return (
     <footer className="footer full-width">
       <div className="footer-container">
@@ -77,18 +52,14 @@ export default function Footer() {
 
         <div className="footer-bottom">
           <div className="footer-copyright">
-            <p>
-              We are a proud member of 1% for the Planet<br />
-              and a Living Wage Foundation Employer.<br />
-              Copyright ©2025 Velocity Running  | All Rights Reserved
-            </p>
+            <p>We are a proud member of 1% for the Planet<br/>and a Living Wage Foundation Employer.<br/>Copyright &copy;2025 Velocity Running  | All Rights Reserved</p>
           </div>
-
+          
           <div className="footer-badges">
-            <img src="https://placehold.co/100x40/0b2545/fff3e8?text=1%+PLANET" alt="1% for the Planet" />
-            <img src="https://placehold.co/100x40/0b2545/fff3e8?text=LIVING+WAGE" alt="Living Wage Employer" />
+            <div className="footer-badge" aria-label="1% for the Planet">1% PLANET</div>
+            <div className="footer-badge" aria-label="Living Wage Employer">LIVING WAGE</div>
           </div>
-
+          
           <div className="footer-links">
             <a href="#">FAQ's</a>
             <a href="#">Careers</a>

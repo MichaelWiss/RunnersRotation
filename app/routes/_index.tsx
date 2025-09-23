@@ -1,25 +1,14 @@
-import {LinksFunction, useNavigate} from 'react-router';
+import {LinksFunction} from 'react-router';
 import homepageStyles from '~/styles/homepage.css?url';
-import productStyles from '~/styles/product.css?url';
-import {useEffect, useRef, useState} from 'react';
-import Header from '~/components/Header';
-import Footer from '~/components/Footer';
-import ProductGallery from '~/components/ProductGallery';
-import PurchaseCard from '~/components/PurchaseCard';
+import {useEffect} from 'react';
+import Layout from '~/components/layout/Layout';
 
 export const links: LinksFunction = () => [
   {rel: 'stylesheet', href: homepageStyles},
-  {rel: 'stylesheet', href: productStyles},
 ];
 
 export default function Index() {
-  const navigate = useNavigate();
-  // Mobile nav state
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const hamburgerRef = useRef<HTMLButtonElement | null>(null);
-  const navMainRef = useRef<HTMLElement | null>(null);
-
-  // Scroll-driven rotation
+  // Scroll-driven rotation for nav circle / background blending
   useEffect(() => {
     const updateScroll = () => {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -31,24 +20,6 @@ export default function Index() {
     window.addEventListener('scroll', updateScroll, {passive: true});
     return () => window.removeEventListener('scroll', updateScroll);
   }, []);
-
-  // Click outside to close mobile menu
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (
-        mobileOpen &&
-        hamburgerRef.current &&
-        navMainRef.current &&
-        !hamburgerRef.current.contains(target) &&
-        !navMainRef.current.contains(target)
-      ) {
-        setMobileOpen(false);
-      }
-    };
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
-  }, [mobileOpen]);
 
   // Quantity +/- handlers (delegated for demo)
   useEffect(() => {
@@ -80,115 +51,8 @@ export default function Index() {
     return () => document.removeEventListener('click', handler);
   }, []);
 
-  // Wire "Shop" CTAs and static nav/footer links to routes without changing markup
-  useEffect(() => {
-    const clickHandler = (e: MouseEvent) => {
-      const el = e.target as HTMLElement;
-      const shopAnchor = el.closest('a.home-product-cta') as HTMLAnchorElement | null;
-      const addToCart = el.closest('button.add-to-cart') as HTMLButtonElement | null;
-      const navLink = el.closest('.nav-menu a') as HTMLAnchorElement | null;
-      const footerLink = el.closest('.footer-links a') as HTMLAnchorElement | null;
-      const mobileSectionLink = el.closest('.mobile-nav-section a') as HTMLAnchorElement | null;
-      if (shopAnchor) {
-        e.preventDefault();
-        // Demo route for testing product page functionality
-        navigate('/demo');
-        return;
-      }
-      if (addToCart) {
-        e.preventDefault();
-        navigate('/demo');
-        return;
-      }
-
-      // Primary nav mapping (text-based matching, preserves exact markup)
-      if (navLink) {
-        const text = navLink.textContent?.trim().toLowerCase();
-        if (!text) return;
-        e.preventDefault();
-        if (text.includes('trail')) return navigate('/trail-running');
-        if (text.includes('road')) return navigate('/road-running');
-        if (text.includes('ultra')) return navigate('/ultralight');
-        if (text.includes('racing')) return navigate('/racing');
-        if (text.includes('gear')) return navigate('/gear');
-        return;
-      }
-
-      // Footer quick links
-      if (footerLink) {
-        const text = footerLink.textContent?.trim().toLowerCase();
-        if (!text) return;
-        e.preventDefault();
-        if (text.includes('faq')) return navigate('/faqs');
-        if (text.includes('career')) return navigate('/careers');
-        if (text.includes('run club')) return navigate('/run-club');
-        if (text.includes('blog')) return navigate('/blog');
-        if (text.includes('sustain')) return navigate('/sustainability');
-        return;
-      }
-
-      // Account/Search links in mobile section
-      if (mobileSectionLink) {
-        const text = mobileSectionLink.textContent?.trim().toLowerCase();
-        if (!text) return;
-        e.preventDefault();
-        if (text.includes('search')) return navigate('/search');
-        if (text.includes('account')) return navigate('/account');
-        if (text.includes('cart')) return; // cart not implemented here
-        if (text.includes('faq')) return navigate('/faqs');
-        if (text.includes('career')) return navigate('/careers');
-        if (text.includes('run club')) return navigate('/run-club');
-        if (text.includes('blog')) return navigate('/blog');
-        if (text.includes('sustain')) return navigate('/sustainability');
-        return;
-      }
-
-      // Product component interactions (for featured runner section)
-      const pill = el.closest('.pill') as HTMLElement | null;
-      if (pill) {
-        const group = pill.parentElement;
-        if (!group) return;
-        group.querySelectorAll('.pill').forEach((x) => x.classList.remove('active'));
-        pill.classList.add('active');
-        return;
-      }
-
-      const qtyBtn = el.closest('.qty button') as HTMLButtonElement | null;
-      if (qtyBtn) {
-        const input = qtyBtn.parentElement?.querySelector('input') as HTMLInputElement | null;
-        if (!input) return;
-        let val = parseInt(input.value || '1', 10);
-        if (qtyBtn.textContent?.trim() === '−') val = Math.max(1, val - 1);
-        else val = val + 1;
-        input.value = String(val);
-        return;
-      }
-
-      const thumb = el.closest('.thumb') as HTMLElement | null;
-      if (thumb) {
-        const mainImg = document.querySelector('.main-img') as HTMLElement | null;
-        if (!mainImg) return;
-        const thumbs = Array.from(thumb.parentElement?.querySelectorAll('.thumb') || []);
-        const index = thumbs.indexOf(thumb);
-        const colors = [
-          'linear-gradient(135deg, var(--panel), var(--accent))',
-          'linear-gradient(135deg, var(--accent), var(--cta-hover))',
-          'linear-gradient(135deg, var(--muted), var(--panel))',
-        ];
-        const names = ['MIDNIGHT/ORANGE', 'FOREST/LIME', 'CHARCOAL/RED'];
-        mainImg.style.background = colors[index] || colors[0];
-        mainImg.textContent = `TRAIL RUNNER PRO\n${names[index] || names[0]}`;
-        return;
-      }
-    };
-    document.addEventListener('click', clickHandler);
-    return () => document.removeEventListener('click', clickHandler);
-  }, [navigate]);
-
   return (
-    <>
-      <Header cartCount={0} />
-
+    <Layout cartCount={0}>
       {/* Hero Section */}
       <section className="hero-section section full-width">
         <div className="hero-card grid-container">
@@ -208,64 +72,180 @@ export default function Index() {
         </div>
 
         <div className="home-products-grid grid-container">
-          {[
-            {label: 'TRAIL MASTER', title: 'Trail Master Pro', price: '£185.00', cta: 'Shop Trail Master'},
-            {label: 'ROAD RACER', title: 'Carbon Road Racer', price: '£220.00', cta: 'Shop Road Racer'},
-            {label: 'DAILY TRAINER', title: 'Daily Comfort Max', price: '£145.00', cta: 'Shop Daily Trainer'},
-            {label: 'TEMPO ELITE', title: 'Tempo Elite', price: '£175.00', cta: 'Shop Tempo Elite'},
-            {label: 'RECOVERY MAX', title: 'Recovery Max', price: '£165.00', cta: 'Shop Recovery Max'},
-            {label: 'SPIKE ELITE', title: 'Track Spike Elite', price: '£195.00', cta: 'Shop Track Spikes'},
-          ].map((p) => (
-            <div className="home-product-card" key={p.title}>
-              <div className="home-product-image">{p.label}</div>
-              <div className="home-product-content">
-                <h3>{p.title}</h3>
-                <p></p>
-                <div className="home-product-price">{p.price}</div>
-                <a href="#" className="home-product-cta">{p.cta}</a>
+          <div className="home-product-card">
+            <div className="home-product-image">TRAIL MASTER</div>
+            <div className="home-product-content">
+              <h3>Trail Master Pro</h3>
+              <p>Ultimate trail protection with Vibram MegaGrip sole and rock plate. Engineered for technical terrain and ultra-distance adventures.</p>
+              <div className="home-product-price">£185.00</div>
+              <a href="#" className="home-product-cta">Shop Trail Master</a>
+            </div>
+          </div>
+          <div className="home-product-card">
+            <div className="home-product-image">ROAD RACER</div>
+            <div className="home-product-content">
+              <h3>Carbon Road Racer</h3>
+              <p>Competition-grade racing flat with carbon fiber plate. Designed for personal bests and podium finishes on road and track.</p>
+              <div className="home-product-price">£220.00</div>
+              <a href="#" className="home-product-cta">Shop Road Racer</a>
+            </div>
+          </div>
+          <div className="home-product-card">
+            <div className="home-product-image">DAILY TRAINER</div>
+            <div className="home-product-content">
+              <h3>Daily Comfort Max</h3>
+              <p>Perfect everyday trainer with responsive cushioning and breathable upper. Ideal for daily miles and recovery runs.</p>
+              <div className="home-product-price">£145.00</div>
+              <a href="#" className="home-product-cta">Shop Daily Trainer</a>
+            </div>
+          </div>
+          <div className="home-product-card">
+            <div className="home-product-image">TEMPO ELITE</div>
+            <div className="home-product-content">
+              <h3>Tempo Elite</h3>
+              <p>Lightweight tempo trainer for speed workouts and threshold sessions. Responsive foam and propulsive geometry.</p>
+              <div className="home-product-price">£175.00</div>
+              <a href="#" className="home-product-cta">Shop Tempo Elite</a>
+            </div>
+          </div>
+          <div className="home-product-card">
+            <div className="home-product-image">RECOVERY MAX</div>
+            <div className="home-product-content">
+              <h3>Recovery Max</h3>
+              <p>Maximum cushioning for recovery runs and long easy miles. Cloud-like comfort with superior energy return.</p>
+              <div className="home-product-price">£165.00</div>
+              <a href="#" className="home-product-cta">Shop Recovery Max</a>
+            </div>
+          </div>
+          <div className="home-product-card">
+            <div className="home-product-image">SPIKE ELITE</div>
+            <div className="home-product-content">
+              <h3>Track Spike Elite</h3>
+              <p>Professional track spikes for competition. Aggressive traction and lightweight construction for maximum speed.</p>
+              <div className="home-product-price">£195.00</div>
+              <a href="#" className="home-product-cta">Shop Track Spikes</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Runner Section - Exact HTML Structure */}
+      <section className="section">
+        <div className="section-header">
+          <div className="section-kicker">Featured Runner</div>
+          <h2 className="section-title">Bold, grippy & ultra-responsive</h2>
+          <p className="section-subtitle">Our signature trail shoe, engineered for those who demand excellence</p>
+        </div>
+
+        <div className="product-showcase grid-container">
+          <div className="product-gallery">
+            <div className="gallery-images">
+              <div className="main-image"></div>
+              <div className="thumbnail-row">
+                <div className="thumbnail"></div>
+                <div className="thumbnail"></div>
+                <div className="thumbnail"></div>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* Product Showcase Section */}
-      <section className="showcase-section section full-width">
-        <div className="showcase-content">
-          <div className="showcase-text">
-            <div className="showcase-kicker">Performance Focus</div>
-            <h2 className="showcase-title">Built for Every Mile</h2>
-            <p className="showcase-description">
-              From early morning trail runs to race day performance, our shoes are engineered
-              to support your running journey at every step.
-            </p>
-            <a href="#" className="showcase-cta">Discover Our Technology</a>
+            <div className="product-meta">
+              <div>
+                <div className="product-kicker">Trail Runner Pro</div>
+                <h1 className="product-title">Bold, grippy & ultra-responsive</h1>
+                <div className="product-subtitle">Engineered for those who seek paths less traveled, delivering uncompromising performance.</div>
+              </div>
+
+              <p className="product-description">
+                A love letter to trail runners and mountain enthusiasts. This design combines three revolutionary technologies giving it the perfect balance of grip, protection, and comfort – the ultimate trail companion developed by our passionate design team.
+              </p>
+
+              <div className="info-grid">
+                <div className="info-item"><b>Drop</b><span>6mm heel-to-toe</span></div>
+                <div className="info-item"><b>Weight</b><span>285g (UK 9)</span></div>
+                <div className="info-item"><b>Sole</b><span>Vibram MegaGrip</span></div>
+                <div className="info-item"><b>Best for</b><span>Technical trails & ultras</span></div>
+              </div>
+            </div>
           </div>
-          <div className="showcase-visual">
-            <div className="showcase-image">PERFORMANCE SHOWCASE</div>
+
+          <div className="purchase-card">
+            <div className="price-section">
+              <div className="price">£185.00</div>
+              <div className="unit-price">
+                <div className="unit-price-label">Unit price</div>
+                <div className="unit-price-value">per pair</div>
+              </div>
+            </div>
+
+            <div className="selectors">
+              <div>
+                <div className="selector-label">Size (UK)</div>
+                <div className="selector-options">
+                  <button className="pill active">8</button>
+                  <button className="pill">8.5</button>
+                  <button className="pill">9</button>
+                  <button className="pill">9.5</button>
+                  <button className="pill">10</button>
+                </div>
+              </div>
+
+              <div>
+                <div className="selector-label">Width</div>
+                <div className="selector-options">
+                  <button className="pill active">Regular</button>
+                  <button className="pill">Wide</button>
+                </div>
+              </div>
+
+              <div className="quantity-selector">
+                <div className="selector-label">Quantity</div>
+                <div className="quantity-controls">
+                  <button className="qty-btn">−</button>
+                  <input className="qty-input" defaultValue="1" />
+                  <button className="qty-btn">+</button>
+                </div>
+              </div>
+            </div>
+
+            <button className="add-to-cart">Add to cart</button>
+            <div className="shipping-note">Free UK shipping over £150 • Orders dispatched within 1–3 working days</div>
           </div>
         </div>
       </section>
 
-      {/* Featured Runner Section - Using Product Page Components */}
-      <section className="featured-section section">
-        <div className="featured-header">
-          <div className="featured-kicker">Featured Runner</div>
-          <h2 className="featured-title">Trail Runner Pro</h2>
-          <p className="featured-subtitle">Experience our most advanced trail running technology</p>
-        </div>
-        
-        <div className="container">
-          <main>
-            <ProductGallery />
-            <div className="divider"></div>
-          </main>
-          <PurchaseCard />
+      {/* Collection Section */}
+      <section className="featured-section" id="featured">
+        <div className="collection-container">
+          <h2 className="collection-title">The Complete Runner's Arsenal</h2>
+          <div className="products-grid">
+            <div className="product-card">
+              <div className="card-image">ROAD RACER</div>
+              <div className="card-content">
+                <h3 className="card-title">Carbon Road Racer</h3>
+                <p className="card-description">Ultra-lightweight racing shoe with carbon fiber plate. Built for speed and personal records.</p>
+                <div className="card-price">£220.00</div>
+              </div>
+            </div>
+            <div className="product-card">
+              <div className="card-image">ULTRA LIGHT</div>
+              <div className="card-content">
+                <h3 className="card-title">Ultralight Trainer</h3>
+                <p className="card-description">Minimalist design for natural running. Perfect for daily training and ground feel.</p>
+                <div className="card-price">£145.00</div>
+              </div>
+            </div>
+            <div className="product-card">
+              <div className="card-image">TRAIL MASTER</div>
+              <div className="card-content">
+                <h3 className="card-title">Trail Master Pro</h3>
+                <p className="card-description">Ultimate trail protection with Vibram sole. Engineered for technical terrain.</p>
+                <div className="card-price">£185.00</div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
-
-      <Footer />
-    </>
+    </Layout>
   );
 }
 

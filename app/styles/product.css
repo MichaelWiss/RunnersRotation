@@ -11,6 +11,9 @@
   --cta-hover: #c83b1a;     /* darker accent for hover */
   --glass: rgba(11,37,69,0.06);
   --radius: 0px;            /* Changed from 14px to 0px for sharp corners */
+  /* Scroll-driven blending helpers (same naming as homepage) */
+  --scroll-pct: calc(var(--scroll-percentage, 0) * 100%);
+  --surface: color-mix(in srgb, var(--bg) calc(100% - var(--scroll-pct)), var(--card) var(--scroll-pct));
 }
 
 /* --- Base reset --- */
@@ -26,6 +29,8 @@ body{
   line-height:1.45;
   padding:48px;
 }
+
+.page-container{background: var(--surface); transition: background 120ms linear}
 
 /* --- Page layout --- */
 .container{
@@ -225,17 +230,18 @@ h1{
 /* Utilities */
 .divider{height:1px;background:var(--line);margin:10px 0}
 
-/* Navigation Header */
+/* Navigation Header (offset for fixed announcement bar on site) */
 .header{
   position: fixed;
-  top: 0;
+  top: 40px; /* leave room for announcement bar */
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(247, 239, 230, 0.95);
-  backdrop-filter: blur(20px);
+  background: var(--bg); /* fallback */
+  background: var(--surface);
   border-bottom: 1px solid var(--line);
   padding: 16px 0;
+  transition: background 120ms linear;
 }
 
 .nav-container{
@@ -277,9 +283,7 @@ h1{
 }
 
 /* Adjust body padding for fixed header */
-body{
-  padding-top: 80px;
-}
+body{padding-top: 88px;}
 
 /* Responsive */
 @media (max-width:980px){

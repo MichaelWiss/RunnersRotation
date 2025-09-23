@@ -1,8 +1,7 @@
 import {type LinksFunction, type LoaderFunctionArgs, useLoaderData, useNavigate} from 'react-router';
 import {useEffect} from 'react';
 import productStyles from '~/styles/product.css?url';
-import Header from '~/components/Header';
-import Footer from '~/components/Footer';
+import ProductLayout from '~/components/layout/ProductLayout';
 import ProductGallery from '~/components/ProductGallery';
 import PurchaseCard from '~/components/PurchaseCard';
 
@@ -40,6 +39,19 @@ export const links: LinksFunction = () => [
 export default function Product() {
   const navigate = useNavigate();
   const {product} = useLoaderData<typeof loader>();
+
+  // Scroll-driven blend value for header/background sync
+  useEffect(() => {
+    const updateScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollProgress = Math.min(documentHeight > 0 ? scrollTop / documentHeight : 0, 1);
+      document.documentElement.style.setProperty('--scroll-percentage', String(scrollProgress));
+    };
+    updateScroll();
+    window.addEventListener('scroll', updateScroll, {passive: true});
+    return () => window.removeEventListener('scroll', updateScroll);
+  }, []);
 
   // Interactions: pills toggle, qty +/- and thumbnails update main-img
   useEffect(() => {
@@ -103,8 +115,7 @@ export default function Product() {
   }, [navigate]);
 
   return (
-    <>
-      <Header cartCount={0} />
+    <ProductLayout>
       <div className="container">
         <main>
           <ProductGallery />
@@ -112,7 +123,6 @@ export default function Product() {
         </main>
         <PurchaseCard />
       </div>
-      <Footer />
-    </>
+    </ProductLayout>
   );
 }

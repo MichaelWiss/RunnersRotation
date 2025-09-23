@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
 * {
   margin: 0;
@@ -26,6 +26,12 @@
   --radius: 0px; /* Sharp corners */
   --shadow-soft: 0 8px 30px rgba(11, 37, 69, 0.06);
   --shadow-strong: 0 18px 50px rgba(11, 37, 69, 0.08);
+  /* Scroll-driven blending helpers */
+  --scroll-pct: calc(var(--scroll-percentage, 0) * 100%);
+  /* Surface tracks body gradient by blending bg→card with scroll */
+  --surface: color-mix(in srgb, var(--bg) calc(100% - var(--scroll-pct)), var(--card) var(--scroll-pct));
+  /* Band surfaces (nav/footer link bars) use a slightly more elevated tone */
+  --band-surface: color-mix(in srgb, var(--surface) 70%, var(--card) 30%);
 }
 
 body {
@@ -40,11 +46,12 @@ body {
 /* Header with Glass Effect */
 .header {
   position: sticky;
-  top: 0;
+  top: 40px; /* leave room for fixed announcement bar */
   z-index: 100;
-  background: rgba(247, 239, 230, 0.92);
-  backdrop-filter: blur(20px);
+  background: var(--bg); /* fallback */
+  background: var(--surface);
   border-bottom: 1px solid var(--line);
+  transition: background 120ms linear;
 }
 
 .nav-container {
@@ -52,10 +59,15 @@ body {
 }
 
 .announcement-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   background: var(--accent-gradient);
   color: var(--card);
   text-align: center;
-  padding: 8px 16px;
+  padding: 10px 16px;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -182,6 +194,9 @@ body {
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
+  background: var(--card); /* fallback */
+  background: var(--band-surface);
+  transition: background 120ms linear;
 }
 
 .nav-menu {
@@ -189,7 +204,8 @@ body {
   grid-template-columns: repeat(5, 1fr);
   gap: 0;
   list-style: none;
-  background: var(--card);
+  background: var(--card); /* fallback */
+  background: var(--band-surface);
   border: none;
   border-radius: 0px;
   padding: 2px 0;
@@ -423,17 +439,6 @@ body {
   grid-template-columns: 1fr 320px;
   gap: 40px;
   align-items: start;
-}
-
-@media (max-width: 992px) {
-  .product-showcase {
-    grid-template-columns: 1fr;
-  }
-
-  .purchase-card {
-    position: static;
-    max-width: 100%;
-  }
 }
 
 @media (max-width: 992px) {
@@ -940,6 +945,8 @@ body {
   display: grid;
   grid-template-columns: 1fr min(1200px, 90%) 1fr;
   width: 100%;
+  background: var(--surface);
+  transition: background 120ms linear;
 }
 
 .page-container > * {
@@ -962,13 +969,15 @@ body {
 
 /* Footer - Hard Lines Style */
 .footer {
-  background: var(--bg);
+  background: var(--bg); /* fallback */
+  background: var(--surface);
   color: var(--panel);
   padding: 80px 24px 0px;
   margin-top: 80px;
   position: relative;
-  overflow: hidden;
+  overflow: visible; /* allow full-bleed footer-links */
   border-top: 3px solid var(--accent);
+  transition: background 120ms linear;
 }
 
 .footer-container {
@@ -1074,9 +1083,18 @@ body {
   margin-bottom: 20px;
 }
 
-.footer-badges img {
-  height: 40px;
-  width: auto;
+.footer-badge {
+  background: #0b2545; /* deep indigo to match mock */
+  color: var(--card);
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 12px 20px;
+  border-radius: 0px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+  text-align: center;
 }
 
 .footer-links {
@@ -1084,12 +1102,15 @@ body {
   grid-template-columns: repeat(5, 1fr);
   gap: 0;
   margin-top: 30px;
+  padding: 2px 0; /* match nav-main band thickness */
+  background: var(--band-surface); /* match nav band */
   width: 100vw;
   position: relative;
   left: 50%;
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
+  transition: background 120ms linear;
 }
 
 .footer-links a {
@@ -1320,37 +1341,5 @@ body {
     flex-direction: column;
     gap: 15px;
     text-align: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .footer-section {
-    margin-bottom: 30px;
-  }
-
-  .footer-logo {
-    max-width: 280px;
-  }
-
-  .velocity-logo {
-    font-size: 32px;
-  }
-
-  .nav-actions {
-    justify-content: center;
-  }
-
-  .product-card {
-    margin-bottom: 20px;
-  }
-
-  .section-kicker,
-  .home-products-kicker {
-    font-size: 14px;
-  }
-
-  .section-subtitle,
-  .home-products-subtitle {
-    font-size: 15px;
   }
 }

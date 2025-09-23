@@ -27,7 +27,6 @@ body{
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
   line-height:1.45;
-  padding:48px;
 }
 
 .page-container{background: var(--surface); transition: background 120ms linear}
@@ -230,60 +229,7 @@ h1{
 /* Utilities */
 .divider{height:1px;background:var(--line);margin:10px 0}
 
-/* Navigation Header (offset for fixed announcement bar on site) */
-.header{
-  position: fixed;
-  top: 40px; /* leave room for announcement bar */
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background: var(--bg); /* fallback */
-  background: var(--surface);
-  border-bottom: 1px solid var(--line);
-  padding: 16px 0;
-  transition: background 120ms linear;
-}
-
-.nav-container{
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.logo{
-  font-family: 'Playfair Display', serif;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--panel);
-  text-decoration: none;
-  font-style: italic;
-}
-
-.nav-links{
-  display: flex;
-  gap: 24px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-links a{
-  color: var(--muted);
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 14px;
-  transition: color 0.3s ease;
-}
-
-.nav-links a:hover{
-  color: var(--accent);
-}
-
-/* Adjust body padding for fixed header */
-body{padding-top: 88px;}
+/* (Header styles removed; page uses shared header/footer from homepage.css) */
 
 /* Responsive */
 @media (max-width:980px){
@@ -292,6 +238,4 @@ body{padding-top: 88px;}
   .gallery{flex-direction:column}
   .images,.meta{width:100%}
   .main-img{height:320px}
-  body{padding-top: 60px; padding-left: 18px; padding-right: 18px;}
-  .nav-links{display: none}
 }

@@ -11,11 +11,9 @@ export default function Layout({ children, cartCount }: LayoutProps) {
   return (
     <>
       <AnnouncementBar />
-      <div className="page-container">
-        <Header cartCount={cartCount} />
-        <main>{children}</main>
-        <Footer />
-      </div>
+      <Header cartCount={cartCount} />
+      <main>{children}</main>
+      <Footer />
     </>
   );
 }

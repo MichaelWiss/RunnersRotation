@@ -1,10 +1,17 @@
-export default function PurchaseCard() {
+interface PurchaseCardProps {
+  price?: {amount: string; currencyCode: string};
+  available?: boolean;
+}
+
+export default function PurchaseCard({price, available = true}: PurchaseCardProps) {
   return (
     <aside className="card" aria-labelledby="purchase">
       <div className="price-row">
         <div>
           <div className="old">Regular price</div>
-          <div className="price">£185.00</div>
+          <div className="price">
+            {price ? `${new Intl.NumberFormat('en-GB', {style: 'currency', currency: price.currencyCode}).format(Number(price.amount))}` : '£185.00'}
+          </div>
         </div>
         <div style={{textAlign:'right'}}>
           <div style={{fontSize:13,color:'var(--muted)',fontWeight:700}}>Unit price</div>
@@ -54,7 +61,9 @@ export default function PurchaseCard() {
       </div>
 
       <div className="cta">
-        <button className="add-to-cart">Add to cart</button>
+        <button className="add-to-cart" disabled={!available} aria-disabled={!available}>
+          {available ? 'Add to cart' : 'Sold out'}
+        </button>
         <div className="muted-note">Free UK shipping over £150 • 30-day trail guarantee • Expert fitting available</div>
       </div>
 

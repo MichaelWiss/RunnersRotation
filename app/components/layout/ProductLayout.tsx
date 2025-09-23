@@ -1,5 +1,7 @@
 import type {ReactNode} from 'react';
-import HeaderProduct from './HeaderProduct';
+import AnnouncementBar from './AnnouncementBar';
+import Header from './Header';
+import Footer from './Footer';
 
 interface ProductLayoutProps {
   children: ReactNode;
@@ -7,9 +9,13 @@ interface ProductLayoutProps {
 
 export default function ProductLayout({children}: ProductLayoutProps) {
   return (
-    <div>
-      <HeaderProduct />
-      <div>{children}</div>
-    </div>
+    <>
+      <AnnouncementBar />
+      <div className="page-container">
+        <Header cartCount={0} />
+        <main>{children}</main>
+        <Footer />
+      </div>
+    </>
   );
 }

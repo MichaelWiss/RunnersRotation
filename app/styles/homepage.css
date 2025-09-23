@@ -6,6 +6,10 @@
   box-sizing: border-box;
 }
 
+html, body {
+  overflow-x: hidden; /* prevent 100vw bands from creating horizontal scroll */
+}
+
 :root {
   /* Analogous warm palette inspired by the mockup */
   --bg: #f7efe6;
@@ -32,6 +36,9 @@
   --surface: color-mix(in srgb, var(--bg) calc(100% - var(--scroll-pct)), var(--card) var(--scroll-pct));
   /* Band surfaces (nav/footer link bars) use a slightly more elevated tone */
   --band-surface: color-mix(in srgb, var(--surface) 70%, var(--card) 30%);
+  /* layout metrics */
+  --header-h: 120px; /* matches visual header height incl. nav band */
+  --announcement-h: 40px;
 }
 
 body {
@@ -41,17 +48,26 @@ body {
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* offset for fixed header + announcement */
+  padding-top: calc(var(--header-h) + var(--announcement-h));
 }
 
 /* Header with Glass Effect */
 .header {
-  position: sticky;
-  top: 40px; /* leave room for fixed announcement bar */
-  z-index: 100;
+  position: fixed;
+  top: var(--announcement-h, 40px);
+  left: 0;
+  right: 0;
+  z-index: 990;
   background: var(--bg); /* fallback */
   background: var(--surface);
   border-bottom: 1px solid var(--line);
   transition: background 120ms linear;
+}
+
+/* flow spacer so content doesn't go under the fixed header */
+.header-placeholder {
+  height: var(--header-h, 160px);
 }
 
 .nav-container {
@@ -60,7 +76,7 @@ body {
 
 .announcement-bar {
   position: fixed;
-  top: 0;
+  top: 0; /* sits at the very top */
   left: 0;
   right: 0;
   z-index: 1000;
@@ -102,7 +118,7 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 1000;
+  z-index: 980; /* remain below announcement bar (1000) and within fixed header (990) */
   transition: all 0.3s ease;
   box-shadow: 0 8px 32px rgba(212, 165, 116, 0.15);
   text-decoration: none;
@@ -315,6 +331,8 @@ body {
 .hero-section {
   /* Full-bleed section; inner card controls width */
   padding: 0;
+  display: grid;
+  justify-items: center; /* center hero-card horizontally */
 }
 
 .hero-card {
@@ -327,7 +345,7 @@ body {
   position: relative;
   overflow: hidden;
   /* Nearly full width with a comfortable gutter */
-  width: min(1400px, 95vw);
+  width: min(1400px, calc(100% - 48px));
   margin: 60px auto;
 }
 
@@ -384,6 +402,8 @@ body {
   font-size: 16px;
   transition: all 0.3s ease;
   box-shadow: 0 10px 30px rgba(233, 76, 38, 0.2);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .hero-cta:hover {

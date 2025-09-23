@@ -19,6 +19,12 @@ declare global {
 
   interface Env extends HydrogenEnv {
     // declare additional Env parameter use in the fetch handler and Remix loader context here
+    /**
+     * When set to '1' in development, product routes will return a mock
+     * product when the requested handle is not found. Useful before you've
+     * created products in Admin.
+     */
+    DEV_MOCK_PRODUCTS?: string;
   }
 }
 

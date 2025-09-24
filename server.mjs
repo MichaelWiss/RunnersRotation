@@ -1,3 +1,4 @@
+console.log('[bootstrap] Loading server.mjs ...');
 import {createRequestHandler} from '@react-router/express';
 import { createCookieSessionStorage} from 'react-router';
 import compression from 'compression';
@@ -10,20 +11,53 @@ import crypto from 'node:crypto';
 
 const env = process.env;
 
+const isProd = process.env.NODE_ENV === 'production';
 const vite =
-  process.env.NODE_ENV === 'production'
+  isProd
     ? undefined
     : await import('vite').then(({createServer}) =>
         createServer({
-          server: {
-            middlewareMode: true,
-          },
+          server: {middlewareMode: true},
         }),
       );
 
+// Preload server build once in production to avoid per-request dynamic import cost.
+let serverBuildPromise;
+if (isProd) {
+  serverBuildPromise = import('./build/server/index.js').then((mod) => {
+    console.log('[warmup] server build loaded');
+    return mod;
+  }).catch((e) => {
+    console.error('[warmup] failed to load server build', e);
+    throw e;
+  });
+}
+
 export const app = express();
+console.log('[bootstrap] Express app created');
 
 app.use(compression());
+
+// Global error + rejection handlers (diagnostics only; remove once stable)
+if (!global.__RR_PROCESS_HOOKS__) {
+  process.on('unhandledRejection', (reason) => {
+    console.error('[unhandledRejection]', reason);
+  });
+  process.on('uncaughtException', (err) => {
+    console.error('[uncaughtException]', err);
+  });
+  global.__RR_PROCESS_HOOKS__ = true;
+}
+
+// Basic per-request timing middleware
+app.use((req, res, next) => {
+  const start = performance.now();
+  res.on('finish', () => {
+    const dur = (performance.now() - start).toFixed(1);
+    console.log(`[req] ${req.method} ${req.originalUrl} -> ${res.statusCode} ${dur}ms`);
+  });
+  next();
+});
 
 // http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header
 app.disable('x-powered-by');
@@ -64,41 +98,57 @@ app.get('/__health', (req, res) => {
   });
 });
 
-app.all(
-  '*',
-  process.env.NODE_ENV === 'development'
-    ? async (req, res, next) => {
-        const context = await getContext(req);
+app.all('*', async (req, res, next) => {
+  const context = await getContext(req);
 
-        return createRequestHandler({
-          build: vite
-            ? () => vite.ssrLoadModule('virtual:react-router/server-build')
-            : await import('./build/server/index.js'),
-          mode: process.env.NODE_ENV,
-          getLoadContext: () => context,
-        })(req, res, next);
-      }
-    : async (req, res, next) => {
-        const context = await getContext(req);
+  // Slow request watchdog (warn before 10s Vercel hard timeout)
+  let warned = false;
+  const watchdog = setInterval(() => {
+    warned = true;
+    console.warn('[watchdog] long-running request >8s', req.method, req.originalUrl);
+  }, 8000);
 
-        return (
-          await createRequestHandler({
-            build: vite
-              ? () => vite.ssrLoadModule('virtual:react-router/server-build')
-              : await import('./build/server/index.js'),
-            mode: process.env.NODE_ENV,
-            getLoadContext: () => context,
-          })
-        )(req, res, next);
-      },
-);
+  const clearWatchdog = () => clearInterval(watchdog);
+  res.on('close', clearWatchdog);
+  res.on('finish', clearWatchdog);
+
+  try {
+    const build = vite
+      ? () => vite.ssrLoadModule('virtual:react-router/server-build')
+      : isProd
+        ? await serverBuildPromise
+        : await import('./build/server/index.js');
+
+    await createRequestHandler({
+      build,
+      mode: process.env.NODE_ENV,
+      getLoadContext: () => context,
+    })(req, res, (err) => {
+      clearWatchdog();
+      if (err) return next(err);
+      next();
+    });
+  } catch (e) {
+    clearWatchdog();
+    console.error('[handler.error]', e);
+    if (!res.headersSent) {
+      res.status(500).send('Internal Server Error');
+    }
+  } finally {
+    if (warned) {
+      console.warn('[watchdog] completed long request', req.method, req.originalUrl);
+    }
+  }
+});
 const port = process.env.PORT || 3000;
 
 // On Vercel (serverless), exporting `app` is enough; avoid starting a server.
 if (!process.env.VERCEL) {
   app.listen(port, () => {
-    console.log(`Express server listening on port ${port}`);
+    console.log(`[bootstrap] Express server listening on port ${port}`);
   });
+} else {
+  console.log('[bootstrap] Running in Vercel serverless mode (no listen)');
 }
 
 async function getContext(req) {
@@ -150,6 +200,25 @@ async function getContext(req) {
       cookie: req.get('cookie'),
     },
   });
+
+  // Wrap storefront.query for timing & error logging
+  const originalQuery = storefront.query.bind(storefront);
+  storefront.query = async function wrappedQuery(doc, options) {
+    const qStart = performance.now();
+    try {
+      const result = await originalQuery(doc, options);
+      const qDur = (performance.now() - qStart).toFixed(1);
+      if (result?.errors?.length) {
+        console.error('[storefront.errors]', JSON.stringify(result.errors));
+      }
+      console.log('[storefront.query]', (options?.variables && Object.keys(options.variables)) || 'no-vars', qDur + 'ms');
+      return result;
+    } catch (e) {
+      const qDur = (performance.now() - qStart).toFixed(1);
+      console.error('[storefront.query.failed]', e, qDur + 'ms');
+      throw e;
+    }
+  };
 
   return {session, storefront, env};
 }

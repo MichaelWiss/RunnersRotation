@@ -10,6 +10,7 @@ import {
 } from 'react-router';
 import type {Cart, Shop} from '@shopify/hydrogen/storefront-api-types';
 import styles from './styles/app.css?url';
+import homepageStyles from './styles/homepage.css?url';
 import {useNonce} from '@shopify/hydrogen';
 
 /**
@@ -94,7 +95,10 @@ export function Layout({children}: {children?: React.ReactNode}) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <link rel="stylesheet" href={styles}></link>
+  {/* Global base styles */}
+  <link rel="stylesheet" href={styles} />
+  {/* Fallback/include homepage visual styles globally to prevent unstyled flash if route link injection fails */}
+  <link rel="stylesheet" href={homepageStyles} />
         <Meta />
         <Links />
       </head>

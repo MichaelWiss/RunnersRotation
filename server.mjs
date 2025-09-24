@@ -82,6 +82,35 @@ if (!process.env.VERCEL) {
 async function getContext(req) {
   const session = await AppSession.init(req, [env.SESSION_SECRET]);
 
+  // One-time env presence logging to help diagnose production blank screen issues
+  if (!global.__RR_ENV_LOGGED__) {
+    const missing = [
+      'PUBLIC_STORE_DOMAIN',
+      'PUBLIC_STOREFRONT_API_TOKEN',
+      'PRIVATE_STOREFRONT_API_TOKEN',
+      'PUBLIC_STOREFRONT_ID',
+      'PUBLIC_CHECKOUT_DOMAIN',
+      'SESSION_SECRET',
+    ].filter((k) => !env[k]);
+    if (missing.length) {
+      console.warn('[startup] Missing expected env vars (names only):', missing.join(', '));
+    } else {
+      console.log('[startup] All expected env vars present');
+    }
+    global.__RR_ENV_LOGGED__ = true;
+  }
+
+  // Derive buyer IP safely (serverless environments may not have req.connection)
+  const forwardedFor = req.headers['x-forwarded-for'];
+  let buyerIp = '';
+  if (Array.isArray(forwardedFor)) {
+    buyerIp = forwardedFor[0];
+  } else if (typeof forwardedFor === 'string' && forwardedFor.length) {
+    buyerIp = forwardedFor.split(',')[0].trim();
+  } else {
+    buyerIp = req.socket?.remoteAddress || req.connection?.remoteAddress || '';
+  }
+
   const {storefront} = createStorefrontClient({
     // A [`cache` instance](https://developer.mozilla.org/en-US/docs/Web/API/Cache) is necessary for sub-request caching to work.
     // We provide only an in-memory implementation
@@ -95,9 +124,7 @@ async function getContext(req) {
     storefrontId: env.PUBLIC_STOREFRONT_ID,
     storefrontHeaders: {
       requestGroupId: crypto.randomUUID(),
-      buyerIp: (req.headers['x-forwarded-for'] || req.connection.remoteAddress)
-        .split(':')
-        .pop(),
+      buyerIp,
       cookie: req.get('cookie'),
     },
   });

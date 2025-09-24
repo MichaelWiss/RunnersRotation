@@ -24,10 +24,20 @@
   /* Scroll-driven blending helpers */
   --scroll-percentage: 0; /* set at runtime */
   --scroll-pct: calc(var(--scroll-percentage, 0) * 100%);
-  --surface: color-mix(in srgb, var(--bg) calc(100% - var(--scroll-pct)), var(--card) var(--scroll-pct));
-  --band-surface: color-mix(in srgb, var(--surface) 70%, var(--card) 30%);
+
+  /* Fallback (non color-mix) surfaces for older browsers */
+  --surface: var(--bg);
+  --band-surface: var(--card);
 
   /* Layout metrics (set precisely at runtime) */
   --header-h: 160px;
   --announcement-h: 40px;
+}
+
+/* Progressive enhancement: only browsers supporting color-mix will override surfaces */
+@supports (color: color-mix(in srgb, white, black)) {
+  :root {
+    --surface: color-mix(in srgb, var(--bg) calc(100% - var(--scroll-pct)), var(--card) var(--scroll-pct));
+    --band-surface: color-mix(in srgb, var(--surface) 70%, var(--card) 30%);
+  }
 }

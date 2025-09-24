@@ -1,4 +1,6 @@
-import serverless from 'serverless-http';
 import {app} from '../server.mjs';
 
-export default serverless(app);
+// Plain export – Vercel Node runtime can invoke this directly without serverless-http wrapper.
+export default function handler(req, res) {
+	return app(req, res);
+}

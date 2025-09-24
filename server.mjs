@@ -16,6 +16,8 @@ if (missing.length) {
   console.warn('[env] Missing required vars at bootstrap:', missing.join(', '));
 }
 const env = loadedEnv;
+// Log summary once at bootstrap (was previously done per-request in getContext)
+logEnvSummary();
 
 const isProd = process.env.NODE_ENV === 'production';
 const vite =
@@ -126,6 +128,24 @@ if (debugEnabled) {
       timestamp: new Date().toISOString(),
     });
   });
+
+  // First-chunk logger to diagnose blank HTML (debug only)
+  app.use((req, res, next) => {
+    if (req.method !== 'GET') return next();
+    let logged = false;
+    const originalWrite = res.write.bind(res);
+    res.write = function (chunk, encoding, cb) {
+      if (!logged) {
+        try {
+          const preview = Buffer.isBuffer(chunk) ? chunk.toString('utf8') : String(chunk);
+          console.log('[ssr.first-chunk]', preview.replace(/\s+/g, ' ').slice(0, 180));
+        } catch {}
+        logged = true;
+      }
+      return originalWrite(chunk, encoding, cb);
+    };
+    next();
+  });
 }
 
 app.all('*', async (req, res, next) => {
@@ -169,9 +189,6 @@ if (!process.env.VERCEL) {
 async function getContext(req) {
   const session = await AppSession.init(req, [env.SESSION_SECRET]);
 
-  // One-time env presence logging to help diagnose production blank screen issues
-  logEnvSummary();
-
   // Derive buyer IP safely (serverless environments may not have req.connection)
   const forwardedFor = req.headers['x-forwarded-for'];
   let buyerIp = '';
@@ -202,26 +219,6 @@ async function getContext(req) {
   if (debugEnabled) {
     storefront = wrapStorefront(storefront);
   }
-
-  // Wrap storefront.query for timing & error logging
-  const originalQuery = storefront.query.bind(storefront);
-  storefront.query = async function wrappedQuery(doc, options) {
-    const qStart = performance.now();
-    try {
-      const result = await originalQuery(doc, options);
-      const qDur = (performance.now() - qStart).toFixed(1);
-      if (result?.errors?.length) {
-        console.error('[storefront.errors]', JSON.stringify(result.errors));
-      }
-      console.log('[storefront.query]', (options?.variables && Object.keys(options.variables)) || 'no-vars', qDur + 'ms');
-      return result;
-    } catch (e) {
-      const qDur = (performance.now() - qStart).toFixed(1);
-      console.error('[storefront.query.failed]', e, qDur + 'ms');
-      throw e;
-    }
-  };
-
   return {session, storefront, env};
 }
 

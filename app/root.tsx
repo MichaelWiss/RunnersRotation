@@ -9,8 +9,8 @@ import {
   useRouteLoaderData,
 } from 'react-router';
 import type {Cart, Shop} from '@shopify/hydrogen/storefront-api-types';
-import styles from './styles/app.css?url';
-import homepageStyles from './styles/homepage.css?url';
+import appStylesheet from './styles/app.css?url';
+import homepageStylesheet from './styles/homepage.css?url';
 import {useNonce} from '@shopify/hydrogen';
 
 /**
@@ -23,19 +23,15 @@ import {useNonce} from '@shopify/hydrogen';
  * It's a temporary fix until the issue is resolved.
  * https://github.com/remix-run/remix/issues/9242
  */
-export const links: LinksFunction = () => {
-  return [
-    {
-      rel: 'preconnect',
-      href: 'https://cdn.shopify.com',
-    },
-    {
-      rel: 'preconnect',
-      href: 'https://shop.app',
-    },
-    {rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg'},
-  ];
-};
+export const links: LinksFunction = () => [
+  {rel: 'preconnect', href: 'https://cdn.shopify.com'},
+  {rel: 'preconnect', href: 'https://shop.app'},
+  {rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg'},
+  // Preload homepage bundle for faster first paint (optional; harmless if duplicated by browser)
+  {rel: 'preload', as: 'style', href: homepageStylesheet},
+  {rel: 'stylesheet', href: appStylesheet},
+  {rel: 'stylesheet', href: homepageStylesheet},
+];
 
 export async function loader({context}: LoaderFunctionArgs) {
   const [customerAccessToken, cartId] = await Promise.all([
@@ -95,9 +91,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        {/* Preload critical homepage stylesheet to reduce flash of unstyled content */}
-        <link rel="preload" as="style" href={homepageStyles} />
-        {/* Inline critical design tokens so custom properties exist before external CSS arrives */}
+  {/* Inline critical design tokens so custom properties exist before external CSS arrives */}
         <style
           // Apply CSP nonce explicitly; Hydrogen adds nonce to <Scripts/> & friends but we need it here for inline tokens.
           nonce={nonce}
@@ -105,10 +99,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
             __html: `:root { --bg:#f7efe6;--panel:#0b2545;--accent:#e94c26;--accent-dark:#c83b1a;--accent-light:#ff7a4a;--panel-light:#a33a25;--panel-dark:#4a140e;--muted:#8b3a2a;--card:#fff3e8;--line:#f1d7c7;--cta-hover:#c83b1a;--glass:rgba(11,37,69,0.06);--warm-gradient:linear-gradient(180deg,#f7efe6,#f6e9df 60%);--card-gradient:linear-gradient(180deg,#fff3e8,#ffece0);--accent-gradient:linear-gradient(90deg,#e94c26,#ff7a4a);--radius:0px;--shadow-soft:0 8px 30px rgba(11,37,69,0.06);--shadow-strong:0 18px 50px rgba(11,37,69,0.08);--scroll-percentage:0;--scroll-pct:calc(var(--scroll-percentage,0)*100%);--surface:#f7efe6;--band-surface:#f7efe6;--header-h:160px;--announcement-h:40px; } body{background:var(--warm-gradient);color:var(--panel);} `,
           }}
         />
-        {/* Global base styles */}
-        <link rel="stylesheet" href={styles} />
-        {/* Full homepage / layout styles */}
-        <link rel="stylesheet" href={homepageStyles} />
+  {/* Stylesheets now provided via links() + <Links /> for canonical asset manifest handling */}
         <Meta />
         <Links />
       </head>

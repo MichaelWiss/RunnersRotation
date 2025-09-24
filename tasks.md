@@ -1,4 +1,36 @@
-# VELOCITY Running - Modern Hydrogen Architecture Migration
+# Tasks — RunnersRotation
+
+Date: 2025-09-23
+
+This document tracks current work, what's done, and what's next.
+
+## Completed
+- Product route wired to live Storefront data (`app/routes/products.$handle.tsx`)
+- DEV mock fallback for product route (`DEV_MOCK_PRODUCTS=1`)
+- Shared Layout applied across routes (`app/components/layout/Layout.tsx`)
+- Header fixed to top; announcement bar fixed above header; proper offsets and z-index (`app/styles/homepage.css`)
+- Full-bleed nav band without horizontal scroll (`.nav-main`)
+- Hero card centered; CTA respects right gutter (`app/styles/homepage.css`)
+- Removed nested `.page-container` wrapper from `Layout` to avoid width inconsistencies
+
+## In Progress
+- Homepage live content (safe)
+  - Replace static copy with Storefront data while preserving exact HTML/CSS/classes
+  - Keep strict fallbacks for missing data
+
+## Backlog / Next
+- Thread cart count and collection links from route loaders into `Header`
+- Tighten responsive metrics for `--header-h` across breakpoints if needed
+- Add lightweight tests (type-level and minimal snapshots) for route loaders
+- Documentation refinements as architecture evolves (server/client split if adopted)
+
+## Notes
+- Environment
+  - Set up `.env` with Storefront credentials and optional `DEV_MOCK_PRODUCTS=1`
+- Run
+  - Dev: `npm run dev`
+  - Build: `npm run build`
+  - Start: `npm start`# VELOCITY Running - Modern Hydrogen Architecture Migration
 
 ## 🔧 Current Sprint: Server/Client Component Rebuild
 

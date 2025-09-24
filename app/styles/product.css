@@ -1,24 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@400;700&display=swap');
+@import url('./tokens.css');
 
-/* --- Palette (no grey / white / black anywhere) --- */
-:root{
-  --bg: #f7efe6;            /* warm cream */
-  --panel: #0b2545;         /* deep indigo (primary dark text alternative) */
-  --accent: #e94c26;        /* warm orange-red (matches original accent) */
-  --muted: #6b3f2f;         /* coffee brown for subtle text */
-  --card: #fff3e8;          /* very light peach (not pure white) */
-  --line: #f1d7c7;          /* light divider tone */
-  --cta-hover: #c83b1a;     /* darker accent for hover */
-  --glass: rgba(11,37,69,0.06);
-  --radius: 0px;            /* Changed from 14px to 0px for sharp corners */
-  /* Scroll-driven blending helpers (same naming as homepage) */
-  --scroll-pct: calc(var(--scroll-percentage, 0) * 100%);
-  --surface: color-mix(in srgb, var(--bg) calc(100% - var(--scroll-pct)), var(--card) var(--scroll-pct));
-}
+/* tokens imported above */
 
 /* --- Base reset --- */
 *{box-sizing:border-box}
-html,body{height:100%}
+html,body{min-height:100%}
 body{
   margin:0;
   font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;

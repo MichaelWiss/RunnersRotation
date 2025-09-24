@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+@import url('./tokens.css');
 
 * {
   margin: 0;
@@ -10,36 +10,7 @@ html, body {
   overflow-x: hidden; /* prevent 100vw bands from creating horizontal scroll */
 }
 
-:root {
-  /* Analogous warm palette inspired by the mockup */
-  --bg: #f7efe6;
-  --panel: #0b2545; /* deep indigo for text/UI consistency with product page */
-  --accent: #e94c26;
-  --accent-dark: #c83b1a;
-  --accent-light: #ff7a4a;
-  --panel-light: #a33a25; /* lighter orange-red */
-  --panel-dark: #4a140e; /* deepest orange-red */
-  --muted: #8b3a2a; /* muted warm tone (no browns) */
-  --card: #fff3e8;
-  --line: #f1d7c7;
-  --cta-hover: #c83b1a;
-  --glass: rgba(11, 37, 69, 0.06); /* updated to match deep indigo */
-  --warm-gradient: linear-gradient(180deg, #f7efe6, #f6e9df 60%);
-  --card-gradient: linear-gradient(180deg, #fff3e8, #ffece0);
-  --accent-gradient: linear-gradient(90deg, #e94c26, #ff7a4a);
-  --radius: 0px; /* Sharp corners */
-  --shadow-soft: 0 8px 30px rgba(11, 37, 69, 0.06);
-  --shadow-strong: 0 18px 50px rgba(11, 37, 69, 0.08);
-  /* Scroll-driven blending helpers */
-  --scroll-pct: calc(var(--scroll-percentage, 0) * 100%);
-  /* Surface tracks body gradient by blending bg→card with scroll */
-  --surface: color-mix(in srgb, var(--bg) calc(100% - var(--scroll-pct)), var(--card) var(--scroll-pct));
-  /* Band surfaces (nav/footer link bars) use a slightly more elevated tone */
-  --band-surface: color-mix(in srgb, var(--surface) 70%, var(--card) 30%);
-  /* layout metrics */
-  --header-h: 120px; /* matches visual header height incl. nav band */
-  --announcement-h: 40px;
-}
+/* tokens imported above */
 
 body {
   font-family: 'Inter', sans-serif;
@@ -122,7 +93,7 @@ body {
   transition: all 0.3s ease;
   box-shadow: 0 8px 32px rgba(212, 165, 116, 0.15);
   text-decoration: none;
-  /* Rotation tied to scroll position */
+  /* Rotation tied to scroll position (single source of truth) */
   transform: rotate(calc(var(--scroll-percentage, 0) * 360deg));
 }
 
@@ -844,6 +815,10 @@ body {
   color: var(--muted);
   margin-bottom: 20px;
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .home-product-price {

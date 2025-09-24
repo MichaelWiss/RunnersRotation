@@ -1,4 +1,4 @@
-import {LinksFunction} from 'react-router';
+import {LinksFunction, type LoaderFunctionArgs, useLoaderData, Link} from 'react-router';
 import homepageStyles from '~/styles/homepage.css?url';
 import {useEffect} from 'react';
 import Layout from '~/components/layout/Layout';
@@ -7,19 +7,50 @@ export const links: LinksFunction = () => [
   {rel: 'stylesheet', href: homepageStyles},
 ];
 
+type ProductLite = {
+  id: string;
+  title: string;
+  handle: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  price?: {amount: string; currencyCode: string} | null;
+};
+
+export async function loader({context}: LoaderFunctionArgs) {
+  const {storefront} = context as {storefront: any};
+  try {
+    const data = await storefront.query(`#graphql
+      query HomeProducts {
+        products(first: 3) {
+          nodes {
+            id
+            title
+            handle
+            description
+            images(first: 1) { nodes { url } }
+            variants(first: 1) { nodes { price { amount currencyCode } } }
+          }
+        }
+      }
+    `);
+    const items: ProductLite[] = ((data as any)?.products?.nodes || []).map((p: any) => ({
+      id: p.id,
+      title: p.title,
+      handle: p.handle,
+      description: p.description,
+      imageUrl: p.images?.nodes?.[0]?.url ?? null,
+      price: p.variants?.nodes?.[0]?.price ?? null,
+    }));
+    return {products: items};
+  } catch {
+    return {products: [] as ProductLite[]};
+  }
+}
+
 export default function Index() {
-  // Scroll-driven rotation for nav circle / background blending
-  useEffect(() => {
-    const updateScroll = () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollProgress = Math.min(documentHeight > 0 ? scrollTop / documentHeight : 0, 1);
-      document.documentElement.style.setProperty('--scroll-percentage', String(scrollProgress));
-    };
-    updateScroll();
-    window.addEventListener('scroll', updateScroll, {passive: true});
-    return () => window.removeEventListener('scroll', updateScroll);
-  }, []);
+  const data = useLoaderData<typeof loader>();
+  const products = data?.products ?? [];
+  // Rotation/blend is now handled globally in Layout for consistent behavior
 
   // Quantity +/- handlers (delegated for demo)
   useEffect(() => {
@@ -72,60 +103,70 @@ export default function Index() {
         </div>
 
         <div className="home-products-grid grid-container">
-          <div className="home-product-card">
-            <div className="home-product-image">TRAIL MASTER</div>
-            <div className="home-product-content">
-              <h3>Trail Master Pro</h3>
-              <p>Ultimate trail protection with Vibram MegaGrip sole and rock plate. Engineered for technical terrain and ultra-distance adventures.</p>
-              <div className="home-product-price">£185.00</div>
-              <a href="#" className="home-product-cta">Shop Trail Master</a>
-            </div>
-          </div>
-          <div className="home-product-card">
-            <div className="home-product-image">ROAD RACER</div>
-            <div className="home-product-content">
-              <h3>Carbon Road Racer</h3>
-              <p>Competition-grade racing flat with carbon fiber plate. Designed for personal bests and podium finishes on road and track.</p>
-              <div className="home-product-price">£220.00</div>
-              <a href="#" className="home-product-cta">Shop Road Racer</a>
-            </div>
-          </div>
-          <div className="home-product-card">
-            <div className="home-product-image">DAILY TRAINER</div>
-            <div className="home-product-content">
-              <h3>Daily Comfort Max</h3>
-              <p>Perfect everyday trainer with responsive cushioning and breathable upper. Ideal for daily miles and recovery runs.</p>
-              <div className="home-product-price">£145.00</div>
-              <a href="#" className="home-product-cta">Shop Daily Trainer</a>
-            </div>
-          </div>
-          <div className="home-product-card">
-            <div className="home-product-image">TEMPO ELITE</div>
-            <div className="home-product-content">
-              <h3>Tempo Elite</h3>
-              <p>Lightweight tempo trainer for speed workouts and threshold sessions. Responsive foam and propulsive geometry.</p>
-              <div className="home-product-price">£175.00</div>
-              <a href="#" className="home-product-cta">Shop Tempo Elite</a>
-            </div>
-          </div>
-          <div className="home-product-card">
-            <div className="home-product-image">RECOVERY MAX</div>
-            <div className="home-product-content">
-              <h3>Recovery Max</h3>
-              <p>Maximum cushioning for recovery runs and long easy miles. Cloud-like comfort with superior energy return.</p>
-              <div className="home-product-price">£165.00</div>
-              <a href="#" className="home-product-cta">Shop Recovery Max</a>
-            </div>
-          </div>
-          <div className="home-product-card">
-            <div className="home-product-image">SPIKE ELITE</div>
-            <div className="home-product-content">
-              <h3>Track Spike Elite</h3>
-              <p>Professional track spikes for competition. Aggressive traction and lightweight construction for maximum speed.</p>
-              <div className="home-product-price">£195.00</div>
-              <a href="#" className="home-product-cta">Shop Track Spikes</a>
-            </div>
-          </div>
+          {[...Array(6)].map((_, i) => {
+            const p = products[i];
+            const title = p?.title || (
+              [
+                'Trail Master Pro',
+                'Carbon Road Racer',
+                'Daily Comfort Max',
+                'Tempo Elite',
+                'Recovery Max',
+                'Track Spike Elite',
+              ][i]
+            );
+            const blurb = (
+              [
+                'Ultimate trail protection with Vibram MegaGrip sole and rock plate. Engineered for technical terrain and ultra-distance adventures.',
+                'Competition-grade racing flat with carbon fiber plate. Designed for personal bests and podium finishes on road and track.',
+                'Perfect everyday trainer with responsive cushioning and breathable upper. Ideal for daily miles and recovery runs.',
+                'Lightweight tempo trainer for speed workouts and threshold sessions. Responsive foam and propulsive geometry.',
+                'Maximum cushioning for recovery runs and long easy miles. Cloud-like comfort with superior energy return.',
+                'Professional track spikes for competition. Aggressive traction and lightweight construction for maximum speed.',
+              ][i]
+            );
+            const label = (
+              [
+                'TRAIL MASTER',
+                'ROAD RACER',
+                'DAILY TRAINER',
+                'TEMPO ELITE',
+                'RECOVERY MAX',
+                'SPIKE ELITE',
+              ][i]
+            );
+            const priceStr = p?.price
+              ? new Intl.NumberFormat('en-GB', {style: 'currency', currency: p.price.currencyCode}).format(Number(p.price.amount))
+              : (
+                  ['£185.00', '£220.00', '£145.00', '£175.00', '£165.00', '£195.00'][i]
+                );
+            const href = p?.handle ? `/products/${p.handle}` : '#';
+            return (
+              <div className="home-product-card" key={i}>
+                <div
+                  className="home-product-image"
+                  style={p?.imageUrl ? {
+                    backgroundImage: `url(${p.imageUrl})`,
+                    backgroundSize: 'contain',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                  } : undefined}
+                >
+                  {!p?.imageUrl ? label : null}
+                </div>
+                <div className="home-product-content">
+                  <h3>{title}</h3>
+                  <p>{p?.description || blurb}</p>
+                  <div className="home-product-price">{priceStr}</div>
+                  {p?.handle ? (
+                    <Link to={href} className="home-product-cta">Shop Now</Link>
+                  ) : (
+                    <a href="#" className="home-product-cta">Shop Now</a>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 

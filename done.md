@@ -1,4 +1,84 @@
-# VELOCITY Running - Completed Tasks
+# Done — RunnersRotation
+
+Date: 2025-09-23
+
+This document summarizes the work completed to date with links to the relevant code areas and how to verify behavior locally.
+
+## Visual/layout consistency
+- Announcement bar and header
+  - Announcement bar is fixed at the very top of the viewport.
+  - Header/navigation is fixed immediately below the announcement bar.
+  - Correct stacking (z-index) and body offset so page content never slides underneath.
+  - Source:
+    - Markup ordering: `app/components/layout/Layout.tsx`
+    - Styles: `app/styles/homepage.css` (`.announcement-bar`, `.header`, `:root` layout variables, and `body` padding-top)
+- Full-bleed navigation band
+  - `.nav-main` renders as a full-width band using the 100vw technique without horizontal scroll.
+  - Source: `app/styles/homepage.css` (nav band).
+- Hero alignment and CTA containment
+  - `.hero-card` is horizontally centered; grid parent enforces centering.
+  - CTA constrained with `max-width: 100%` and gutters so it never touches the right edge.
+  - Source: `app/styles/homepage.css` (`.hero-section`, `.hero-card`, `.hero-cta`).
+
+## Product page improvements
+- Live data wiring (Storefront API)
+  - Product route (`/products/:handle`) queries Shopify Storefront by handle.
+  - Minimal fields mapped and passed to existing components without changing HTML structure.
+  - Source: `app/routes/products.$handle.tsx` (loader + links + shared `Layout`).
+- DEV mock fallback (development only)
+  - When `DEV_MOCK_PRODUCTS=1` and `NODE_ENV=development`, the product loader serves a mock product if none is found.
+  - Enables local testing without Admin products.
+  - Source: `app/routes/products.$handle.tsx`.
+- Gallery and purchase UI
+  - `ProductGallery` renders provided images; backgrounds use `contain` and `no-repeat` to prevent bleed.
+  - `PurchaseCard` shows price/availability, formats currency, and disables CTA when unavailable.
+  - Source: `app/components/ProductGallery.tsx`, `app/components/PurchaseCard.tsx`.
+
+## CSS tokens and page grid
+- Design tokens and scroll-driven blending remain centralized in `homepage.css`.
+- `.page-container` grid is used at the body level; an extra nested wrapper in `Layout` was removed to avoid width inconsistencies.
+- Source: `app/components/layout/Layout.tsx`, `app/styles/homepage.css`.
+
+## How to run
+- Development
+  - `npm run dev` (starts Vite + Express with HMR)
+- Build & start
+  - `npm run build`
+  - `npm start`
+
+## Environment variables
+Required (Storefront):
+- `PUBLIC_STORE_DOMAIN`
+- `PUBLIC_STOREFRONT_API_TOKEN`
+Optional:
+- `PRIVATE_STOREFRONT_API_TOKEN`
+- `PUBLIC_STOREFRONT_ID`
+- `SESSION_SECRET`
+
+Development-only mock:
+- `DEV_MOCK_PRODUCTS=1`
+  - Add to `.env` at repo root, then restart the dev server.
+
+Example `.env` snippet:
+```
+PUBLIC_STORE_DOMAIN=your-shop.myshopify.com
+PUBLIC_STOREFRONT_API_TOKEN=shpat_xxx
+SESSION_SECRET=some-long-random-string
+DEV_MOCK_PRODUCTS=1
+```
+
+## How to test
+- Homepage: `/`
+- Product page (real or mock): `/products/<handle>`
+  - Example: `/products/books-cascadia-19-gtx`
+  - With `DEV_MOCK_PRODUCTS=1`, returns a mock product if the handle isn’t found.
+- Storefront connectivity demo: `/demo` (returns shop name JSON if configured)
+
+## Notes
+- If you notice header/announcement spacing off by a few pixels, adjust the layout variables in `:root`:
+  - `--announcement-h` (default 40px)
+  - `--header-h` (default 120px)
+  These control both element positions and the body offset padding.# VELOCITY Running - Completed Tasks
 
 ## ✅ Design System Foundation
 - [x] Created comprehensive color palette with warm analogous colors

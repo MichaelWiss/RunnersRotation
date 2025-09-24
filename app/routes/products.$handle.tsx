@@ -130,18 +130,7 @@ export default function Product() {
   const navigate = useNavigate();
   const {product} = useLoaderData<typeof loader>();
 
-  // Scroll-driven blend value for header/background sync
-  useEffect(() => {
-    const updateScroll = () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollProgress = Math.min(documentHeight > 0 ? scrollTop / documentHeight : 0, 1);
-      document.documentElement.style.setProperty('--scroll-percentage', String(scrollProgress));
-    };
-    updateScroll();
-    window.addEventListener('scroll', updateScroll, {passive: true});
-    return () => window.removeEventListener('scroll', updateScroll);
-  }, []);
+  // Rotation/blend is set globally in Layout now for consistent behavior across routes
 
   // Interactions: pills toggle, qty +/- and thumbnails update main-img
   useEffect(() => {
@@ -179,28 +168,13 @@ export default function Product() {
       mainImg.style.background = colors[index] || colors[0];
       mainImg.textContent = `TRAIL RUNNER PRO\n${names[index] || names[0]}`;
     };
-    const onNav = (e: MouseEvent) => {
-      const link = (e.target as HTMLElement).closest('.nav-links a') as HTMLAnchorElement | null;
-      if (!link) return;
-      const text = link.textContent?.trim().toLowerCase();
-      if (!text) return;
-      e.preventDefault();
-      if (text.includes('trail')) return navigate('/trail-running');
-      if (text.includes('road')) return navigate('/road-running');
-      if (text.includes('ultra')) return navigate('/ultralight');
-      if (text.includes('racing')) return navigate('/racing');
-      if (text.includes('account')) return navigate('/account');
-      if (text.includes('cart')) return; // TODO: cart sidebar
-    };
     document.addEventListener('click', onPill);
     document.addEventListener('click', onQty);
     document.addEventListener('click', onThumb);
-    document.addEventListener('click', onNav);
     return () => {
       document.removeEventListener('click', onPill);
       document.removeEventListener('click', onQty);
       document.removeEventListener('click', onThumb);
-      document.removeEventListener('click', onNav);
     };
   }, [navigate]);
 

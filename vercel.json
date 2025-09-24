@@ -1,0 +1,11 @@
+{
+  "functions": {
+    "api/ssr.mjs": {
+      "runtime": "nodejs22.x"
+    }
+  },
+  "routes": [
+    { "src": "/assets/(.*)", "dest": "/build/client/assets/$1" },
+    { "src": "/(.*)", "dest": "/api/ssr" }
+  ]
+}

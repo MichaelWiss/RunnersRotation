@@ -21,7 +21,7 @@ const vite =
         }),
       );
 
-const app = express();
+export const app = express();
 
 app.use(compression());
 
@@ -56,23 +56,28 @@ app.all(
           getLoadContext: () => context,
         })(req, res, next);
       }
-    : async (req) => {
+    : async (req, res, next) => {
         const context = await getContext(req);
 
-        return createRequestHandler({
-          build: vite
-            ? () => vite.ssrLoadModule('virtual:react-router/server-build')
-            : await import('./build/server/index.js'),
-          mode: process.env.NODE_ENV,
-          getLoadContext: () => context,
-        });
+        return (
+          await createRequestHandler({
+            build: vite
+              ? () => vite.ssrLoadModule('virtual:react-router/server-build')
+              : await import('./build/server/index.js'),
+            mode: process.env.NODE_ENV,
+            getLoadContext: () => context,
+          })
+        )(req, res, next);
       },
 );
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
-  console.log(`Express server listening on port ${port}`);
-});
+// On Vercel (serverless), exporting `app` is enough; avoid starting a server.
+if (!process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`Express server listening on port ${port}`);
+  });
+}
 
 async function getContext(req) {
   const session = await AppSession.init(req, [env.SESSION_SECRET]);

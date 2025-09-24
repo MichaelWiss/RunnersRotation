@@ -1,9 +1,59 @@
 node_modules
-/.cache
+
+# Build / output
 /build
 /dist
 /public/build
-/.mf
-.env
-.shopify
+.vercel/output
+
+# Caches
+/.cache
+.vite
+.parcel-cache
 .react-router
+.hydrogen
+
+# Misc framework
+/.mf
+.shopify
+
+# Env files (keep examples separately)
+.env
+.env.*
+!.env.example
+!.env.d.ts
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Coverage
+coverage
+.nyc_output
+
+# Swaps
+*.swp
+*.swo
+
+# Temporary server files
+server-*.tmp.*
+
+# Lockfiles (uncomment the one you actually use)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

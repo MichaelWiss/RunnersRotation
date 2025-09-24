@@ -42,6 +42,28 @@ if (vite) {
 }
 app.use(express.static('build/client', {maxAge: '1h'}));
 
+// Lightweight health/diagnostic endpoint (do NOT leak secret values)
+app.get('/__health', (req, res) => {
+  const keys = [
+    'PUBLIC_STORE_DOMAIN',
+    'PUBLIC_STOREFRONT_API_TOKEN',
+    'PRIVATE_STOREFRONT_API_TOKEN',
+    'PUBLIC_STOREFRONT_ID',
+    'PUBLIC_CHECKOUT_DOMAIN',
+    'SESSION_SECRET',
+  ];
+  const envPresence = Object.fromEntries(
+    keys.map((k) => [k, process.env[k] ? true : false]),
+  );
+  res.json({
+    ok: true,
+    env: envPresence,
+    nodeEnv: process.env.NODE_ENV,
+    vercel: Boolean(process.env.VERCEL),
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.all(
   '*',
   process.env.NODE_ENV === 'development'

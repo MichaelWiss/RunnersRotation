@@ -1,5 +1,9 @@
 console.log('[bootstrap] Loading server.mjs ...');
 import {createRequestHandler} from '@react-router/express';
+// Load .env in production too so local `npm start` picks it up (dev already uses nodemon --require dotenv/config)
+if (process.env.NODE_ENV === 'production') {
+  try { await import('dotenv/config'); } catch {}
+}
 import compression from 'compression';
 import express from 'express';
 import morgan from 'morgan';
@@ -14,6 +18,21 @@ import {createBuildResolver} from './build-loader.mjs';
 const {env: loadedEnv, missing} = loadEnv();
 if (missing.length) {
   console.warn('[env] Missing required vars at bootstrap:', missing.join(', '));
+  // Provide a clearer hard failure so Hydrogen doesn't throw later in createStorefrontClient.
+  // Fail early with remediation steps.
+  console.error('\n[env] FATAL: Required environment variables are missing.');
+  console.error('Add them to a .env file or your process environment:');
+  console.error('  PUBLIC_STORE_DOMAIN=your-shop.myshopify.com');
+  console.error('  PUBLIC_STOREFRONT_API_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+  console.error('  SESSION_SECRET=some-long-random-string');
+  console.error('\nExample:');
+  console.error('  echo "PUBLIC_STORE_DOMAIN=example-shop.myshopify.com" >> .env');
+  console.error('  echo "PUBLIC_STOREFRONT_API_TOKEN=shpat_..." >> .env');
+  console.error('  echo "SESSION_SECRET=$(openssl rand -hex 32)" >> .env');
+  // Exit only if running as a standalone server (avoid crashing serverless warm start). 
+  if (!process.env.VERCEL) {
+    process.exit(1);
+  }
 }
 const env = loadedEnv;
 // Log summary once at bootstrap (was previously done per-request in getContext)

@@ -19,24 +19,37 @@ npm start
 
 ## Environment
 
-Create a `.env` in the repo root with your Storefront credentials:
+Create a `.env.local` (ignored by git). This app intentionally keeps the surface minimal.
 
+### Required
 ```
 PUBLIC_STORE_DOMAIN=your-shop.myshopify.com
-PUBLIC_STOREFRONT_API_TOKEN=shpat_xxx
+PUBLIC_STOREFRONT_API_TOKEN=shpat_storefront_api_token
 SESSION_SECRET=some-long-random-string
-
-# optional
-PRIVATE_STOREFRONT_API_TOKEN=
-PUBLIC_STOREFRONT_ID=
-
-# development fallback for product page
-DEV_MOCK_PRODUCTS=1
 ```
 
+### Optional (off by default)
+```
+# Mock product fallback (development only)
+# DEV_MOCK_PRODUCTS=1
+
+# Verbose diagnostics (request timing, preflight, /__health)
+# DEBUG_INSTRUMENTATION=1
+```
+
+### Advanced (add later only if you truly need them)
+These are NOT required for current functionality and are purposely omitted to avoid confusion:
+```
+# PUBLIC_STOREFRONT_ID=gid://shopify/Storefront/<id>    # Multi-storefront / channel contexts
+# PUBLIC_CHECKOUT_DOMAIN=checkout.shopify.com           # Custom CSP tweaks
+```
+
+Do NOT paste Admin API tokens here. Only the single Storefront API access token is required.
+
 Notes:
-- Dev uses `nodemon --require dotenv/config` so `.env` is automatically loaded.
-- Restart the dev server after editing `.env`.
+- Dev uses `nodemon --require dotenv/config` so `.env.local` is auto-loaded.
+- Restart the dev server after editing environment values.
+- Minimal surface reduces misconfiguration (403 ACCESS_DENIED) during deploy.
 
 ## Routes
 - `/` homepage (styled per `app/styles/homepage.css`)
@@ -57,3 +70,29 @@ Key files:
 ## Docs
 - Tasks tracker: `tasks.md`
 - What’s done: `done.md`
+
+## Debug / Instrumentation
+
+Verbose diagnostics (request timing, storefront query timing, watchdog, /__health) are gated by the env flag:
+
+```
+DEBUG_INSTRUMENTATION=1
+```
+
+When set:
+- Adds per-request timing logs `[req] ...`
+- Wraps `storefront.query` with timing & error logs
+- Enables long-request watchdog (>8s warning)
+- Exposes `GET /__health` (no secrets, only presence booleans)
+
+When unset or `0`: production stays quiet and those hooks are skipped.
+
+### Structure
+- `env.mjs` centralizes required/optional env loading & summary logging.
+- `instrumentation.mjs` provides attachable diagnostics (pure side-effects only when enabled).
+- `server.mjs` remains thin: loads env, conditionally enables instrumentation, sets up SSR handler.
+
+### Recommended Practice
+1. Use `DEBUG_INSTRUMENTATION=1` in Preview / development only.
+2. Keep Production quiet unless chasing an issue.
+3. Remove instrumentation modules later if not needed—they are fully isolated.

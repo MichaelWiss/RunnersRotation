@@ -42,32 +42,45 @@ export async function loader({context}: LoaderFunctionArgs) {
     context.session.get('cartId'),
   ]);
 
-  const [cart, layout] = await Promise.all([
-    cartId
-      ? (
-          await context.storefront.query<{cart: Cart}>(CART_QUERY, {
-            variables: {
-              cartId,
-              /**
-              Country and language properties are automatically injected
-              into all queries. Passing them is unnecessary unless you
-              want to override them from the following default:
-              */
-              country: context.storefront.i18n?.country,
-              language: context.storefront.i18n?.language,
-            },
-            cache: context.storefront.CacheNone(),
-          })
-        ).cart
-      : null,
-    await context.storefront.query<{shop: Shop}>(LAYOUT_QUERY),
-  ]);
+  try {
+    const [cart, layout] = await Promise.all([
+      cartId
+        ? (
+            await context.storefront.query<{cart: Cart}>(CART_QUERY, {
+              variables: {
+                cartId,
+                country: context.storefront.i18n?.country,
+                language: context.storefront.i18n?.language,
+              },
+              cache: context.storefront.CacheNone(),
+            })
+          ).cart
+        : null,
+      await context.storefront.query<{shop: Shop}>(LAYOUT_QUERY),
+    ]);
 
-  return {
-    isLoggedIn: Boolean(customerAccessToken),
-    cart,
-    layout,
-  };
+    return {
+      isLoggedIn: Boolean(customerAccessToken),
+      cart,
+      layout,
+    };
+  } catch (e) {
+    const err = e instanceof Error ? e : new Error(typeof e === 'string' ? e : 'Unknown error');
+    const msg = String(err.message || '');
+    const cause = (err && 'cause' in err && err.cause) ? String(err.cause) : '';
+    const accessDenied = msg.includes('ACCESS_DENIED') || cause.includes('ACCESS_DENIED') || msg.includes('403');
+    if (accessDenied) {
+      // Fail open so the shell renders and we can surface configuration issues instead of a blank 500
+      console.error('[root.loader] ACCESS_DENIED from Storefront API – returning minimal fallback layout');
+      return {
+        isLoggedIn: false,
+        cart: null,
+        layout: {shop: {name: 'Storefront Unavailable', description: ''}},
+        storefrontAccessError: 'ACCESS_DENIED',
+      };
+    }
+    throw e; // rethrow unknown errors
+  }
 }
 
 export function Layout({children}: {children?: React.ReactNode}) {

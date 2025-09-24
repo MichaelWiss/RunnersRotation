@@ -1,15 +1,21 @@
 console.log('[bootstrap] Loading server.mjs ...');
 import {createRequestHandler} from '@react-router/express';
-import { createCookieSessionStorage} from 'react-router';
+import {createCookieSessionStorage} from 'react-router';
 import compression from 'compression';
 import express from 'express';
 import morgan from 'morgan';
 import {createStorefrontClient, InMemoryCache} from '@shopify/hydrogen';
 import crypto from 'node:crypto';
+import {loadEnv, logEnvSummary} from './env.mjs';
+import {attachProcessHooks, attachRequestTiming, createWatchdog, wrapStorefront} from './instrumentation.mjs';
 
 
 
-const env = process.env;
+const {env: loadedEnv, missing} = loadEnv();
+if (missing.length) {
+  console.warn('[env] Missing required vars at bootstrap:', missing.join(', '));
+}
+const env = loadedEnv;
 
 const isProd = process.env.NODE_ENV === 'production';
 const vite =
@@ -36,28 +42,60 @@ if (isProd) {
 export const app = express();
 console.log('[bootstrap] Express app created');
 
-app.use(compression());
-
-// Global error + rejection handlers (diagnostics only; remove once stable)
-if (!global.__RR_PROCESS_HOOKS__) {
-  process.on('unhandledRejection', (reason) => {
-    console.error('[unhandledRejection]', reason);
-  });
-  process.on('uncaughtException', (err) => {
-    console.error('[uncaughtException]', err);
-  });
-  global.__RR_PROCESS_HOOKS__ = true;
+// Instrumentation gating
+const debugEnabled = env.DEBUG_INSTRUMENTATION === '1';
+if (debugEnabled) {
+  attachProcessHooks();
+  attachRequestTiming(app);
 }
 
-// Basic per-request timing middleware
-app.use((req, res, next) => {
-  const start = performance.now();
-  res.on('finish', () => {
-    const dur = (performance.now() - start).toFixed(1);
-    console.log(`[req] ${req.method} ${req.originalUrl} -> ${res.statusCode} ${dur}ms`);
-  });
-  next();
-});
+// Storefront API preflight (debug mode) – lean & only uses required vars
+if (debugEnabled) {
+  (async () => {
+    try {
+      if (!env.PUBLIC_STORE_DOMAIN || !env.PUBLIC_STOREFRONT_API_TOKEN) {
+        console.warn('[preflight] Skipping Storefront API check (missing domain or token)');
+        return;
+      }
+      const {storefront: pfStorefront} = createStorefrontClient({
+        cache: new InMemoryCache(),
+        waitUntil: null,
+        i18n: {language: 'EN', country: 'US'},
+        publicStorefrontToken: env.PUBLIC_STOREFRONT_API_TOKEN,
+        storeDomain: env.PUBLIC_STORE_DOMAIN,
+      });
+      const started = performance.now();
+      const result = await pfStorefront.query(`#graphql\n        query PreflightShopInfo { shop { name } }\n      `);
+      const dur = (performance.now() - started).toFixed(1);
+      if (result?.shop?.name) {
+        console.log(`[preflight] Storefront API OK (${dur}ms) shop.name="${result.shop.name}"`);
+      } else if (result?.errors?.length) {
+        console.warn('[preflight] Storefront API errors:', JSON.stringify(result.errors));
+      } else {
+        console.warn('[preflight] Storefront API unexpected response');
+      }
+    } catch (e) {
+      const err = e instanceof Error ? e : new Error(String(e));
+      const msg = err.message;
+      const cause = (err && 'cause' in err && err.cause) ? String(err.cause) : '';
+      const accessDenied = msg.includes('ACCESS_DENIED') || cause.includes('ACCESS_DENIED') || msg.includes('403');
+      if (accessDenied) {
+        console.error('[preflight] 403 ACCESS_DENIED');
+        console.error('[preflight] Fix steps:\n' +
+          ' 1. PUBLIC_STORE_DOMAIN must equal your myshopify domain (no protocol).\n' +
+          ' 2. Use the Storefront API access token from your custom app (Storefront API integration).\n' +
+          ' 3. Do not use an Admin API token.\n' +
+          ' 4. If token was regenerated, redeploy so the new value is active.');
+      } else {
+        console.error('[preflight] Storefront API preflight failed:', err);
+      }
+    }
+  })();
+}
+
+app.use(compression());
+
+// (Per-request timing now handled only when debugEnabled)
 
 // http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header
 app.disable('x-powered-by');
@@ -76,68 +114,45 @@ if (vite) {
 }
 app.use(express.static('build/client', {maxAge: '1h'}));
 
-// Lightweight health/diagnostic endpoint (do NOT leak secret values)
-app.get('/__health', (req, res) => {
-  const keys = [
-    'PUBLIC_STORE_DOMAIN',
-    'PUBLIC_STOREFRONT_API_TOKEN',
-    'PRIVATE_STOREFRONT_API_TOKEN',
-    'PUBLIC_STOREFRONT_ID',
-    'PUBLIC_CHECKOUT_DOMAIN',
-    'SESSION_SECRET',
-  ];
-  const envPresence = Object.fromEntries(
-    keys.map((k) => [k, process.env[k] ? true : false]),
-  );
-  res.json({
-    ok: true,
-    env: envPresence,
-    nodeEnv: process.env.NODE_ENV,
-    vercel: Boolean(process.env.VERCEL),
-    timestamp: new Date().toISOString(),
+if (debugEnabled) {
+  app.get('/__health', (req, res) => {
+    const keys = [ 'PUBLIC_STORE_DOMAIN', 'PUBLIC_STOREFRONT_API_TOKEN', 'SESSION_SECRET', 'DEV_MOCK_PRODUCTS', 'DEBUG_INSTRUMENTATION' ];
+    const envPresence = Object.fromEntries(keys.map((k) => [k, env[k] ? true : false]));
+    res.json({
+      ok: true,
+      env: envPresence,
+      nodeEnv: process.env.NODE_ENV,
+      debug: true,
+      timestamp: new Date().toISOString(),
+    });
   });
-});
+}
 
 app.all('*', async (req, res, next) => {
   const context = await getContext(req);
-
-  // Slow request watchdog (warn before 10s Vercel hard timeout)
-  let warned = false;
-  const watchdog = setInterval(() => {
-    warned = true;
-    console.warn('[watchdog] long-running request >8s', req.method, req.originalUrl);
-  }, 8000);
-
-  const clearWatchdog = () => clearInterval(watchdog);
-  res.on('close', clearWatchdog);
-  res.on('finish', clearWatchdog);
-
+  let finalizeWatchdog = () => {};
+  if (debugEnabled) {
+    finalizeWatchdog = createWatchdog(req, res, 8000);
+  }
   try {
     const build = vite
       ? () => vite.ssrLoadModule('virtual:react-router/server-build')
       : isProd
         ? await serverBuildPromise
         : await import('./build/server/index.js');
-
     await createRequestHandler({
       build,
       mode: process.env.NODE_ENV,
       getLoadContext: () => context,
     })(req, res, (err) => {
-      clearWatchdog();
       if (err) return next(err);
       next();
     });
   } catch (e) {
-    clearWatchdog();
     console.error('[handler.error]', e);
-    if (!res.headersSent) {
-      res.status(500).send('Internal Server Error');
-    }
+    if (!res.headersSent) res.status(500).send('Internal Server Error');
   } finally {
-    if (warned) {
-      console.warn('[watchdog] completed long request', req.method, req.originalUrl);
-    }
+    finalizeWatchdog();
   }
 });
 const port = process.env.PORT || 3000;
@@ -155,22 +170,7 @@ async function getContext(req) {
   const session = await AppSession.init(req, [env.SESSION_SECRET]);
 
   // One-time env presence logging to help diagnose production blank screen issues
-  if (!global.__RR_ENV_LOGGED__) {
-    const missing = [
-      'PUBLIC_STORE_DOMAIN',
-      'PUBLIC_STOREFRONT_API_TOKEN',
-      'PRIVATE_STOREFRONT_API_TOKEN',
-      'PUBLIC_STOREFRONT_ID',
-      'PUBLIC_CHECKOUT_DOMAIN',
-      'SESSION_SECRET',
-    ].filter((k) => !env[k]);
-    if (missing.length) {
-      console.warn('[startup] Missing expected env vars (names only):', missing.join(', '));
-    } else {
-      console.log('[startup] All expected env vars present');
-    }
-    global.__RR_ENV_LOGGED__ = true;
-  }
+  logEnvSummary();
 
   // Derive buyer IP safely (serverless environments may not have req.connection)
   const forwardedFor = req.headers['x-forwarded-for'];
@@ -183,7 +183,7 @@ async function getContext(req) {
     buyerIp = req.socket?.remoteAddress || req.connection?.remoteAddress || '';
   }
 
-  const {storefront} = createStorefrontClient({
+  const storefrontConfig = {
     // A [`cache` instance](https://developer.mozilla.org/en-US/docs/Web/API/Cache) is necessary for sub-request caching to work.
     // We provide only an in-memory implementation
     cache: new InMemoryCache(),
@@ -191,15 +191,17 @@ async function getContext(req) {
     waitUntil: null,
     i18n: {language: 'EN', country: 'US'},
     publicStorefrontToken: env.PUBLIC_STOREFRONT_API_TOKEN,
-    privateStorefrontToken: env.PRIVATE_STOREFRONT_API_TOKEN,
     storeDomain: env.PUBLIC_STORE_DOMAIN,
-    storefrontId: env.PUBLIC_STOREFRONT_ID,
     storefrontHeaders: {
       requestGroupId: crypto.randomUUID(),
       buyerIp,
       cookie: req.get('cookie'),
     },
-  });
+  };
+  let {storefront} = createStorefrontClient(storefrontConfig);
+  if (debugEnabled) {
+    storefront = wrapStorefront(storefront);
+  }
 
   // Wrap storefront.query for timing & error logging
   const originalQuery = storefront.query.bind(storefront);

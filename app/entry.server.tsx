@@ -48,7 +48,7 @@ function handleBotRequest(
   return new Promise((resolve, reject) => {
     const {nonce, header, NonceProvider} = createContentSecurityPolicy({
       shop: {
-        checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
+        // Only storeDomain is required for baseline CSP; checkout domain optional and removed for minimal env surface.
         storeDomain: context.env.PUBLIC_STORE_DOMAIN,
       },
     });

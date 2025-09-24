@@ -1,8 +1,31 @@
 console.log('[bootstrap] Loading server.mjs ...');
 import {createRequestHandler} from '@react-router/express';
-// Load .env in production too so local `npm start` picks it up (dev already uses nodemon --require dotenv/config)
-if (process.env.NODE_ENV === 'production') {
-  try { await import('dotenv/config'); } catch {}
+// Unified .env loading strategy: always try .env.local first (override), then .env.
+// This mirrors popular frameworks (Next.js, Remix) and allows you to keep secrets out of the base .env committed file.
+// If dev script already injected dotenv/config this is harmless (config is idempotent; override rules preserved).
+try {
+  const [{config}, fs] = await Promise.all([
+    import('dotenv'),
+    import('fs')
+  ]);
+  let loadedAny = false;
+  if (fs.existsSync('.env.local')) {
+    config({path: '.env.local', override: true});
+    console.log('[env] loaded .env.local');
+    loadedAny = true;
+  }
+  if (fs.existsSync('.env')) {
+    // Do not override anything already set by .env.local or actual process env
+    config({path: '.env', override: false});
+    console.log('[env] loaded .env');
+    loadedAny = true;
+  }
+  if (!loadedAny) {
+    console.log('[env] no .env or .env.local file present (relying on process environment)');
+  }
+} catch (e) {
+  // Swallow – dotenv is a tiny helper; absence shouldn't crash server.
+  console.warn('[env] dotenv load skipped:', e?.message || e);
 }
 import compression from 'compression';
 import express from 'express';
@@ -16,23 +39,10 @@ import {createBuildResolver} from './build-loader.mjs';
 
 
 const {env: loadedEnv, missing} = loadEnv();
-if (missing.length) {
+const envMissing = missing.length > 0;
+if (envMissing) {
   console.warn('[env] Missing required vars at bootstrap:', missing.join(', '));
-  // Provide a clearer hard failure so Hydrogen doesn't throw later in createStorefrontClient.
-  // Fail early with remediation steps.
-  console.error('\n[env] FATAL: Required environment variables are missing.');
-  console.error('Add them to a .env file or your process environment:');
-  console.error('  PUBLIC_STORE_DOMAIN=your-shop.myshopify.com');
-  console.error('  PUBLIC_STOREFRONT_API_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
-  console.error('  SESSION_SECRET=some-long-random-string');
-  console.error('\nExample:');
-  console.error('  echo "PUBLIC_STORE_DOMAIN=example-shop.myshopify.com" >> .env');
-  console.error('  echo "PUBLIC_STOREFRONT_API_TOKEN=shpat_..." >> .env');
-  console.error('  echo "SESSION_SECRET=$(openssl rand -hex 32)" >> .env');
-  // Exit only if running as a standalone server (avoid crashing serverless warm start). 
-  if (!process.env.VERCEL) {
-    process.exit(1);
-  }
+  console.warn('[env] The server will start in LIMITED mode and show a guidance page until you add them.');
 }
 const env = loadedEnv;
 // Log summary once at bootstrap (was previously done per-request in getContext)
@@ -67,7 +77,7 @@ export const app = express();
 console.log('[bootstrap] Express app created');
 
 // Instrumentation gating
-const debugEnabled = env.DEBUG_INSTRUMENTATION === '1';
+const debugEnabled = !envMissing && env.DEBUG_INSTRUMENTATION === '1';
 if (debugEnabled) {
   attachProcessHooks();
   attachRequestTiming(app);
@@ -171,6 +181,13 @@ if (debugEnabled) {
 }
 
 app.all('*', async (req, res, next) => {
+if (envMissing) {
+  app.get('*', (req, res) => {
+    res.status(500).send(`<!doctype html><html><head><meta charset='utf-8'><title>Missing env</title><style>body{font-family:system-ui;padding:40px;line-height:1.5;max-width:640px;margin:0 auto;}code{background:#eee;padding:2px 4px;border-radius:4px;}</style></head><body><h1>Configuration Required</h1><p>The server started but required environment variables are missing.</p><p>Add a <code>.env</code> file with:</p><pre style='background:#f7f7f7;padding:12px;border:1px solid #ddd;border-radius:6px;'>PUBLIC_STORE_DOMAIN=your-shop-name.myshopify.com
+PUBLIC_STOREFRONT_API_TOKEN=your_storefront_api_access_token
+SESSION_SECRET=$(openssl rand -hex 32)</pre><p>Then restart: <code>npm start</code>.</p><p>Missing: <strong>${missing.join(', ')}</strong></p></body></html>`);
+  });
+} else {
   const context = await getContext(req, env, debugEnabled, wrapStorefront);
   let finalizeWatchdog = () => {};
   if (debugEnabled) {
@@ -192,6 +209,7 @@ app.all('*', async (req, res, next) => {
     if (!res.headersSent) res.status(500).send('Internal Server Error');
   } finally {
     finalizeWatchdog();
+  }
   }
 });
 const port = process.env.PORT || 3000;

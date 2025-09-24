@@ -97,10 +97,6 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         {/* Preload critical homepage stylesheet to reduce flash of unstyled content */}
         <link rel="preload" as="style" href={homepageStyles} />
-  {/* Preload critical font files (ensure these .woff2 exist in /public/fonts). TTF fallbacks load only if browser lacks woff2. */}
-        <link rel="preload" href="/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/PlayfairDisplay-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/LibreBaskerville-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         {/* Inline critical design tokens so custom properties exist before external CSS arrives */}
         <style
           // Apply CSP nonce explicitly; Hydrogen adds nonce to <Scripts/> & friends but we need it here for inline tokens.

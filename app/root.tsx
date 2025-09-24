@@ -95,10 +95,19 @@ export function Layout({children}: {children?: React.ReactNode}) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-  {/* Global base styles */}
-  <link rel="stylesheet" href={styles} />
-  {/* Fallback/include homepage visual styles globally to prevent unstyled flash if route link injection fails */}
-  <link rel="stylesheet" href={homepageStyles} />
+        {/* Preload critical homepage stylesheet to reduce flash of unstyled content */}
+        <link rel="preload" as="style" href={homepageStyles} />
+        {/* Inline critical design tokens so custom properties exist before external CSS arrives */}
+        <style
+          // Nonce applied automatically by CSP via hydrogen NonceProvider wrapping Scripts/Links; tokens contain only static values.
+          dangerouslySetInnerHTML={{
+            __html: `:root { --bg:#f7efe6;--panel:#0b2545;--accent:#e94c26;--accent-dark:#c83b1a;--accent-light:#ff7a4a;--panel-light:#a33a25;--panel-dark:#4a140e;--muted:#8b3a2a;--card:#fff3e8;--line:#f1d7c7;--cta-hover:#c83b1a;--glass:rgba(11,37,69,0.06);--warm-gradient:linear-gradient(180deg,#f7efe6,#f6e9df 60%);--card-gradient:linear-gradient(180deg,#fff3e8,#ffece0);--accent-gradient:linear-gradient(90deg,#e94c26,#ff7a4a);--radius:0px;--shadow-soft:0 8px 30px rgba(11,37,69,0.06);--shadow-strong:0 18px 50px rgba(11,37,69,0.08);--scroll-percentage:0;--scroll-pct:calc(var(--scroll-percentage,0)*100%);--surface:#f7efe6;--band-surface:#f7efe6;--header-h:160px;--announcement-h:40px; } body{background:var(--warm-gradient);color:var(--panel);} `,
+          }}
+        />
+        {/* Global base styles */}
+        <link rel="stylesheet" href={styles} />
+        {/* Full homepage / layout styles */}
+        <link rel="stylesheet" href={homepageStyles} />
         <Meta />
         <Links />
       </head>
@@ -106,6 +115,15 @@ export function Layout({children}: {children?: React.ReactNode}) {
         {children}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
+        {/* Runtime CSS readiness diagnostic (development / debug only) */}
+        {process.env.DEBUG_INSTRUMENTATION === '1' ? (
+          <script
+            nonce={nonce}
+            dangerouslySetInnerHTML={{
+              __html: `(() => { try { const rs = getComputedStyle(document.documentElement); const ok = rs.getPropertyValue('--accent').trim(); if(!ok){ console.warn('[css] token --accent missing before hydration'); } else { console.log('[css] tokens ready'); } } catch(e) { console.warn('[css] readiness check failed', e); } })();`,
+            }}
+          />
+        ) : null}
       </body>
     </html>
   );

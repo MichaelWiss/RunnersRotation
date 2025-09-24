@@ -1,13 +1,13 @@
 console.log('[bootstrap] Loading server.mjs ...');
 import {createRequestHandler} from '@react-router/express';
-import {createCookieSessionStorage} from 'react-router';
 import compression from 'compression';
 import express from 'express';
 import morgan from 'morgan';
 import {createStorefrontClient, InMemoryCache} from '@shopify/hydrogen';
-import crypto from 'node:crypto';
 import {loadEnv, logEnvSummary} from './env.mjs';
 import {attachProcessHooks, attachRequestTiming, createWatchdog, wrapStorefront} from './instrumentation.mjs';
+import {getContext} from './context.mjs';
+import {createBuildResolver} from './build-loader.mjs';
 
 
 
@@ -32,14 +32,17 @@ const vite =
 // Preload server build once in production to avoid per-request dynamic import cost.
 let serverBuildPromise;
 if (isProd) {
-  serverBuildPromise = import('./build/server/index.js').then((mod) => {
-    console.log('[warmup] server build loaded');
-    return mod;
-  }).catch((e) => {
-    console.error('[warmup] failed to load server build', e);
-    throw e;
-  });
+  serverBuildPromise = import('./build/server/index.js')
+    .then((mod) => {
+      console.log('[warmup] server build loaded');
+      return mod;
+    })
+    .catch((e) => {
+      console.error('[warmup] failed to load server build', e);
+      throw e;
+    });
 }
+const resolveBuild = createBuildResolver({isProd, vite, preloadPromise: serverBuildPromise});
 
 export const app = express();
 console.log('[bootstrap] Express app created');
@@ -149,17 +152,14 @@ if (debugEnabled) {
 }
 
 app.all('*', async (req, res, next) => {
-  const context = await getContext(req);
+  const context = await getContext(req, env, debugEnabled, wrapStorefront);
   let finalizeWatchdog = () => {};
   if (debugEnabled) {
     finalizeWatchdog = createWatchdog(req, res, 8000);
   }
   try {
-    const build = vite
-      ? () => vite.ssrLoadModule('virtual:react-router/server-build')
-      : isProd
-        ? await serverBuildPromise
-        : await import('./build/server/index.js');
+    const buildModule = await resolveBuild();
+    const build = () => buildModule; // createRequestHandler expects a function returning build
     await createRequestHandler({
       build,
       mode: process.env.NODE_ENV,
@@ -182,91 +182,5 @@ if (!process.env.VERCEL) {
   app.listen(port, () => {
     console.log(`[bootstrap] Express server listening on port ${port}`);
   });
-} else {
-  console.log('[bootstrap] Running in Vercel serverless mode (no listen)');
 }
-
-async function getContext(req) {
-  const session = await AppSession.init(req, [env.SESSION_SECRET]);
-
-  // Derive buyer IP safely (serverless environments may not have req.connection)
-  const forwardedFor = req.headers['x-forwarded-for'];
-  let buyerIp = '';
-  if (Array.isArray(forwardedFor)) {
-    buyerIp = forwardedFor[0];
-  } else if (typeof forwardedFor === 'string' && forwardedFor.length) {
-    buyerIp = forwardedFor.split(',')[0].trim();
-  } else {
-    buyerIp = req.socket?.remoteAddress || req.connection?.remoteAddress || '';
-  }
-
-  const storefrontConfig = {
-    // A [`cache` instance](https://developer.mozilla.org/en-US/docs/Web/API/Cache) is necessary for sub-request caching to work.
-    // We provide only an in-memory implementation
-    cache: new InMemoryCache(),
-    // `waitUntil` is only needed on worker environments. For Express/Node, it isn't applicable
-    waitUntil: null,
-    i18n: {language: 'EN', country: 'US'},
-    publicStorefrontToken: env.PUBLIC_STOREFRONT_API_TOKEN,
-    storeDomain: env.PUBLIC_STORE_DOMAIN,
-    storefrontHeaders: {
-      requestGroupId: crypto.randomUUID(),
-      buyerIp,
-      cookie: req.get('cookie'),
-    },
-  };
-  let {storefront} = createStorefrontClient(storefrontConfig);
-  if (debugEnabled) {
-    storefront = wrapStorefront(storefront);
-  }
-  return {session, storefront, env};
-}
-
-class AppSession {
-  constructor(sessionStorage, session) {
-    this.sessionStorage = sessionStorage;
-    this.session = session;
-  }
-
-  static async init(request, secrets) {
-    const storage = createCookieSessionStorage({
-      cookie: {
-        name: 'session',
-        httpOnly: true,
-        path: '/',
-        sameSite: 'lax',
-        secrets,
-      },
-    });
-
-    const session = await storage
-      .getSession(request.get('Cookie'))
-      .catch(() => storage.getSession());
-
-    return new this(storage, session);
-  }
-
-  get(key) {
-    return this.session.get(key);
-  }
-
-  destroy() {
-    return this.sessionStorage.destroySession(this.session);
-  }
-
-  flash(key, value) {
-    this.session.flash(key, value);
-  }
-
-  unset(key) {
-    this.session.unset(key);
-  }
-
-  set(key, value) {
-    this.session.set(key, value);
-  }
-
-  commit() {
-    return this.sessionStorage.commitSession(this.session);
-  }
-}
+// AppSession & getContext moved to context.mjs

@@ -100,7 +100,15 @@ function handleBrowserRequest(
   responseHeaders: Headers,
   reactRouterContext: EntryContext,
 ) {
-  const {nonce, header, NonceProvider} = createContentSecurityPolicy();
+  // Provide minimal shop config so Hydrogen generates a CSP including our nonce for inline tokens/style diagnostics
+  const host = request.headers.get('host') || '';
+  // We can't access full loadContext here easily, so rely on env injection from process (ok in server env)
+  const storeDomain = process.env.PUBLIC_STORE_DOMAIN;
+  const {nonce, header, NonceProvider} = createContentSecurityPolicy(
+    storeDomain
+      ? {shop: {storeDomain}}
+      : undefined,
+  );
 
   return new Promise((resolve, reject) => {
     const {pipe, abort} = renderToPipeableStream(

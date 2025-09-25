@@ -146,7 +146,10 @@ if (vite) {
     express.static('build/client/assets', {immutable: true, maxAge: '1y'}),
   );
 }
+// Serve other build files (entry HTML, icons, etc.)
 app.use(express.static('build/client', {maxAge: '1h'}));
+// Also serve from public/ so files copied by postbuild are reachable by Vercel static layer
+app.use(express.static('public', {maxAge: '1h'}));
 
 if (debugEnabled) {
   app.get('/__health', (req, res) => {

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
-    "postbuild": "node -e \"const fs=require('fs');const path=require('path');const src='build/client/assets';if(!fs.existsSync(src)){console.warn('[postbuild] No build/client/assets to copy');process.exit(0);}const copy=(from,to)=>{fs.mkdirSync(path.dirname(to),{recursive:true});fs.cpSync(from,to,{recursive:true,force:true});};try{fs.rmSync('public/assets',{recursive:true,force:true})}catch{};fs.mkdirSync('public',{recursive:true});copy(src,'public/assets');console.log('[postbuild] Copied assets to public/assets');const vercelStatic='.vercel/output/static/assets';try{fs.rmSync(vercelStatic,{recursive:true,force:true})}catch{};fs.mkdirSync('.vercel/output/static',{recursive:true});copy(src,vercelStatic);console.log('[postbuild] Copied assets to .vercel/output/static/assets');\"",
+  "postbuild": "node -e \"const fs=require('fs');const path=require('path');const src='build/client/assets';if(!fs.existsSync(src)){console.warn('[postbuild] No build/client/assets to copy');process.exit(0);}const copy=(from,to)=>{fs.mkdirSync(path.dirname(to),{recursive:true});fs.cpSync(from,to,{recursive:true,force:true});};try{fs.rmSync('public/assets',{recursive:true,force:true})}catch{};fs.mkdirSync('public',{recursive:true});copy(src,'public/assets');console.log('[postbuild] Copied assets to public/assets');\"",
     "dev": "cross-env NODE_ENV=development nodemon --require dotenv/config ./server.mjs --watch ./server.mjs",
     "start": "cross-env NODE_ENV=production node ./server.mjs",
     "typecheck": "tsc --noEmit"

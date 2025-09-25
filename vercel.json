@@ -2,7 +2,11 @@
   "version": 2,
   "framework": null,
   "buildCommand": "npm run build",
-  "outputDirectory": ".vercel/output",
+  "functions": {
+    "api/ssr.mjs": {
+      "includeFiles": "build/**\npublic/assets/**"
+    }
+  },
   "routes": [
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/api/ssr" }

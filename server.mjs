@@ -40,6 +40,9 @@ import {createBuildResolver} from './build-loader.mjs';
 
 const {env: loadedEnv, missing} = loadEnv();
 const envMissing = missing.length > 0;
+const missingEnvHtml = `<!doctype html><html><head><meta charset='utf-8'><title>Missing env</title><style>body{font-family:system-ui;padding:40px;line-height:1.5;max-width:640px;margin:0 auto;}code{background:#eee;padding:2px 4px;border-radius:4px;}</style></head><body><h1>Configuration Required</h1><p>The server started but required environment variables are missing.</p><p>Add a <code>.env</code> file with:</p><pre style='background:#f7f7f7;padding:12px;border:1px solid #ddd;border-radius:6px;'>PUBLIC_STORE_DOMAIN=your-shop-name.myshopify.com
+PUBLIC_STOREFRONT_API_TOKEN=your_storefront_api_access_token
+SESSION_SECRET=$(openssl rand -hex 32)</pre><p>Then restart: <code>npm start</code>.</p><p>Missing: <strong>${missing.join(', ')}</strong></p></body></html>`;
 if (envMissing) {
   console.warn('[env] Missing required vars at bootstrap:', missing.join(', '));
   console.warn('[env] The server will start in LIMITED mode and show a guidance page until you add them.');
@@ -183,38 +186,36 @@ if (debugEnabled) {
   });
 }
 
-app.all('*', async (req, res, next) => {
 if (envMissing) {
   app.get('*', (req, res) => {
-    res.status(500).send(`<!doctype html><html><head><meta charset='utf-8'><title>Missing env</title><style>body{font-family:system-ui;padding:40px;line-height:1.5;max-width:640px;margin:0 auto;}code{background:#eee;padding:2px 4px;border-radius:4px;}</style></head><body><h1>Configuration Required</h1><p>The server started but required environment variables are missing.</p><p>Add a <code>.env</code> file with:</p><pre style='background:#f7f7f7;padding:12px;border:1px solid #ddd;border-radius:6px;'>PUBLIC_STORE_DOMAIN=your-shop-name.myshopify.com
-PUBLIC_STOREFRONT_API_TOKEN=your_storefront_api_access_token
-SESSION_SECRET=$(openssl rand -hex 32)</pre><p>Then restart: <code>npm start</code>.</p><p>Missing: <strong>${missing.join(', ')}</strong></p></body></html>`);
+    res.status(500).send(missingEnvHtml);
   });
 } else {
-  const context = await getContext(req, env, debugEnabled, wrapStorefront);
-  let finalizeWatchdog = () => {};
-  if (debugEnabled) {
-    finalizeWatchdog = createWatchdog(req, res, 8000);
-  }
-  try {
-    const buildModule = await resolveBuild();
-    const build = () => buildModule; // createRequestHandler expects a function returning build
-    await createRequestHandler({
-      build,
-      mode: process.env.NODE_ENV,
-      getLoadContext: () => context,
-    })(req, res, (err) => {
-      if (err) return next(err);
-      next();
-    });
-  } catch (e) {
-    console.error('[handler.error]', e);
-    if (!res.headersSent) res.status(500).send('Internal Server Error');
-  } finally {
-    finalizeWatchdog();
-  }
-  }
-});
+  app.all('*', async (req, res, next) => {
+    const context = await getContext(req, env, debugEnabled, wrapStorefront);
+    let finalizeWatchdog = () => {};
+    if (debugEnabled) {
+      finalizeWatchdog = createWatchdog(req, res, 8000);
+    }
+    try {
+      const buildModule = await resolveBuild();
+      const build = () => buildModule; // createRequestHandler expects a function returning build
+      await createRequestHandler({
+        build,
+        mode: process.env.NODE_ENV,
+        getLoadContext: () => context,
+      })(req, res, (err) => {
+        if (err) return next(err);
+        next();
+      });
+    } catch (e) {
+      console.error('[handler.error]', e);
+      if (!res.headersSent) res.status(500).send('Internal Server Error');
+    } finally {
+      finalizeWatchdog();
+    }
+  });
+}
 const port = process.env.PORT || 3000;
 
 // On Vercel (serverless), exporting `app` is enough; avoid starting a server.

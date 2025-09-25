@@ -8,11 +8,36 @@ import {HydratedRouter} from 'react-router/dom';
 import {startTransition, StrictMode} from 'react';
 import {hydrateRoot} from 'react-dom/client';
 
+declare global {
+  interface Window {
+    __rrHydrationConfirm?: () => void;
+    __rrHydrationShowBanner?: (message: string) => void;
+  }
+}
+
 startTransition(() => {
-  hydrateRoot(
-    document,
-    <StrictMode>
-      <HydratedRouter />
-    </StrictMode>,
-  );
+  try {
+    const root = hydrateRoot(
+      document,
+      <StrictMode>
+        <HydratedRouter />
+      </StrictMode>,
+    );
+
+    queueMicrotask(() => {
+      window.__rrHydrationConfirm?.();
+    });
+
+    if (import.meta.env.DEV) {
+      // Keep a reference alive in dev so we can inspect and avoid unused var warnings.
+      (window as unknown as {__rrHydrationRoot?: unknown}).__rrHydrationRoot = root;
+    }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : typeof error === 'string' ? error : 'Unknown hydration error';
+    window.__rrHydrationShowBanner?.(
+      `Interactive JS crashed during startup: ${message}. Check the console for stack traces.`,
+    );
+    throw error;
+  }
 });

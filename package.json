@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
+    "postbuild": "node -e \"const fs=require('fs');try{fs.rmSync('public/assets',{recursive:true,force:true})}catch{};fs.mkdirSync('public',{recursive:true});if(fs.existsSync('build/client/assets')){fs.cpSync('build/client/assets','public/assets',{recursive:true,force:true});console.log('[postbuild] Copied build/client/assets -> public/assets');}else{console.warn('[postbuild] No build/client/assets to copy');}\"",
     "dev": "cross-env NODE_ENV=development nodemon --require dotenv/config ./server.mjs --watch ./server.mjs",
     "start": "cross-env NODE_ENV=production node ./server.mjs",
     "typecheck": "tsc --noEmit"

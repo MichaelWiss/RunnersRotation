@@ -146,7 +146,7 @@ if (vite) {
   app.use(morgan('tiny'));
   app.use(
     '/assets',
-    express.static('build/client/assets', {immutable: true, maxAge: '1y'}),
+    express.static('public/assets', {immutable: true, maxAge: '1y'}),
   );
 }
 // Serve other build files (entry HTML, icons, etc.)

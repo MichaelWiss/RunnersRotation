@@ -4,11 +4,7 @@
   "buildCommand": "npm run build",
   "functions": {
     "api/ssr.mjs": {
-      "includeFiles": [
-        "build/client/**",
-        "build/server/**",
-        "public/assets/**"
-      ]
+      "includeFiles": "build/client/**\nbuild/server/**\npublic/assets/**"
     }
   },
   "routes": [

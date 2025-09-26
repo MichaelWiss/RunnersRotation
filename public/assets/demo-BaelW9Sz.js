@@ -1,0 +1,1 @@
+import{w as t}from"./with-props-Cp6sFjEk.js";import{u as r,j as a}from"./chunk-D4RADZKF-Bpmw1RCb.js";const i=t(function(){const o=r();return a.jsx("pre",{"aria-label":"demo-out",children:JSON.stringify(o,null,2)})});export{i as default};

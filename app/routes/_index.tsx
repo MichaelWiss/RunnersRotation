@@ -83,7 +83,7 @@ export default function Index() {
   }, []);
 
   return (
-    <Layout cartCount={0}>
+    <Layout>
       {/* Hero Section */}
       <section className="hero-section section full-width">
         <div className="hero-card grid-container">

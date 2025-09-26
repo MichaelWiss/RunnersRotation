@@ -13,6 +13,7 @@ import appStylesheet from './styles/app.css?url';
 import homepageStylesheet from './styles/homepage.css?url';
 import {useNonce} from '@shopify/hydrogen';
 import {hydrationGuardSnippet} from './scripts/hydration-guard';
+import { CartProvider } from '~/context/CartContext';
 
 /**
  * The main and reset stylesheets are added in the Layout component
@@ -129,7 +130,15 @@ export function Layout({children}: {children?: React.ReactNode}) {
 }
 
 export default function App() {
-  return <Outlet />;
+  const data = useRouteLoaderData<typeof loader>('root');
+
+  return (
+    <CartProvider initialCart={data?.cart || null}>
+      <Layout>
+        <Outlet />
+      </Layout>
+    </CartProvider>
+  );
 }
 
 const CART_QUERY = `#graphql

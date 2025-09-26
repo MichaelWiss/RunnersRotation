@@ -103,6 +103,7 @@ export async function loader({params, context}: LoaderFunctionArgs) {
   const price = firstVariant?.price ?? null;
   const available = firstVariant?.availableForSale ?? false;
   const images = product.images.nodes;
+  const variants = product.variants.nodes;
 
   return {
     product: {
@@ -115,6 +116,7 @@ export async function loader({params, context}: LoaderFunctionArgs) {
       images,
       price,
       available,
+      variants,
     },
   };
 }
@@ -179,7 +181,7 @@ export default function Product() {
   }, [navigate]);
 
   return (
-    <Layout cartCount={0}>
+    <Layout>
       <div className="container">
         <main>
           <ProductGallery
@@ -193,6 +195,7 @@ export default function Product() {
         <PurchaseCard
           price={product.price ? {amount: product.price.amount, currencyCode: product.price.currencyCode} : undefined}
           available={product.available}
+          variants={product.variants}
         />
       </div>
     </Layout>

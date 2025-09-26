@@ -5,10 +5,9 @@ import Footer from './Footer';
 
 interface LayoutProps {
   children: React.ReactNode;
-  cartCount?: number;
 }
 
-export default function Layout({ children, cartCount }: LayoutProps) {
+export default function Layout({ children }: LayoutProps) {
   // Dynamically set header/announcement heights so content never overlaps
   useEffect(() => {
     const setHeights = () => {
@@ -51,7 +50,7 @@ export default function Layout({ children, cartCount }: LayoutProps) {
   return (
     <>
       <AnnouncementBar />
-      <Header cartCount={cartCount} />
+      <Header />
       <main>{children}</main>
       <Footer />
     </>

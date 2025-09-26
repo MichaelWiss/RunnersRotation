@@ -13,12 +13,58 @@ This document tracks current work, what's done, and what's next.
 - Hero card centered; CTA respects right gutter (`app/styles/homepage.css`)
 - Removed nested `.page-container` wrapper from `Layout` to avoid width inconsistencies
 
-## In Progress
-- Homepage live content (safe)
-  - Replace static copy with Storefront data while preserving exact HTML/CSS/classes
-  - Keep strict fallbacks for missing data
+## Completed (Latest)
+- **CSS/Assets Fixed on Vercel Deployment** ✅
+  - Created proper Vercel Build Output structure with `.vercel/output/config.json`
+  - Assets now serving correctly at `/assets/*` paths with HTTP 200 responses
+  - Updated postbuild script to copy assets to `.vercel/output/static/assets/`
+  - Simplified `vercel.json` to minimal working configuration with filesystem handler
+  - Verified CSS and JS bundles loading properly on production deployment
 
-## Backlog / Next
+## In Progress
+- Making the site "live" and building working cart functionality
+
+## Next: Live Site & Working Cart Plan
+
+### Phase 1: Make Site "Live" (Production Ready)
+1. **Domain & SSL Setup**
+   - Purchase/configure custom domain
+   - Set up Vercel custom domain with SSL
+   - Update Shopify storefront settings for new domain
+
+2. **Environment Configuration**
+   - Set production environment variables in Vercel dashboard
+   - Configure Shopify Storefront API for production domain
+   - Set up proper CORS and security headers
+
+3. **Content & SEO**
+   - Add real product data and images
+   - Configure meta tags and OpenGraph
+   - Set up Google Analytics/tracking
+   - Add sitemap and robots.txt
+
+### Phase 2: Working Cart Implementation
+1. **Cart State Management**
+   - Implement cart context/state provider
+   - Add cart persistence (localStorage + server sync)
+   - Create cart badge in header with item count
+
+2. **Add to Cart Functionality**
+   - Wire up "Add to Cart" buttons to Shopify Cart API
+   - Add quantity selectors and variant selection
+   - Implement cart line item management (add/remove/update)
+
+3. **Cart UI Components**
+   - Build cart drawer/modal component
+   - Add cart summary and totals
+   - Implement checkout redirect to Shopify
+
+4. **Product Variants & Options**
+   - Add size/color selection for products
+   - Implement variant pricing and availability
+   - Add product option validation
+
+## Backlog / Later
 - Thread cart count and collection links from route loaders into `Header`
 - Tighten responsive metrics for `--header-h` across breakpoints if needed
 - Add lightweight tests (type-level and minimal snapshots) for route loaders

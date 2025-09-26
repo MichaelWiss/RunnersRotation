@@ -12,7 +12,7 @@ export default function ProductLayout({children}: ProductLayoutProps) {
     <>
       <AnnouncementBar />
       <div className="page-container">
-        <Header cartCount={0} />
+        <Header />
         <main>{children}</main>
         <Footer />
       </div>

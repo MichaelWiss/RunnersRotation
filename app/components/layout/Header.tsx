@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import type { HeaderProps } from '~/types';
+import { useCart } from '~/context/CartContext';
 import NavigationCircle from './NavigationCircle';
 import NavigationActions from './NavigationActions';
 import MainNavigation from './MainNavigation';
 import MobileMenu from './MobileMenu';
+import CartDrawer from '~/components/cart/CartDrawer';
 
-export default function Header({ cartCount = 0, collections }: HeaderProps) {
+export default function Header({ collections }: Omit<HeaderProps, 'cartCount'>) {
+  const { cartCount } = useCart();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement | null>(null);
   const navMainRef = useRef<HTMLElement | null>(null);
 
@@ -48,7 +52,10 @@ export default function Header({ cartCount = 0, collections }: HeaderProps) {
       <div className="nav-container">
         <div className="nav-top">
           <NavigationCircle />
-          <NavigationActions cartCount={cartCount} />
+          <NavigationActions 
+            cartCount={cartCount} 
+            onCartClick={() => setCartDrawerOpen(true)} 
+          />
           <button
             className={`hamburger${mobileOpen ? ' active' : ''}`}
             id="hamburger"
@@ -74,6 +81,11 @@ export default function Header({ cartCount = 0, collections }: HeaderProps) {
           />
         </nav>
       </div>
+      
+      <CartDrawer 
+        isOpen={cartDrawerOpen} 
+        onClose={() => setCartDrawerOpen(false)} 
+      />
     </header>
   );
 }

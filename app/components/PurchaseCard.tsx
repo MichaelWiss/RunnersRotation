@@ -1,9 +1,38 @@
+import { useState } from 'react';
+import { useCart } from '~/context/CartContext';
+
+interface Variant {
+  id: string;
+  title: string;
+  price: {amount: string; currencyCode: string};
+  availableForSale: boolean;
+}
+
 interface PurchaseCardProps {
   price?: {amount: string; currencyCode: string};
   available?: boolean;
+  variants?: Variant[];
 }
 
-export default function PurchaseCard({price, available = true}: PurchaseCardProps) {
+export default function PurchaseCard({price, available = true, variants = []}: PurchaseCardProps) {
+  const { addToCart, isLoading } = useCart();
+  const [quantity, setQuantity] = useState(1);
+  
+  // Use first variant as default, or create a fallback
+  const selectedVariant = variants[0] || {
+    id: 'mock-variant-id',
+    title: 'Default',
+    price: price || {amount: '185.00', currencyCode: 'GBP'},
+    availableForSale: available
+  };
+  
+  const handleAddToCart = () => {
+    addToCart(selectedVariant.id, quantity);
+  };
+  
+  const handleQuantityChange = (newQuantity: number) => {
+    setQuantity(Math.max(1, newQuantity));
+  };
   return (
     <aside className="card" aria-labelledby="purchase">
       <div className="price-row">
@@ -53,16 +82,37 @@ export default function PurchaseCard({price, available = true}: PurchaseCardProp
           <div style={{fontSize:13,color:'var(--muted)',fontWeight:700}}>Quantity</div>
           <div style={{flex:1}}></div>
           <div style={{display:'flex',gap:8,alignItems:'center'}}>
-            <button aria-label="Decrease">−</button>
-            <input aria-label="Quantity" defaultValue={1} />
-            <button aria-label="Increase">+</button>
+            <button 
+              aria-label="Decrease" 
+              onClick={() => handleQuantityChange(quantity - 1)}
+            >
+              −
+            </button>
+            <input 
+              aria-label="Quantity" 
+              value={quantity}
+              onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
+              min="1"
+              type="number"
+            />
+            <button 
+              aria-label="Increase"
+              onClick={() => handleQuantityChange(quantity + 1)}
+            >
+              +
+            </button>
           </div>
         </div>
       </div>
 
       <div className="cta">
-        <button className="add-to-cart" disabled={!available} aria-disabled={!available}>
-          {available ? 'Add to cart' : 'Sold out'}
+        <button 
+          className="add-to-cart" 
+          disabled={!selectedVariant.availableForSale || isLoading} 
+          onClick={handleAddToCart}
+          aria-disabled={!selectedVariant.availableForSale || isLoading}
+        >
+          {isLoading ? 'Adding...' : selectedVariant.availableForSale ? 'Add to cart' : 'Sold out'}
         </button>
         <div className="muted-note">Free UK shipping over £150 • 30-day trail guarantee • Expert fitting available</div>
       </div>

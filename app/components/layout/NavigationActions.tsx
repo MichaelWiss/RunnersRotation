@@ -2,14 +2,28 @@ import { Link } from 'react-router';
 
 interface NavigationActionsProps {
   cartCount: number;
+  onCartClick?: () => void;
 }
 
-export default function NavigationActions({ cartCount }: NavigationActionsProps) {
+export default function NavigationActions({ cartCount, onCartClick }: NavigationActionsProps) {
   return (
     <div className="nav-actions">
       <Link to="/search" className="nav-link">Search</Link>
       <Link to="/account" className="nav-link">Account</Link>
-      <Link to="/cart" className="nav-link">Cart ({cartCount})</Link>
+      <button 
+        onClick={onCartClick} 
+        className="nav-link"
+        style={{ 
+          background: 'none', 
+          border: 'none', 
+          cursor: 'pointer',
+          color: 'inherit',
+          fontFamily: 'inherit',
+          fontSize: 'inherit'
+        }}
+      >
+        Cart ({cartCount})
+      </button>
     </div>
   );
 }

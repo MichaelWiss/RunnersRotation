@@ -59,15 +59,16 @@ export default function Footer() {
             <div className="footer-badge" aria-label="1% for the Planet">1% PLANET</div>
             <div className="footer-badge" aria-label="Living Wage Employer">LIVING WAGE</div>
           </div>
-          
-          <div className="footer-links">
-            <a href="#">FAQ's</a>
-            <a href="#">Careers</a>
-            <a href="#">Run Club</a>
-            <a href="#">Blog</a>
-            <a href="#">Sustainability</a>
-          </div>
         </div>
+      </div>
+      
+      {/* Footer links outside container for full-bleed like nav-main */}
+      <div className="footer-links">
+        <a href="#">FAQ's</a>
+        <a href="#">Careers</a>
+        <a href="#">Run Club</a>
+        <a href="#">Blog</a>
+        <a href="#">Sustainability</a>
       </div>
     </footer>
   );

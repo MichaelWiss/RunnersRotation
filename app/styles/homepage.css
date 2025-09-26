@@ -309,7 +309,7 @@ body {
 .hero-card {
   background: var(--card-gradient);
   border-radius: 0px;
-  padding: 48px 24px;
+  padding: 0; /* Remove padding from outer card */
   box-shadow: var(--shadow-strong);
   border: 1px solid var(--line);
   text-align: center;
@@ -324,6 +324,13 @@ body {
   /* Pull hero up to be immediately visible under fixed header */
   margin-top: 0;
   margin-bottom: 60px;
+}
+
+/* Hero card inner content container for proper centering */
+.hero-card > * {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 24px;
 }
 
 .hero-card::before {

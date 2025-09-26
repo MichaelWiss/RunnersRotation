@@ -327,7 +327,7 @@ body {
 }
 
 /* Hero card inner content container for proper centering */
-.hero-card > * {
+.hero-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 48px 24px;
@@ -1115,7 +1115,7 @@ body {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 0;
-  margin-top: 30px;
+  margin: 30px 0 0 0; /* Reset all margins, only top margin */
   padding: 2px 0; /* match nav-main band thickness */
   background: var(--band-surface); /* match nav band */
   width: 100vw; /* full viewport width, like nav-main */

@@ -86,11 +86,13 @@ export default function Index() {
     <Layout>
       {/* Hero Section */}
       <section className="hero-section full-width">
-        <div className="hero-card grid-container">
-          <div className="hero-badge">Handcrafted Performance</div>
-          <h1 className="hero-title">Run Beyond Limits</h1>
-          <p className="hero-subtitle">Premium running shoes crafted for the passionate runner</p>
-          <a href="#featured" className="hero-cta">Explore Collection</a>
+        <div className="hero-card">
+          <div className="hero-content">
+            <div className="hero-badge">Handcrafted Performance</div>
+            <h1 className="hero-title">Run Beyond Limits</h1>
+            <p className="hero-subtitle">Premium running shoes crafted for the passionate runner</p>
+            <a href="#featured" className="hero-cta">Explore Collection</a>
+          </div>
         </div>
       </section>
 

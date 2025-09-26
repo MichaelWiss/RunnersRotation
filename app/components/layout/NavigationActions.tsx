@@ -13,14 +13,7 @@ export default function NavigationActions({ cartCount, onCartClick }: Navigation
       <button 
         onClick={onCartClick} 
         className="nav-link"
-        style={{ 
-          background: 'none', 
-          border: 'none', 
-          cursor: 'pointer',
-          color: 'inherit',
-          fontFamily: 'inherit',
-          fontSize: 'inherit'
-        }}
+        style={{ background: 'transparent' }}
       >
         Cart ({cartCount})
       </button>

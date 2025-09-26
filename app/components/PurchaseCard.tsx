@@ -27,6 +27,11 @@ export default function PurchaseCard({price, available = true, variants = []}: P
   };
   
   const handleAddToCart = () => {
+    console.log('Adding to cart:', selectedVariant.id, quantity);
+    if (selectedVariant.id === 'mock-variant-id') {
+      console.warn('Cannot add mock variant to cart - need real Shopify variant ID');
+      return;
+    }
     addToCart(selectedVariant.id, quantity);
   };
   

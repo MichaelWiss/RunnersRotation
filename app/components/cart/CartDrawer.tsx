@@ -28,8 +28,8 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 999,
+          backgroundColor: 'rgba(11, 37, 69, 0.5)',
+          zIndex: 9999,
         }}
       />
       
@@ -38,16 +38,18 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         className="cart-drawer"
         style={{
           position: 'fixed',
-          top: 0,
+          top: 'var(--announcement-h, 40px)',
           right: 0,
           bottom: 0,
           width: '400px',
           maxWidth: '100vw',
           backgroundColor: 'var(--card)',
-          zIndex: 1000,
-          boxShadow: '-2px 0 10px rgba(0, 0, 0, 0.1)',
+          zIndex: 10000,
+          boxShadow: 'var(--shadow-strong)',
           display: 'flex',
           flexDirection: 'column',
+          borderRadius: '0px',
+          border: '1px solid var(--line)',
         }}
       >
         {/* Header */}

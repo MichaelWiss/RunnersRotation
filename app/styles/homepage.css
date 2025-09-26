@@ -302,28 +302,24 @@ body {
 .hero-section {
   /* Full-bleed section; inner card controls width */
   padding: 0;
-  display: grid;
-  justify-items: center; /* center hero-card horizontally */
 }
 
 .hero-card {
-  background: var(--card-gradient);
-  border-radius: 0px;
-  padding: 0; /* Remove padding from outer card */
-  box-shadow: var(--shadow-strong);
-  border: 1px solid var(--line);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  /* Full-bleed like nav-main */
+  /* Use exact same pattern as nav-main for full-bleed */
   width: 100vw;
+  position: relative;
   left: 50%;
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
-  /* Pull hero up to be immediately visible under fixed header */
   margin-top: 0;
   margin-bottom: 60px;
+  background: var(--card-gradient);
+  border-radius: 0px;
+  box-shadow: var(--shadow-strong);
+  border: 1px solid var(--line);
+  text-align: center;
+  overflow: hidden;
 }
 
 /* Hero card inner content container for proper centering */
@@ -331,6 +327,8 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 48px 24px;
+  display: block;
+  width: 100%;
 }
 
 .hero-card::before {
@@ -1112,29 +1110,40 @@ body {
 }
 
 .footer-links {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0;
-  margin: 30px 0 0 0; /* Reset all margins, only top margin */
-  padding: 2px 0; /* match nav-main band thickness */
-  background: var(--band-surface); /* match nav band */
-  width: 100vw; /* full viewport width, like nav-main */
+  /* Match nav-main full-bleed positioning exactly */
+  padding: 16px 0;
+  width: 100vw;
   position: relative;
   left: 50%;
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
+  margin-top: 30px;
+  margin-bottom: 0;
+  background: var(--card); /* fallback */
+  background: var(--band-surface);
   transition: background 120ms linear;
+  /* Inner grid structure exactly like nav-menu */
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  list-style: none;
+  border: none;
+  border-radius: 0px;
+  padding: 2px 0;
+  overflow: visible;
 }
 
 .footer-links a {
-  color: var(--muted);
+  /* Match nav-menu a styling exactly */
+  color: var(--panel); /* same as nav-menu, not muted */
   text-decoration: none;
-  font-size: 12px;
+  font-family: 'Inter', sans-serif;
   font-weight: 800;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 8px 12px;
+  padding: 16px 20px; /* match nav-menu padding */
   border: 2px solid var(--line);
   border-radius: 0px;
   transition: all 0.3s ease;
@@ -1142,6 +1151,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Match nav-menu li background */
+  background: var(--card);
 }
 
 .footer-links a:hover {

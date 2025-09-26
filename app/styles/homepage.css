@@ -309,15 +309,21 @@ body {
 .hero-card {
   background: var(--card-gradient);
   border-radius: 0px;
-  padding: 60px 40px;
+  padding: 48px 24px;
   box-shadow: var(--shadow-strong);
   border: 1px solid var(--line);
   text-align: center;
   position: relative;
   overflow: hidden;
-  /* Nearly full width with a comfortable gutter */
-  width: min(1400px, calc(100% - 48px));
-  margin: 60px auto;
+  /* Full-bleed like nav-main */
+  width: 100vw;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  /* Pull hero up to be immediately visible under fixed header */
+  margin-top: 0;
+  margin-bottom: 60px;
 }
 
 .hero-card::before {
@@ -957,6 +963,11 @@ body {
   padding: 80px 0;
 }
 
+/* Reduce spacing for the hero to appear immediately under the header */
+.hero-section.section {
+  padding-top: 16px; /* minimal breathing room below header */
+}
+
 .grid-container {
   display: grid;
   gap: 30px;
@@ -967,7 +978,7 @@ body {
   background: var(--bg); /* fallback */
   background: var(--surface);
   color: var(--panel);
-  padding: 80px 24px 0px;
+  padding: 80px 0 0; /* remove horizontal padding so full-bleed links align */
   margin-top: 80px;
   position: relative;
   overflow: visible; /* allow full-bleed footer-links */
@@ -978,6 +989,7 @@ body {
 .footer-container {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 24px; /* retain inner padding for content, separate from full-bleed links */
   position: relative;
   z-index: 2;
 }
@@ -1099,7 +1111,7 @@ body {
   margin-top: 30px;
   padding: 2px 0; /* match nav-main band thickness */
   background: var(--band-surface); /* match nav band */
-  width: 100vw;
+  width: 100vw; /* full viewport width, like nav-main */
   position: relative;
   left: 50%;
   right: 50%;

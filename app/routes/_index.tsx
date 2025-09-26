@@ -85,7 +85,7 @@ export default function Index() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="hero-section section full-width">
+      <section className="hero-section full-width">
         <div className="hero-card grid-container">
           <div className="hero-badge">Handcrafted Performance</div>
           <h1 className="hero-title">Run Beyond Limits</h1>

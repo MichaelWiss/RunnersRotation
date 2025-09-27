@@ -1081,7 +1081,8 @@ body {
   font-size: 14px;
   position: relative;
   margin-bottom: 0;
-  background: transparent;
+  background: var(--surface);
+  z-index: 0;
 }
 
 .footer-bottom::before {
@@ -1091,9 +1092,10 @@ body {
   left: 50%;
   width: 100vw;
   transform: translateX(-50%);
-  background: var(--surface);
+  background: inherit;
   border-top: 1px solid var(--line);
   z-index: -1;
+  pointer-events: none;
 }
 
 .footer-copyright {

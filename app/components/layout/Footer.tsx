@@ -1,6 +1,7 @@
 export default function Footer() {
   return (
-    <footer className="footer full-width">
+    <>
+      <footer className="footer full-width">
       <div className="footer-container">
         <div className="footer-title">
           <div className="footer-logo">
@@ -61,15 +62,18 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      
-      {/* Footer links outside container for full-bleed like nav-main */}
-      <div className="footer-links">
-        <a href="#">FAQ's</a>
-        <a href="#">Careers</a>
-        <a href="#">Run Club</a>
-        <a href="#">Blog</a>
-        <a href="#">Sustainability</a>
-      </div>
     </footer>
+
+    {/* Footer links mirror nav-main structure for consistent full-bleed styling */}
+    <nav className="nav-main footer-links full-width" aria-label="Footer">
+      <ul className="nav-menu">
+        <li><a href="#">FAQ's</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Run Club</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Sustainability</a></li>
+      </ul>
+    </nav>
+    </>
   );
 }

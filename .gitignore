@@ -5,6 +5,7 @@ node_modules
 /dist
 /public/build
 .vercel/output
+public/assets/
 
 # Caches
 /.cache

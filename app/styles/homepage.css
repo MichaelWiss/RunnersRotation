@@ -301,7 +301,7 @@ body {
 /* Hero Section with Glass Card */
 .hero-section {
   /* Full-bleed section; inner card controls width */
-  padding: 0;
+  padding: 20px 0 0 0; /* Reduce top padding to bring hero card closer to nav-main */
 }
 
 .hero-card {
@@ -1082,6 +1082,7 @@ body {
   font-size: 14px;
   position: relative;
   margin-bottom: 0;
+  background: var(--surface);
 }
 
 .footer-copyright {
@@ -1110,55 +1111,12 @@ body {
 }
 
 .footer-links {
-  /* Match nav-main full-bleed positioning exactly */
-  padding: 16px 0;
-  width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
-  margin-top: 30px;
-  margin-bottom: 0;
-  background: var(--card); /* fallback */
-  background: var(--band-surface);
-  transition: background 120ms linear;
-  /* Inner grid structure exactly like nav-menu */
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0;
-  list-style: none;
-  border: none;
-  border-radius: 0px;
-  padding: 2px 0;
-  overflow: visible;
+  margin-top: 0;
+  padding: 0;
 }
 
-.footer-links a {
-  /* Match nav-menu a styling exactly */
-  color: var(--panel); /* same as nav-menu, not muted */
-  text-decoration: none;
-  font-family: 'Inter', sans-serif;
-  font-weight: 800;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 16px 20px; /* match nav-menu padding */
-  border: 2px solid var(--line);
-  border-radius: 0px;
-  transition: all 0.3s ease;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* Match nav-menu li background */
-  background: var(--card);
-}
-
-.footer-links a:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-  transform: translateY(-2px);
+.footer-links .nav-menu {
+  margin: 0;
 }
 
 .footer-social {

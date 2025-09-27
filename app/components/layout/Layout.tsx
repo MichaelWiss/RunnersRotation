@@ -50,8 +50,10 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <>
       <AnnouncementBar />
-      <Header />
-      <main>{children}</main>
+      <div className="page-container">
+        <Header />
+        <main>{children}</main>
+      </div>
       <Footer />
     </>
   );

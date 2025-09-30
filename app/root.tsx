@@ -13,7 +13,7 @@ import appStylesheet from './styles/app.css?url';
 import homepageStylesheet from './styles/homepage.css?url';
 import tokensStylesheet from './styles/tokens.css?url';
 import {useNonce} from '@shopify/hydrogen';
-import {hydrationGuardSnippet} from './scripts/hydration-guard';
+import hydrationGuardScriptUrl from './scripts/hydration-guard.global.js?url';
 import { CartProvider } from '~/context/CartContext';
 
 /**
@@ -34,6 +34,7 @@ export const links: LinksFunction = () => [
   {rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg'},
   // Preload homepage bundle for faster first paint (optional; harmless if duplicated by browser)
   {rel: 'preload', as: 'style', href: homepageStylesheet},
+  {rel: 'preload', as: 'script', href: hydrationGuardScriptUrl},
   {rel: 'stylesheet', href: tokensStylesheet},
   {
     rel: 'stylesheet',
@@ -49,44 +50,52 @@ export async function loader({context}: LoaderFunctionArgs) {
     context.session.get('cartId'),
   ]);
 
+  const layoutPromise = context.storefront
+    .query<{shop: Shop}>(LAYOUT_QUERY, {
+      cache: context.storefront.CacheShort(),
+    })
+    .catch((error) => {
+      console.error('[root.loader] layout query failed', error);
+      return {shop: {name: 'Storefront Unavailable', description: ''}} satisfies {shop: Shop};
+    });
+
+  const cartPromise = cartId
+    ? context.storefront
+        .query<{cart: Cart}>(CART_QUERY, {
+          variables: {
+            cartId,
+            country: context.storefront.i18n?.country,
+            language: context.storefront.i18n?.language,
+          },
+          cache: context.storefront.CacheNone(),
+        })
+        .then((result) => result.cart ?? null)
+        .catch((error) => {
+          const err = error instanceof Error ? error : new Error(String(error));
+          const msg = err.message ?? '';
+          const cause = (err as {cause?: unknown})?.cause;
+          const causeMsg = typeof cause === 'string' ? cause : '';
+          const accessDenied = msg.includes('ACCESS_DENIED') || causeMsg.includes('ACCESS_DENIED') || msg.includes('403');
+          if (accessDenied) {
+            console.error('[root.loader] ACCESS_DENIED from Storefront API – returning empty cart');
+            return null;
+          }
+          throw err;
+        })
+    : Promise.resolve(null);
+
   try {
-    const [cart, layout] = await Promise.all([
-      cartId
-        ? (
-            await context.storefront.query<{cart: Cart}>(CART_QUERY, {
-              variables: {
-                cartId,
-                country: context.storefront.i18n?.country,
-                language: context.storefront.i18n?.language,
-              },
-              cache: context.storefront.CacheNone(),
-            })
-          ).cart
-        : null,
-      await context.storefront.query<{shop: Shop}>(LAYOUT_QUERY),
-    ]);
+    const [cart, layout] = await Promise.all([cartPromise, layoutPromise]);
 
     return {
       isLoggedIn: Boolean(customerAccessToken),
       cart,
       layout,
     };
-  } catch (e) {
-    const err = e instanceof Error ? e : new Error(typeof e === 'string' ? e : 'Unknown error');
-    const msg = String(err.message || '');
-    const cause = (err && 'cause' in err && err.cause) ? String(err.cause) : '';
-    const accessDenied = msg.includes('ACCESS_DENIED') || cause.includes('ACCESS_DENIED') || msg.includes('403');
-    if (accessDenied) {
-      // Fail open so the shell renders and we can surface configuration issues instead of a blank 500
-      console.error('[root.loader] ACCESS_DENIED from Storefront API – returning minimal fallback layout');
-      return {
-        isLoggedIn: false,
-        cart: null,
-        layout: {shop: {name: 'Storefront Unavailable', description: ''}},
-        storefrontAccessError: 'ACCESS_DENIED',
-      };
-    }
-    throw e; // rethrow unknown errors
+  } catch (error) {
+    const err = error instanceof Error ? error : new Error(typeof error === 'string' ? error : 'Unknown error');
+    console.error('[root.loader] unexpected error', err);
+    throw err;
   }
 }
 
@@ -101,25 +110,11 @@ export function Layout({children}: {children?: React.ReactNode}) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-  {/* Inline critical design tokens so custom properties exist before external CSS arrives */}
-        <style
-          // Apply CSP nonce explicitly; Hydrogen adds nonce to <Scripts/> & friends but we need it here for inline tokens.
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html: `:root { --bg:#f7efe6;--panel:#0b2545;--accent:#e94c26;--accent-dark:#c83b1a;--accent-light:#ff7a4a;--panel-light:#a33a25;--panel-dark:#4a140e;--muted:#8b3a2a;--card:#fff3e8;--line:#f1d7c7;--cta-hover:#c83b1a;--glass:rgba(11,37,69,0.06);--warm-gradient:linear-gradient(180deg,#f7efe6,#f6e9df 60%);--card-gradient:linear-gradient(180deg,#fff3e8,#ffece0);--accent-gradient:linear-gradient(90deg,#e94c26,#ff7a4a);--radius:0px;--shadow-soft:0 8px 30px rgba(11,37,69,0.06);--shadow-strong:0 18px 50px rgba(11,37,69,0.08);--scroll-percentage:0;--scroll-pct:calc(var(--scroll-percentage,0)*100%);--surface:#f7efe6;--band-surface:#f7efe6;--header-h:160px;--announcement-h:40px; } body{background:var(--warm-gradient);color:var(--panel);} `,
-          }}
-        />
-  {/* Stylesheets now provided via links() + <Links /> for canonical asset manifest handling */}
         <Meta />
         <Links />
       </head>
       <body>
-        <script
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html: hydrationGuardSnippet,
-          }}
-        />
+        <script nonce={nonce} src={hydrationGuardScriptUrl} defer />
         {children}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
@@ -150,115 +145,56 @@ export default function App() {
 }
 
 const CART_QUERY = `#graphql
-  query CartQuery($cartId: ID!) {
+  query CartQuery($cartId: ID!, $country: CountryCode, $language: LanguageCode)
+  @inContext(country: $country, language: $language) {
     cart(id: $cartId) {
-      ...CartFragment
-    }
-  }
-
-  fragment CartFragment on Cart {
-    id
-    checkoutUrl
-    totalQuantity
-    buyerIdentity {
-      countryCode
-      customer {
-        id
-        email
-        firstName
-        lastName
-        displayName
+      id
+      checkoutUrl
+      totalQuantity
+      cost {
+        subtotalAmount {
+          amount
+          currencyCode
+        }
+        totalAmount {
+          amount
+          currencyCode
+        }
       }
-      email
-      phone
-    }
-    lines(first: 100) {
-      edges {
-        node {
-          id
-          quantity
-          attributes {
-            key
-            value
-          }
-          cost {
-            totalAmount {
-              amount
-              currencyCode
-            }
-            amountPerQuantity {
-              amount
-              currencyCode
-            }
-            compareAtAmountPerQuantity {
-              amount
-              currencyCode
-            }
-          }
-          merchandise {
-            ... on ProductVariant {
-              id
-              availableForSale
-              compareAtPrice {
-                ...MoneyFragment
+      lines(first: 100) {
+        edges {
+          node {
+            id
+            quantity
+            cost {
+              totalAmount {
+                amount
+                currencyCode
               }
-              price {
-                ...MoneyFragment
-              }
-              requiresShipping
-              title
-              image {
-                ...ImageFragment
-              }
-              product {
-                handle
-                title
+            }
+            merchandise {
+              ... on ProductVariant {
                 id
-              }
-              selectedOptions {
-                name
-                value
+                title
+                availableForSale
+                price {
+                  amount
+                  currencyCode
+                }
+                product {
+                  title
+                  handle
+                }
+                image {
+                  url
+                  altText
+                }
               }
             }
           }
         }
       }
     }
-    cost {
-      subtotalAmount {
-        ...MoneyFragment
-      }
-      totalAmount {
-        ...MoneyFragment
-      }
-      totalDutyAmount {
-        ...MoneyFragment
-      }
-      totalTaxAmount {
-        ...MoneyFragment
-      }
-    }
-    note
-    attributes {
-      key
-      value
-    }
-    discountCodes {
-      code
-    }
-  }
-
-  fragment MoneyFragment on MoneyV2 {
-    currencyCode
-    amount
-  }
-
-  fragment ImageFragment on Image {
-    id
-    url
-    altText
-    width
-    height
   }
 `;
 

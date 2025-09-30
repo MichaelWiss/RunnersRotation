@@ -8,7 +8,7 @@ html, body {
   overflow-x: hidden; /* prevent 100vw bands from creating horizontal scroll */
 }
 
-/* tokens imported above */
+/* tokens provided via root links */
 
 body {
   font-family: 'Inter', sans-serif;

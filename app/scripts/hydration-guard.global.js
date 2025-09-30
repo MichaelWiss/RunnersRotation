@@ -1,7 +1,6 @@
-export const hydrationGuardSnippet = `(() => {
-  const w = window;
-  if (w.__rrHydrationGuardInit) return;
-  w.__rrHydrationGuardInit = true;
+(() => {
+  if (window.__rrHydrationGuardInit) return;
+  window.__rrHydrationGuardInit = true;
 
   const attach = (banner) => {
     const body = document.body;
@@ -42,13 +41,17 @@ export const hydrationGuardSnippet = `(() => {
       'font-size:14px',
       'line-height:1.4',
       'text-align:center',
+      'display:flex',
+      'justify-content:center',
+      'align-items:center',
+      'gap:12px',
+      'flex-wrap:wrap',
     ].join(';');
 
     const dismiss = document.createElement('button');
     dismiss.type = 'button';
     dismiss.textContent = 'Dismiss';
     dismiss.style.cssText = [
-      'margin-left:12px',
       'padding:6px 10px',
       'border-radius:6px',
       'border:none',
@@ -63,17 +66,17 @@ export const hydrationGuardSnippet = `(() => {
     attach(el);
   };
 
-  w.__rrHydrationShowBanner = showBanner;
-  w.__rrHydrationConfirm = () => {
-    w.__rrHydrationConfirmed = true;
-    if (w.__rrHydrationTimer) {
-      clearTimeout(w.__rrHydrationTimer);
-      w.__rrHydrationTimer = undefined;
+  window.__rrHydrationShowBanner = showBanner;
+  window.__rrHydrationConfirm = () => {
+    window.__rrHydrationConfirmed = true;
+    if (window.__rrHydrationTimer) {
+      clearTimeout(window.__rrHydrationTimer);
+      window.__rrHydrationTimer = undefined;
     }
   };
 
-  w.__rrHydrationTimer = setTimeout(() => {
-    if (w.__rrHydrationConfirmed) return;
+  window.__rrHydrationTimer = setTimeout(() => {
+    if (window.__rrHydrationConfirmed) return;
     showBanner('Interactive features are taking longer than expected to load. Please refresh or check the console for errors.');
   }, 4000);
-})();`;
+})();

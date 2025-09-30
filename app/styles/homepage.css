@@ -1124,6 +1124,11 @@ body {
   text-align: center;
 }
 
+.nav-main.footer-links {
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+
 .footer-links {
   margin-top: 0;
   padding: 0;
@@ -1132,6 +1137,11 @@ body {
 
 .footer-links .nav-menu {
   margin: 0;
+  background: var(--surface);
+}
+
+.footer-links .nav-menu li {
+  background: var(--surface);
 }
 
 .footer-social {

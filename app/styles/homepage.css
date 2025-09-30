@@ -200,6 +200,16 @@ body {
   overflow: visible;
 }
 
+.nav-main.footer-links {
+  background: var(--surface);
+  border-top: none;
+}
+
+.nav-main.footer-links .nav-menu,
+.nav-main.footer-links .nav-menu li {
+  background: var(--surface);
+}
+
 .nav-menu li {
   background: var(--card);
 }

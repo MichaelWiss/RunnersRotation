@@ -172,7 +172,7 @@ body {
 }
 
 .nav-main {
-  padding: 16px 0;
+  padding: 0;
   width: 100vw;
   position: relative;
   left: 50%;
@@ -193,7 +193,7 @@ body {
   background: var(--band-surface);
   border: none;
   border-radius: 0px;
-  padding: 2px 0;
+  padding: 0;
   overflow: visible;
 }
 

@@ -17,7 +17,10 @@ body {
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* offset for fixed header + announcement */
+}
+
+.page-container > main {
+  /* Keep content clear of the fixed header once it measures in */
   padding-top: calc(var(--header-h) + var(--announcement-h));
 }
 
@@ -172,7 +175,7 @@ body {
 }
 
 .nav-main {
-  padding: 16px 0;
+  padding: 4px 0;
   width: 100vw;
   position: relative;
   left: 50%;
@@ -299,7 +302,7 @@ body {
 /* Hero Section with Glass Card */
 .hero-section {
   /* Full-bleed section; inner card controls width */
-  padding: 20px 0 0 0;
+  padding: 0;
 }
 
 .hero-card {
@@ -968,7 +971,7 @@ body {
 
 /* Reduce spacing for the hero to appear immediately under the header */
 .hero-section.section {
-  padding-top: 16px; /* minimal breathing room below header */
+  padding-top: 8px; /* subtle breathing room below header */
 }
 
 .grid-container {

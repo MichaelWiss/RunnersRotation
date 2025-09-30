@@ -172,7 +172,7 @@ body {
 }
 
 .nav-main {
-  padding: 0;
+  padding: 16px 0;
   width: 100vw;
   position: relative;
   left: 50%;
@@ -193,7 +193,7 @@ body {
   background: var(--band-surface);
   border: none;
   border-radius: 0px;
-  padding: 0;
+  padding: 2px 0;
   overflow: visible;
 }
 
@@ -299,7 +299,7 @@ body {
 /* Hero Section with Glass Card */
 .hero-section {
   /* Full-bleed section; inner card controls width */
-  padding: 0;
+  padding: 20px 0 0 0;
 }
 
 .hero-card {
@@ -324,7 +324,7 @@ body {
 .hero-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px 48px;
+  padding: 48px 24px;
   display: block;
   width: 100%;
 }
@@ -968,7 +968,7 @@ body {
 
 /* Reduce spacing for the hero to appear immediately under the header */
 .hero-section.section {
-  padding-top: 0;
+  padding-top: 16px; /* minimal breathing room below header */
 }
 
 .grid-container {

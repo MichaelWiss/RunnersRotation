@@ -988,7 +988,7 @@ body {
   margin-top: 80px;
   position: relative;
   overflow: visible; /* allow full-bleed footer-links */
-  border-top: 3px solid var(--accent);
+  border-top: 3px solid var(--surface);
   transition: background 120ms linear;
 }
 

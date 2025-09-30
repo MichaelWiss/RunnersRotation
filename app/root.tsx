@@ -11,6 +11,7 @@ import {
 import type {Cart, Shop} from '@shopify/hydrogen/storefront-api-types';
 import appStylesheet from './styles/app.css?url';
 import homepageStylesheet from './styles/homepage.css?url';
+import tokensStylesheet from './styles/tokens.css?url';
 import {useNonce} from '@shopify/hydrogen';
 import {hydrationGuardSnippet} from './scripts/hydration-guard';
 import { CartProvider } from '~/context/CartContext';
@@ -28,9 +29,16 @@ import { CartProvider } from '~/context/CartContext';
 export const links: LinksFunction = () => [
   {rel: 'preconnect', href: 'https://cdn.shopify.com'},
   {rel: 'preconnect', href: 'https://shop.app'},
+  {rel: 'preconnect', href: 'https://fonts.googleapis.com'},
+  {rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous'},
   {rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg'},
   // Preload homepage bundle for faster first paint (optional; harmless if duplicated by browser)
   {rel: 'preload', as: 'style', href: homepageStylesheet},
+  {rel: 'stylesheet', href: tokensStylesheet},
+  {
+    rel: 'stylesheet',
+    href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap',
+  },
   {rel: 'stylesheet', href: appStylesheet},
   {rel: 'stylesheet', href: homepageStylesheet},
 ];

@@ -299,7 +299,7 @@ body {
 /* Hero Section with Glass Card */
 .hero-section {
   /* Full-bleed section; inner card controls width */
-  padding: 20px 0 0 0; /* Reduce top padding to bring hero card closer to nav-main */
+  padding: 0;
 }
 
 .hero-card {
@@ -324,7 +324,7 @@ body {
 .hero-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 48px 24px;
+  padding: 0 24px 48px;
   display: block;
   width: 100%;
 }
@@ -968,7 +968,7 @@ body {
 
 /* Reduce spacing for the hero to appear immediately under the header */
 .hero-section.section {
-  padding-top: 16px; /* minimal breathing room below header */
+  padding-top: 0;
 }
 
 .grid-container {

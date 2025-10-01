@@ -250,7 +250,7 @@ export default function Index() {
           <div className="hero-content">
             <div className="hero-badge">Handcrafted Performance</div>
             <h1 className="hero-title">Run Beyond Limits</h1>
-            <p className="hero-subtitle">Premium running shoes crafted for the passionate runner</p>
+            {/* <p className="hero-subtitle">Premium running shoes crafted for the passionate runner</p> */}
             <a href="#product-showcase" className="hero-cta">Explore Collection</a>
           </div>
         </div>

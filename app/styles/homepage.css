@@ -122,6 +122,29 @@ body {
   }
 }
 
+@keyframes heroTitleGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes heroTitleFade {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .nav-circle:hover {
   transform: rotate(calc(var(--scroll-percentage, 0) * 360deg)) scale(1.01);
   box-shadow: 0 12px 36px rgba(233, 76, 38, 0.15);
@@ -343,7 +366,7 @@ body {
   width: 100%;
   position: relative;
   z-index: 1;
-  background: url('/images/hero-trail-runners.jpg') center/cover no-repeat;
+  background: url('/images/runners-feet.jpg') center/cover no-repeat;
   background-color: #1c1c1c;
   border: 1px solid rgba(0, 0, 0, 0.12);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
@@ -390,13 +413,21 @@ body {
 
 .hero-title {
   font-family: 'Playfair Display', serif;
-  font-size: 64px;
+  font-size: 72px;
   font-weight: 800;
-  color: var(--panel);
   margin-bottom: 16px;
   font-style: italic;
-  line-height: 1.1;
+  line-height: 1.05;
   letter-spacing: -0.02em;
+  background: linear-gradient(120deg, #f56c6c, #ff9a44, #f8e71c, #ec008c, #4b2bbf, #f56c6c);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: heroTitleGradient 14s ease infinite, heroTitleFade 900ms ease forwards;
 }
 
 .hero-subtitle {

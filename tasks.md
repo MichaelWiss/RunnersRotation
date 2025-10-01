@@ -23,6 +23,7 @@ This document tracks current work, what's done, and what's next.
 
 ## In Progress
 - Making the site "live" and building working cart functionality
+- Homepage component reuse & showcase alignment (ProductGallery/PurchaseCard/ProductCard) ✅ Step 1 underway
 
 ## Next: Live Site & Working Cart Plan
 
@@ -84,6 +85,8 @@ This document tracks current work, what's done, and what's next.
 - [x] ~~Identified mixed server/client component issues~~
 - [x] ~~Defined proper server/client component architecture~~
 - [x] ~~Created component conversion mapping and file structure plan~~
+- [x] Homepage showcase reuses shared ProductGallery + PurchaseCard
+- [x] Reusable ProductCard component extracted for grids
 - [ ] **Rebuild Header as Header.client.tsx + AnnouncementBar.server.tsx**
 - [ ] **Convert homepage to index.server.tsx with proper component split**
 - [ ] **Split ProductGallery/PurchaseCard into server/client components**
@@ -103,6 +106,8 @@ Homepage System:
 Product System:
   ProductGallery.tsx → ProductGallery.server.tsx
   PurchaseCard.tsx → PurchaseCard.client.tsx
+  Homepage showcase reuse → integrate shared components
+  Grid cards → extract shared ProductCard component
   Status: Planning → Implementation
 ```
 

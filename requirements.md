@@ -40,12 +40,12 @@ Based on `homepage-sharp.html` mockup:
 - `Footer.server.tsx` - Static footer content, links, policies (SSR)
 - `Layout.tsx` - Page wrapper coordinating header/footer
 
-### Product Components (Server/Client Split)
+### Product Components (Shared + Server/Client Split)
 - `ProductGallery.server.tsx` - Image rendering, thumbnails (SSR)
-- `ProductShowcase.server.tsx` - Product content layout coordinator (SSR)
 - `PurchaseCard.client.tsx` - Cart mutations, variant selection (Client)
-- `ProductDetails.server.tsx` - Product info, descriptions (SSR)
-- All must work on homepage AND product pages identically
+- `ProductShowcase.server.tsx` - Layout coordinator composing gallery + card
+- `ProductCard.server.tsx` - Grid tile for homepage/footer/collection routes
+- Components must work across homepage, product detail, and collection contexts identically
 
 ### UI Components (Server/Client Split)
 - `Button.client.tsx` - Interactive buttons with click handlers
@@ -54,8 +54,8 @@ Based on `homepage-sharp.html` mockup:
 - `QuantitySelector.client.tsx` - Interactive quantity controls
 
 ### Reusability Requirements
-- Components must be **page-agnostic** (work on homepage, product pages, collections)
-- Components must accept **both Shopify API data and fallback data**
+- Components must be **page-agnostic** (homepage, product pages, collections, footer grids)
+- Components must accept **Shopify Storefront API data, metafield overrides, and fallback data**
 - Components must be **layout independent** (arrangeable in different layouts)
 - Components must maintain **style consistency** across all usage contexts
 
@@ -138,8 +138,8 @@ app/
 - [ ] Font usage correct (Playfair Display for nav circle)
 
 ### Architecture Success  
-- [x] ProductGallery/PurchaseCard components shared between homepage and product pages
-- [x] Featured Runner section uses shared components
+- [x] Homepage showcase reuses ProductGallery + PurchaseCard
+- [x] Reusable ProductCard powers homepage and footer grids
 - [ ] Header/Footer components work as universal layout components
 - [ ] CSS grid system functional with page-container wrapper
 - [ ] Route-scoped CSS imports working
@@ -178,6 +178,7 @@ Current: ProductGallery.tsx + PurchaseCard.tsx (mixed)
 New: ProductShowcase.server.tsx (layout coordinator)
    + ProductGallery.server.tsx (images/content)
    + PurchaseCard.client.tsx (cart interactions)
+   + ProductCard.server.tsx (grid reuse)
    + ProductDetails.server.tsx (product info)
 ```
 

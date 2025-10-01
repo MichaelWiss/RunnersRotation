@@ -56,7 +56,7 @@ export async function loader({context}: LoaderFunctionArgs) {
     })
     .catch((error) => {
       console.error('[root.loader] layout query failed', error);
-      return {shop: {name: 'Storefront Unavailable', description: ''}} satisfies {shop: Shop};
+      return {shop: {name: 'Storefront Unavailable', description: ''}} as unknown as {shop: Shop};
     });
 
   const cartPromise = cartId

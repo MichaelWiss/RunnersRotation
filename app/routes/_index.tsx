@@ -1,12 +1,21 @@
-import {LinksFunction, type LoaderFunctionArgs, useLoaderData, Link} from 'react-router';
+import {LinksFunction, type LoaderFunctionArgs, useLoaderData} from 'react-router';
+import {useMemo} from 'react';
 import homepageStyles from '~/styles/homepage.css?url';
-import {useEffect} from 'react';
+import productStyles from '~/styles/product.css?url';
 import Layout from '~/components/layout/Layout';
+import ProductGallery from '~/components/ProductGallery';
+import PurchaseCard from '~/components/PurchaseCard';
+import ProductCard from '~/components/ProductCard';
+
+// Each bundle included via links() keeps the homepage visually consistent
+// while still reusing the product detail components for the showcase.
 
 export const links: LinksFunction = () => [
   {rel: 'stylesheet', href: homepageStyles},
+  {rel: 'stylesheet', href: productStyles},
 ];
 
+// Minimal product shape for grid + footer cards.
 type ProductLite = {
   id: string;
   title: string;
@@ -16,12 +25,86 @@ type ProductLite = {
   price?: {amount: string; currencyCode: string} | null;
 };
 
+// Rich product shape for the hero showcase, including variants and gallery.
+type ShowcaseProduct = {
+  id: string;
+  title: string;
+  handle: string;
+  description?: string | null;
+  descriptionHtml?: string | null;
+  imageUrl?: string | null;
+  gallery: Array<{url: string; altText: string | null}>;
+  price?: {amount: string; currencyCode: string} | null;
+  available?: boolean;
+  options: Array<{name: string; values: string[]}>;
+  selectedOptions: Array<{name: string; value: string}>;
+  variants: Array<{
+    id: string;
+    title: string;
+    availableForSale: boolean;
+    price: {amount: string; currencyCode: string};
+  }>;
+};
+
+// Loader pulls homepage data from Shopify collections:
+//   - grid collection for the main product list
+//   - showcase collection (first product) for the hero card
+//   - fallback query ensures we always have products to show
 export async function loader({context}: LoaderFunctionArgs) {
-  const {storefront} = context as {storefront: any};
+  const {storefront, env} = context as unknown as {
+    storefront: any;
+    env?: Record<string, string | undefined>;
+  };
+  const collectionHandle = env?.HOMEPAGE_COLLECTION_HANDLE || 'frontpage';
+  const showcaseHandle = env?.HOMEPAGE_SHOWCASE_COLLECTION_HANDLE || 'product-showcase';
   try {
     const data = await storefront.query(`#graphql
-      query HomeProducts {
-        products(first: 3) {
+      query HomeProducts(
+        $gridHandle: String!
+        $showcaseHandle: String!
+        $gridCount: Int!
+        $galleryCount: Int!
+      ) {
+        grid: collection(handle: $gridHandle) {
+          id
+          title
+          products(first: $gridCount) {
+            nodes {
+              id
+              title
+              handle
+              description
+              images(first: 1) { nodes { url } }
+              variants(first: 1) { nodes { price { amount currencyCode } } }
+            }
+          }
+        }
+        showcase: collection(handle: $showcaseHandle) {
+          id
+          title
+          products(first: 1) {
+            nodes {
+              id
+              title
+              handle
+              description
+              descriptionHtml
+              featuredImage { url altText }
+              images(first: $galleryCount) { nodes { url altText } }
+              options { name values }
+              variants(first: 10) {
+                nodes {
+                  id
+                  title
+                  availableForSale
+                  price { amount currencyCode }
+                  selectedOptions { name value }
+                }
+              }
+            }
+          }
+        }
+        fallback: products(first: $gridCount) {
           nodes {
             id
             title
@@ -32,55 +115,132 @@ export async function loader({context}: LoaderFunctionArgs) {
           }
         }
       }
-    `);
-    const items: ProductLite[] = ((data as any)?.products?.nodes || []).map((p: any) => ({
-      id: p.id,
-      title: p.title,
-      handle: p.handle,
-      description: p.description,
-      imageUrl: p.images?.nodes?.[0]?.url ?? null,
-      price: p.variants?.nodes?.[0]?.price ?? null,
-    }));
-    return {products: items};
+    `, {
+      variables: {
+        gridHandle: collectionHandle,
+        showcaseHandle,
+        gridCount: 6,
+        galleryCount: 4,
+      },
+    });
+
+    const gridProducts = ((data as any)?.grid?.products?.nodes || []) as any[];
+    const fallbackProducts = ((data as any)?.fallback?.nodes || []) as any[];
+
+    const seen = new Set<string>();
+    const merged = [...gridProducts, ...fallbackProducts].filter((p) => {
+      const key = p?.id || p?.handle;
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    const showcaseNode = ((data as any)?.showcase?.products?.nodes || [])[0] as any | undefined;
+    const showcaseProductId = showcaseNode?.id ?? null;
+    const showcaseHandleId = showcaseNode?.handle ?? null;
+
+    // Grid products exclude the item featured in the showcase
+    const items: ProductLite[] = merged
+      .filter((p: any) => {
+        const id = p?.id;
+        const handle = p?.handle;
+        if (showcaseProductId && id === showcaseProductId) return false;
+        if (showcaseHandleId && handle === showcaseHandleId) return false;
+        return true;
+      })
+      .slice(0, 6)
+      .map((p: any) => ({
+        id: p.id,
+        title: p.title,
+        handle: p.handle,
+        description: p.description,
+        imageUrl: p.images?.nodes?.[0]?.url ?? null,
+        price: p.variants?.nodes?.[0]?.price ?? null,
+      }));
+
+    const showcaseProduct: ShowcaseProduct | null = showcaseNode
+      ? {
+          id: showcaseNode.id,
+          title: showcaseNode.title,
+          handle: showcaseNode.handle,
+          description: showcaseNode.description,
+          descriptionHtml: showcaseNode.descriptionHtml,
+          imageUrl: showcaseNode.featuredImage?.url ?? showcaseNode.images?.nodes?.[0]?.url ?? null,
+          gallery: (showcaseNode.images?.nodes || []).map((img: any) => ({
+            url: img?.url,
+            altText: img?.altText ?? null,
+          })),
+          price: showcaseNode.variants?.nodes?.[0]?.price ?? null,
+          available: showcaseNode.variants?.nodes?.[0]?.availableForSale ?? false,
+          options: (showcaseNode.options || []).map((opt: any) => ({
+            name: opt?.name,
+            values: Array.isArray(opt?.values) ? opt.values : [],
+          })),
+          selectedOptions: (showcaseNode.variants?.nodes?.[0]?.selectedOptions || []).map((opt: any) => ({
+            name: opt?.name,
+            value: opt?.value,
+          })),
+          variants: ((showcaseNode.variants?.nodes || [])
+            .map((variant: any) => {
+              const price = variant?.price;
+              if (!variant?.id || !price) return null;
+              return {
+                id: variant.id,
+                title: variant.title,
+                availableForSale: Boolean(variant?.availableForSale),
+                price,
+              };
+            })
+            .filter(Boolean)) as ShowcaseProduct['variants'],
+        }
+      : null;
+
+    return {
+      products: items,
+      collectionHandle,
+      showcaseHandle,
+      showcaseCollectionTitle: (data as any)?.showcase?.title ?? null,
+      productShowcase: showcaseProduct,
+    };
   } catch {
-    return {products: [] as ProductLite[]};
+    return {
+      products: [] as ProductLite[],
+      collectionHandle,
+      showcaseHandle,
+      showcaseCollectionTitle: null,
+      productShowcase: null,
+    };
   }
 }
 
+// Home route renders the layout, hero CTA, showcase, grid, and footer collection.
 export default function Index() {
   const data = useLoaderData<typeof loader>();
   const products = data?.products ?? [];
-  // Rotation/blend is now handled globally in Layout for consistent behavior
+  const collectionHandle = data?.collectionHandle;
+  const showcase = data?.productShowcase ?? null;
+  const showcaseHandle = data?.showcaseHandle;
+  const showcaseCollectionTitle = data?.showcaseCollectionTitle;
 
-  // Quantity +/- handlers (delegated for demo)
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      const btn = (e.target as HTMLElement).closest('.qty-btn') as HTMLButtonElement | null;
-      if (!btn) return;
-      const input = btn.parentElement?.querySelector<HTMLInputElement>('.qty-input');
-      if (!input) return;
-      let val = parseInt(input.value || '1', 10);
-      if (btn.textContent?.trim() === '−') val = Math.max(1, val - 1);
-      else val = val + 1;
-      input.value = String(val);
-    };
-    document.addEventListener('click', handler);
-    return () => document.removeEventListener('click', handler);
-  }, []);
+  // Metafield-driven subtitle fallback if Shopify has no options.
+  const showcaseSubtitle = useMemo(() => {
+    if (!showcase?.selectedOptions?.length) {
+      return 'Engineered for those who seek paths less traveled, delivering uncompromising performance.';
+    }
+    return showcase.selectedOptions
+      .filter((opt) => opt?.name && opt?.value)
+      .map((opt) => `${opt.name}: ${opt.value}`)
+      .join(' • ');
+  }, [showcase]);
 
-  // Pill toggle active within group
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      const pill = (e.target as HTMLElement).closest('.pill') as HTMLElement | null;
-      if (!pill) return;
-      const group = pill.parentElement;
-      if (!group) return;
-      group.querySelectorAll('.pill').forEach((p) => p.classList.remove('active'));
-      pill.classList.add('active');
-    };
-    document.addEventListener('click', handler);
-    return () => document.removeEventListener('click', handler);
-  }, []);
+  // Keep the showcase product out of the grid so it doesn't repeat.
+  const gridProducts = useMemo(
+    () => (showcase ? products.filter((p) => p?.id !== showcase.id && p?.handle !== showcase.handle) : products),
+    [products, showcase],
+  );
+
+  // Footer tiles reuse the first three grid products.
+  const footerCards = useMemo(() => gridProducts.slice(0, 3), [gridProducts]);
 
   return (
     <Layout>
@@ -91,7 +251,7 @@ export default function Index() {
             <div className="hero-badge">Handcrafted Performance</div>
             <h1 className="hero-title">Run Beyond Limits</h1>
             <p className="hero-subtitle">Premium running shoes crafted for the passionate runner</p>
-            <a href="#featured" className="hero-cta">Explore Collection</a>
+            <a href="#product-showcase" className="hero-cta">Explore Collection</a>
           </div>
         </div>
       </section>
@@ -105,155 +265,62 @@ export default function Index() {
         </div>
 
         <div className="home-products-grid grid-container">
-          {[...Array(6)].map((_, i) => {
-            const p = products[i];
-            const title = p?.title || (
-              [
-                'Trail Master Pro',
-                'Carbon Road Racer',
-                'Daily Comfort Max',
-                'Tempo Elite',
-                'Recovery Max',
-                'Track Spike Elite',
-              ][i]
-            );
-            const blurb = (
-              [
-                'Ultimate trail protection with Vibram MegaGrip sole and rock plate. Engineered for technical terrain and ultra-distance adventures.',
-                'Competition-grade racing flat with carbon fiber plate. Designed for personal bests and podium finishes on road and track.',
-                'Perfect everyday trainer with responsive cushioning and breathable upper. Ideal for daily miles and recovery runs.',
-                'Lightweight tempo trainer for speed workouts and threshold sessions. Responsive foam and propulsive geometry.',
-                'Maximum cushioning for recovery runs and long easy miles. Cloud-like comfort with superior energy return.',
-                'Professional track spikes for competition. Aggressive traction and lightweight construction for maximum speed.',
-              ][i]
-            );
-            const label = (
-              [
-                'TRAIL MASTER',
-                'ROAD RACER',
-                'DAILY TRAINER',
-                'TEMPO ELITE',
-                'RECOVERY MAX',
-                'SPIKE ELITE',
-              ][i]
-            );
-            const priceStr = p?.price
-              ? new Intl.NumberFormat('en-GB', {style: 'currency', currency: p.price.currencyCode}).format(Number(p.price.amount))
-              : (
-                  ['£185.00', '£220.00', '£145.00', '£175.00', '£165.00', '£195.00'][i]
-                );
-            const href = p?.handle ? `/products/${p.handle}` : '#';
-            return (
-              <div className="home-product-card" key={i}>
-                <div
-                  className="home-product-image"
-                  style={p?.imageUrl ? {
-                    backgroundImage: `url(${p.imageUrl})`,
-                    backgroundSize: 'contain',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                  } : undefined}
-                >
-                  {!p?.imageUrl ? label : null}
-                </div>
-                <div className="home-product-content">
-                  <h3>{title}</h3>
-                  <p>{p?.description || blurb}</p>
-                  <div className="home-product-price">{priceStr}</div>
-                  {p?.handle ? (
-                    <Link to={href} className="home-product-cta">Shop Now</Link>
-                  ) : (
-                    <a href="#" className="home-product-cta">Shop Now</a>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+          {gridProducts.length === 0 ? (
+            <div className="home-products-empty">
+              Add products to the {collectionHandle ? `"${collectionHandle}"` : 'featured'} collection in Shopify to populate this section.
+            </div>
+          ) : (
+            gridProducts.slice(0, 6).map((p, i) => (
+              <ProductCard
+                key={p?.id || i}
+                variant="home"
+                title={p?.title}
+                description={p?.description?.slice(0, 140) || undefined}
+                handle={p?.handle}
+                imageUrl={p?.imageUrl || undefined}
+                price={p?.price || null}
+                fallbackLabel={p?.title || `Featured product ${i + 1}`}
+              />
+            ))
+          )}
         </div>
       </section>
 
-      {/* Featured Runner Section - Exact HTML Structure */}
-      <section className="section">
+      {/* Product Showcase Section */}
+      <section className="section" id="product-showcase">
         <div className="section-header">
-          <div className="section-kicker">Featured Runner</div>
-          <h2 className="section-title">Bold, grippy & ultra-responsive</h2>
-          <p className="section-subtitle">Our signature trail shoe, engineered for those who demand excellence</p>
+          <div className="section-kicker">{showcaseCollectionTitle || 'Product Showcase'}</div>
+          <h2 className="section-title">{showcase?.title || 'Bold, grippy & ultra-responsive'}</h2>
+          <p className="section-subtitle">
+            {showcase?.description
+              ? showcase.description.slice(0, 160)
+              : 'Choose a featured product in Shopify to highlight it here.'}
+          </p>
         </div>
 
-        <div className="product-showcase grid-container">
-          <div className="product-gallery">
-            <div className="gallery-images">
-              <div className="main-image"></div>
-              <div className="thumbnail-row">
-                <div className="thumbnail"></div>
-                <div className="thumbnail"></div>
-                <div className="thumbnail"></div>
-              </div>
+        {showcase ? (
+          <div className="product-showcase grid-container">
+            <div className="product-gallery">
+              <ProductGallery
+                title={showcaseCollectionTitle || 'Featured Product'}
+                subtitle={showcaseSubtitle}
+                description={showcase.description || undefined}
+                images={showcase.gallery}
+              />
             </div>
-
-            <div className="product-meta">
-              <div>
-                <div className="product-kicker">Trail Runner Pro</div>
-                <h1 className="product-title">Bold, grippy & ultra-responsive</h1>
-                <div className="product-subtitle">Engineered for those who seek paths less traveled, delivering uncompromising performance.</div>
-              </div>
-
-              <p className="product-description">
-                A love letter to trail runners and mountain enthusiasts. This design combines three revolutionary technologies giving it the perfect balance of grip, protection, and comfort – the ultimate trail companion developed by our passionate design team.
-              </p>
-
-              <div className="info-grid">
-                <div className="info-item"><b>Drop</b><span>6mm heel-to-toe</span></div>
-                <div className="info-item"><b>Weight</b><span>285g (UK 9)</span></div>
-                <div className="info-item"><b>Sole</b><span>Vibram MegaGrip</span></div>
-                <div className="info-item"><b>Best for</b><span>Technical trails & ultras</span></div>
-              </div>
+            <div className="purchase-card">
+              <PurchaseCard
+                price={showcase.price || undefined}
+                available={showcase.available}
+                variants={showcase.variants}
+              />
             </div>
           </div>
-
-          <div className="purchase-card">
-            <div className="price-section">
-              <div className="price">£185.00</div>
-              <div className="unit-price">
-                <div className="unit-price-label">Unit price</div>
-                <div className="unit-price-value">per pair</div>
-              </div>
-            </div>
-
-            <div className="selectors">
-              <div>
-                <div className="selector-label">Size (UK)</div>
-                <div className="selector-options">
-                  <button className="pill active">8</button>
-                  <button className="pill">8.5</button>
-                  <button className="pill">9</button>
-                  <button className="pill">9.5</button>
-                  <button className="pill">10</button>
-                </div>
-              </div>
-
-              <div>
-                <div className="selector-label">Width</div>
-                <div className="selector-options">
-                  <button className="pill active">Regular</button>
-                  <button className="pill">Wide</button>
-                </div>
-              </div>
-
-              <div className="quantity-selector">
-                <div className="selector-label">Quantity</div>
-                <div className="quantity-controls">
-                  <button className="qty-btn">−</button>
-                  <input className="qty-input" defaultValue="1" />
-                  <button className="qty-btn">+</button>
-                </div>
-              </div>
-            </div>
-
-            <button className="add-to-cart">Add to cart</button>
-            <div className="shipping-note">Free UK shipping over £150 • Orders dispatched within 1–3 working days</div>
+        ) : (
+          <div className="home-products-empty">
+            Add a product to the {showcaseHandle ? `"${showcaseHandle}"` : 'showcase'} collection in Shopify to populate this feature.
           </div>
-        </div>
+        )}
       </section>
 
       {/* Collection Section */}
@@ -261,34 +328,21 @@ export default function Index() {
         <div className="collection-container">
           <h2 className="collection-title">The Complete Runner's Arsenal</h2>
           <div className="products-grid">
-            <div className="product-card">
-              <div className="card-image">ROAD RACER</div>
-              <div className="card-content">
-                <h3 className="card-title">Carbon Road Racer</h3>
-                <p className="card-description">Ultra-lightweight racing shoe with carbon fiber plate. Built for speed and personal records.</p>
-                <div className="card-price">£220.00</div>
-              </div>
-            </div>
-            <div className="product-card">
-              <div className="card-image">ULTRA LIGHT</div>
-              <div className="card-content">
-                <h3 className="card-title">Ultralight Trainer</h3>
-                <p className="card-description">Minimalist design for natural running. Perfect for daily training and ground feel.</p>
-                <div className="card-price">£145.00</div>
-              </div>
-            </div>
-            <div className="product-card">
-              <div className="card-image">TRAIL MASTER</div>
-              <div className="card-content">
-                <h3 className="card-title">Trail Master Pro</h3>
-                <p className="card-description">Ultimate trail protection with Vibram sole. Engineered for technical terrain.</p>
-                <div className="card-price">£185.00</div>
-              </div>
-            </div>
+            {[0, 1, 2].map((idx) => (
+              <ProductCard
+                key={`footer-${idx}`}
+                variant="footer"
+                title={footerCards[idx]?.title}
+                description={footerCards[idx]?.description?.slice(0, 120) || undefined}
+                imageUrl={footerCards[idx]?.imageUrl || undefined}
+                price={footerCards[idx]?.price || null}
+                handle={footerCards[idx]?.handle}
+                fallbackLabel={['ROAD RACER', 'ULTRA LIGHT', 'TRAIL MASTER'][idx]}
+              />
+            ))}
           </div>
         </div>
       </section>
     </Layout>
   );
 }
-

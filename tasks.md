@@ -155,6 +155,7 @@ Product System:
 - [ ] Update contact information and business addresses
 - [ ] Create real social media links and profiles
 - [ ] Add authentic customer reviews and testimonials
+- [ ] Add "New Arrivals" collection section on homepage
 
 ### Functionality
 - [ ] Implement working cart functionality

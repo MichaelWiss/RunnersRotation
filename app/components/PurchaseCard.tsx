@@ -52,9 +52,7 @@ export default function PurchaseCard({
   const benefitsList = benefits && benefits.length ? benefits : DEFAULT_BENEFITS;
 
   const handleAddToCart = () => {
-    console.log('Adding to cart:', selectedVariant.id, quantity);
     if (selectedVariant.id === 'mock-variant-id') {
-      console.warn('Cannot add mock variant to cart - need real Shopify variant ID');
       return;
     }
     addToCart(selectedVariant.id, quantity);

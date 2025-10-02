@@ -15,6 +15,9 @@ import tokensStylesheet from './styles/tokens.css?url';
 import {useNonce} from '@shopify/hydrogen';
 import hydrationGuardScriptUrl from './scripts/hydration-guard.global.js?url';
 import { CartProvider } from '~/context/CartContext';
+import SiteLayout from '~/components/layout/Layout';
+import {loadCollectionsByHandles} from '~/data/collections.server';
+import type {NavigationItem} from '~/types';
 
 /**
  * The main and reset stylesheets are added in the Layout component
@@ -50,6 +53,16 @@ export async function loader({context}: LoaderFunctionArgs) {
     context.session.get('cartId'),
   ]);
 
+  const env = (context as unknown as {env?: Record<string, string | undefined>})?.env ?? {};
+  const parseHandles = (value: string | undefined) =>
+    (value || '')
+      .split(',')
+      .map((handle) => handle.trim())
+      .filter(Boolean);
+
+  const navHandles = parseHandles(env.HEADER_COLLECTION_HANDLES);
+  const footerHandles = parseHandles(env.FOOTER_COLLECTION_HANDLES);
+
   const layoutPromise = context.storefront
     .query<{shop: Shop}>(LAYOUT_QUERY, {
       cache: context.storefront.CacheShort(),
@@ -58,6 +71,14 @@ export async function loader({context}: LoaderFunctionArgs) {
       console.error('[root.loader] layout query failed', error);
       return {shop: {name: 'Storefront Unavailable', description: ''}} as unknown as {shop: Shop};
     });
+
+  const navigationPromise = navHandles.length
+    ? loadCollectionsByHandles(context.storefront, navHandles)
+    : Promise.resolve([] as NavigationItem[]);
+
+  const footerPromise = footerHandles.length
+    ? loadCollectionsByHandles(context.storefront, footerHandles)
+    : Promise.resolve([] as NavigationItem[]);
 
   const cartPromise = cartId
     ? context.storefront
@@ -85,12 +106,19 @@ export async function loader({context}: LoaderFunctionArgs) {
     : Promise.resolve(null);
 
   try {
-    const [cart, layout] = await Promise.all([cartPromise, layoutPromise]);
+    const [cart, layout, navigationCollections, footerCollections] = await Promise.all([
+      cartPromise,
+      layoutPromise,
+      navigationPromise,
+      footerPromise,
+    ]);
 
     return {
       isLoggedIn: Boolean(customerAccessToken),
       cart,
       layout,
+      navigationCollections,
+      footerCollections,
     };
   } catch (error) {
     const err = error instanceof Error ? error : new Error(typeof error === 'string' ? error : 'Unknown error');
@@ -137,9 +165,12 @@ export default function App() {
 
   return (
     <CartProvider initialCart={data?.cart || null}>
-      <Layout>
+      <SiteLayout
+        navigationCollections={data?.navigationCollections}
+        footerCollections={data?.footerCollections}
+      >
         <Outlet />
-      </Layout>
+      </SiteLayout>
     </CartProvider>
   );
 }

@@ -40,7 +40,7 @@ export interface Collection {
 
 export interface HeaderProps {
   cartCount?: number;
-  collections?: Collection[];
+  collections?: NavigationItem[];
 }
 
 export interface Shop {

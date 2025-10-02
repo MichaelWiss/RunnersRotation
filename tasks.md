@@ -20,6 +20,15 @@ This document tracks current work, what's done, and what's next.
   - Updated postbuild script to copy assets to `.vercel/output/static/assets/`
   - Simplified `vercel.json` to minimal working configuration with filesystem handler
   - Verified CSS and JS bundles loading properly on production deployment
+- Homepage data layer consolidated into shared helper (`app/data/homepage.server.ts`)
+- Homepage hero CTA/background/options now driven via Shopify metafields
+- **Navigation & Footer Collections Wired** ✅
+  - Added `loadCollectionsByHandles` helper (`app/data/collections.server.ts`)
+  - Root loader feeds header/footer links via env-controlled handles
+  - Footer quick links now derive from live Shopify collections
+- **Homepage hero styling cleanup** ✅
+  - Hero background/CTA driven by metafields with safe fallbacks
+  - PurchaseCard option lists + shipping note sourced from metafields
 
 ## In Progress
 - Making the site "live" and building working cart functionality

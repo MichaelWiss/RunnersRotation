@@ -1,4 +1,19 @@
-export default function Footer() {
+import type {NavigationItem} from '~/types';
+
+interface FooterProps {
+  links?: NavigationItem[];
+}
+
+const defaultLinks: NavigationItem[] = [
+  {title: "FAQ's", handle: 'faqs', url: '#'},
+  {title: 'Careers', handle: 'careers', url: '#'},
+  {title: 'Run Club', handle: 'run-club', url: '#'},
+  {title: 'Blog', handle: 'blog', url: '#'},
+  {title: 'Sustainability', handle: 'sustainability', url: '#'},
+];
+
+export default function Footer({links}: FooterProps) {
+  const footerLinks = links && links.length ? links : defaultLinks;
   return (
     <footer className="footer full-width">
       <div className="footer-container">
@@ -10,24 +25,24 @@ export default function Footer() {
 
         <div className="footer-grid">
           <div className="footer-section">
-            <h4>Velocity Store</h4>
-            <p>23-25 Runner's Market, CF10 1AU</p>
-            <p>Monday–Friday: 08:30–17:30<br/>Saturday: 09:30–16:30</p>
-          </div>
-          <div className="footer-section">
             <h4>Velocity Flagship</h4>
-            <p>Downtown, London W1 4RX</p>
-            <p>Mon–Fri: 07:30–18:00<br/>Saturday: 08:30–18:00<br/>Sunday: 09:00–16:00</p>
+            <p>155 Market Street, Denver, CO 80202</p>
+            <p>Mon–Fri: 9:00–19:00<br/>Saturday: 10:00–18:00</p>
           </div>
           <div className="footer-section">
-            <h4>Manufacturing</h4>
-            <p>Sustainable Factory, M15 5ZT</p>
-            <p>Mon–Thu: 9:00-5:00 (Tours available)<br/>Fri-Sun: Closed</p>
+            <h4>Velocity NYC</h4>
+            <p>322 Lafayette Street, New York, NY 10012</p>
+            <p>Mon–Fri: 8:00–20:00<br/>Saturday: 9:00–19:00<br/>Sunday: 10:00–17:00</p>
+          </div>
+          <div className="footer-section">
+            <h4>R&D Lab</h4>
+            <p>Innovation Campus, Austin, TX 78701</p>
+            <p>Mon–Thu: 9:00–17:00 (Tours by appointment)<br/>Fri–Sun: Closed</p>
           </div>
           <div className="footer-section">
             <h4>Connect</h4>
-            <p>Partner with us?<br/>See <a href="#"><strong>wholesale enquiry form</strong></a></p>
-            <p>For other enquiries<br/>Please see <a href="#"><strong>contact details</strong></a></p>
+            <p>Partner with us?<br/>See <a href="#"><strong>wholesale partnership form</strong></a></p>
+            <p>Need support?<br/>Visit <a href="#"><strong>contact &amp; help center</strong></a></p>
           </div>
         </div>
 
@@ -52,7 +67,7 @@ export default function Footer() {
 
         <div className="footer-bottom">
           <div className="footer-copyright">
-            <p>We are a proud member of 1% for the Planet<br/>and a Living Wage Foundation Employer.<br/>Copyright &copy;2025 Velocity Running  | All Rights Reserved</p>
+            <p>We proudly support 1% for the Planet<br/>and pay a certified living wage.<br/>Copyright &copy;2025 Velocity Running | All Rights Reserved</p>
           </div>
           
           <div className="footer-badges">
@@ -63,13 +78,13 @@ export default function Footer() {
       </div>
       {/* Footer links mirror nav-main structure for consistent full-bleed styling */}
       <nav className="nav-main footer-links full-width" aria-label="Footer">
-      <ul className="nav-menu">
-        <li><a href="#">FAQ's</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Run Club</a></li>
-        <li><a href="#">Blog</a></li>
-        <li><a href="#">Sustainability</a></li>
-      </ul>
+        <ul className="nav-menu">
+          {footerLinks.map((link) => (
+            <li key={link.handle || link.title}>
+              <a href={link.url}>{link.title}</a>
+            </li>
+          ))}
+        </ul>
       </nav>
     </footer>
   );

@@ -18,7 +18,7 @@ Based on `homepage-sharp.html` mockup:
 
 1. **Navigation Links** - Must appear as bordered buttons with hover effects
 2. **Navigation Menu** - Must display as horizontal grid layout  
-3. **Currency Display** - Must show `£` (British Pounds) not `$` (USD)
+3. **Currency Display** - Must show `$` (US Dollars) consistently
 4. **Navigation Circle** - Must use Playfair Display font with rotation animation
 5. **Page Container** - Must wrap in `.page-container` for CSS grid system
 6. **Mobile Navigation** - Must match mobile menu functionality from mockup
@@ -58,6 +58,22 @@ Based on `homepage-sharp.html` mockup:
 - Components must accept **Shopify Storefront API data, metafield overrides, and fallback data**
 - Components must be **layout independent** (arrangeable in different layouts)
 - Components must maintain **style consistency** across all usage contexts
+
+### Homepage Metafield Configuration
+- Showcase product metafields live in namespace `homepage`:
+  - `hero_cta_text` / `hero_cta_link`
+  - `hero_subtitle`
+  - `hero_background`
+  - `size_options`, `width_options`, `color_options`
+  - `shipping_note`
+  - `benefit_list`
+- Option metafields accept JSON arrays or comma/newline-delimited text; empty fields fall back to defaults.
+
+### Navigation & Footer Configuration
+- Env variables control the collection handles to surface:
+  - `HEADER_COLLECTION_HANDLES` (comma-separated handles in order of appearance)
+  - `FOOTER_COLLECTION_HANDLES` (optional; comma-separated handles)
+- `loadCollectionsByHandles` normalises results; missing handles are skipped and default link sets fill the gap.
 
 ## Development Standards
 
@@ -134,7 +150,7 @@ app/
 - [ ] Header component renders identically to mockup
 - [ ] Footer component renders identically to mockup
 - [ ] Navigation styling matches mockup (bordered buttons, grid layout)
-- [ ] Currency symbols correct (£ not $)
+- [ ] Currency symbols show USD consistently
 - [ ] Font usage correct (Playfair Display for nav circle)
 
 ### Architecture Success  

@@ -87,7 +87,7 @@ export default function ProductGallery({title, subtitle, description, images}: P
 
         <div className="info-grid" aria-hidden="false">
           <div><b>Drop</b><span>6mm heel-to-toe</span></div>
-          <div><b>Weight</b><span>285g (UK 9)</span></div>
+          <div><b>Weight</b><span>10.1 oz (Men's US 9)</span></div>
           <div><b>Sole</b><span>Vibram MegaGrip</span></div>
           <div><b>Upper</b><span>Ripstop mesh &amp; TPU</span></div>
           <div><b>Protection</b><span>Rock plate &amp; toe guard</span></div>

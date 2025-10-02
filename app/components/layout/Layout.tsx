@@ -2,12 +2,15 @@ import {useEffect} from 'react';
 import AnnouncementBar from './AnnouncementBar';
 import Header from './Header';
 import Footer from './Footer';
+import type {NavigationItem} from '~/types';
 
 interface LayoutProps {
   children: React.ReactNode;
+  navigationCollections?: NavigationItem[];
+  footerCollections?: NavigationItem[];
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({children, navigationCollections, footerCollections}: LayoutProps) {
   // Dynamically set header/announcement heights so content never overlaps
   useEffect(() => {
     const setHeights = () => {
@@ -51,10 +54,11 @@ export default function Layout({ children }: LayoutProps) {
     <>
       <AnnouncementBar />
       <div className="page-container">
-        <Header />
+        <Header collections={navigationCollections}
+        />
         <main>{children}</main>
       </div>
-      <Footer />
+      <Footer links={footerCollections} />
     </>
   );
 }

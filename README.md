@@ -35,7 +35,29 @@ SESSION_SECRET=some-long-random-string
 
 # Verbose diagnostics (request timing, preflight, /__health)
 # DEBUG_INSTRUMENTATION=1
+
+# Header/footer navigation (comma-separated collection handles)
+# HEADER_COLLECTION_HANDLES=trail-running,road-running,ultralight
+# FOOTER_COLLECTION_HANDLES=faq,campaigns,sustainability
 ```
+
+### Shopify Metafields (Featured Product)
+
+The product showcased on the homepage reads metafields from the `homepage` namespace:
+
+| Key              | Purpose                                   | Format                              |
+|------------------|-------------------------------------------|-------------------------------------|
+| `hero_cta_text`  | Hero CTA button label                      | Plain text                          |
+| `hero_cta_link`  | Hero CTA destination                       | URL or path                         |
+| `hero_subtitle`  | Hero subtitle copy                         | Plain text                          |
+| `hero_background`| Hero background image URL                  | URL                                 |
+| `size_options`   | Size pill overrides                        | JSON array or comma/newline list    |
+| `width_options`  | Width pill overrides                       | JSON array or comma/newline list    |
+| `color_options`  | Colour pill overrides                      | JSON array or comma/newline list    |
+| `shipping_note`  | Shipping note beneath CTA                  | Plain text                          |
+| `benefit_list`   | Benefit bullets at card footer             | JSON array or comma/newline list    |
+
+All fields are optional; defaults kick in when a metafield is absent.
 
 ### Advanced (add later only if you truly need them)
 These are NOT required for current functionality and are purposely omitted to avoid confusion:

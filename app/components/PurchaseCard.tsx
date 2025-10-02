@@ -8,24 +8,49 @@ interface Variant {
   availableForSale: boolean;
 }
 
+const DEFAULT_SIZE_OPTIONS = ['7', '7.5', '8', '8.5', '9', '9.5', '10', '10.5', '11', '11.5', '12'];
+const DEFAULT_WIDTH_OPTIONS = ['Regular', 'Wide', 'Extra Wide'];
+const DEFAULT_COLOR_OPTIONS = ['Midnight/Orange', 'Forest/Lime', 'Charcoal/Red'];
+const DEFAULT_BENEFITS = ['Sustainable materials', 'Recycled packaging', 'Carbon-neutral shipping'];
+
 interface PurchaseCardProps {
   price?: {amount: string; currencyCode: string};
   available?: boolean;
   variants?: Variant[];
+  sizeOptions?: string[];
+  widthOptions?: string[];
+  colorOptions?: string[];
+  shippingNote?: string | null;
+  benefits?: string[];
 }
 
-export default function PurchaseCard({price, available = true, variants = []}: PurchaseCardProps) {
+export default function PurchaseCard({
+  price,
+  available = true,
+  variants = [],
+  sizeOptions,
+  widthOptions,
+  colorOptions,
+  shippingNote,
+  benefits,
+}: PurchaseCardProps) {
   const { addToCart, isLoading } = useCart();
   const [quantity, setQuantity] = useState(1);
-  
+
   // Use first variant as default, or create a fallback
   const selectedVariant = variants[0] || {
     id: 'mock-variant-id',
     title: 'Default',
-    price: price || {amount: '185.00', currencyCode: 'GBP'},
+    price: price || {amount: '185.00', currencyCode: 'USD'},
     availableForSale: available
   };
-  
+
+  const sizes = sizeOptions && sizeOptions.length ? sizeOptions : DEFAULT_SIZE_OPTIONS;
+  const widths = widthOptions && widthOptions.length ? widthOptions : DEFAULT_WIDTH_OPTIONS;
+  const colors = colorOptions && colorOptions.length ? colorOptions : DEFAULT_COLOR_OPTIONS;
+  const shippingNoteText = shippingNote || 'Free U.S. shipping over $150 • 30-day trail guarantee • Expert fit support';
+  const benefitsList = benefits && benefits.length ? benefits : DEFAULT_BENEFITS;
+
   const handleAddToCart = () => {
     console.log('Adding to cart:', selectedVariant.id, quantity);
     if (selectedVariant.id === 'mock-variant-id') {
@@ -34,7 +59,7 @@ export default function PurchaseCard({price, available = true, variants = []}: P
     }
     addToCart(selectedVariant.id, quantity);
   };
-  
+
   const handleQuantityChange = (newQuantity: number) => {
     setQuantity(Math.max(1, newQuantity));
   };
@@ -44,7 +69,12 @@ export default function PurchaseCard({price, available = true, variants = []}: P
         <div>
           <div className="old">Regular price</div>
           <div className="price">
-            {price ? `${new Intl.NumberFormat('en-GB', {style: 'currency', currency: price.currencyCode}).format(Number(price.amount))}` : '£185.00'}
+            {price
+              ? new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: price.currencyCode,
+                }).format(Number(price.amount))
+              : '$185.00'}
           </div>
         </div>
         <div style={{textAlign:'right'}}>
@@ -54,33 +84,31 @@ export default function PurchaseCard({price, available = true, variants = []}: P
       </div>
 
       <div className="selectors">
-        <div style={{fontSize:13,color:'var(--muted)',fontWeight:700}}>Size (UK)</div>
+        <div style={{fontSize:13,color:'var(--muted)',fontWeight:700}}>Size (US)</div>
         <div className="select" role="list">
-          <button className="pill" role="listitem">7</button>
-          <button className="pill" role="listitem">7.5</button>
-          <button className="pill" role="listitem">8</button>
-          <button className="pill active" role="listitem">8.5</button>
-          <button className="pill" role="listitem">9</button>
-          <button className="pill" role="listitem">9.5</button>
-          <button className="pill" role="listitem">10</button>
-          <button className="pill" role="listitem">10.5</button>
-          <button className="pill" role="listitem">11</button>
-          <button className="pill" role="listitem">11.5</button>
-          <button className="pill" role="listitem">12</button>
+          {sizes.map((size, index) => (
+            <button className={`pill${index === 0 ? ' active' : ''}`} role="listitem" key={`size-${size}`}>
+              {size}
+            </button>
+          ))}
         </div>
 
         <div style={{fontSize:13,color:'var(--muted)',fontWeight:700}}>Width</div>
         <div className="select">
-          <button className="pill active">Regular</button>
-          <button className="pill">Wide</button>
-          <button className="pill">Extra Wide</button>
+          {widths.map((width, index) => (
+            <button className={`pill${index === 0 ? ' active' : ''}`} key={`width-${width}`}>
+              {width}
+            </button>
+          ))}
         </div>
 
         <div style={{fontSize:13,color:'var(--muted)',fontWeight:700}}>Color</div>
         <div className="select">
-          <button className="pill active">Midnight/Orange</button>
-          <button className="pill">Forest/Lime</button>
-          <button className="pill">Charcoal/Red</button>
+          {colors.map((color, index) => (
+            <button className={`pill${index === 0 ? ' active' : ''}`} key={`color-${color}`}>
+              {color}
+            </button>
+          ))}
         </div>
 
         <div className="qty">
@@ -119,12 +147,12 @@ export default function PurchaseCard({price, available = true, variants = []}: P
         >
           {isLoading ? 'Adding...' : selectedVariant.availableForSale ? 'Add to cart' : 'Sold out'}
         </button>
-        <div className="muted-note">Free UK shipping over £150 • 30-day trail guarantee • Expert fitting available</div>
+        <div className="muted-note">{shippingNoteText}</div>
       </div>
 
       <div className="divider"></div>
 
-      <div style={{fontSize:13,color:'var(--muted)'}}>Sustainable materials • Recycled packaging • Carbon neutral shipping</div>
+      <div style={{fontSize:13,color:'var(--muted)'}}>{benefitsList.join(' • ')}</div>
     </aside>
   );
 }

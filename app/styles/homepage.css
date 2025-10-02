@@ -347,7 +347,7 @@ body {
   margin-left: -50vw;
   margin-right: -50vw;
   margin-top: 0;
-  margin-bottom: 60px;
+  margin-bottom: 27px;
   background: var(--card-gradient);
   border-radius: 0px;
   box-shadow: var(--shadow-strong);
@@ -570,7 +570,7 @@ body {
   padding: 6px 4px;
 }
 
-.product-gallery .kicker {
+.product-gallery .meta .kicker {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -578,7 +578,7 @@ body {
   text-transform: uppercase;
 }
 
-.product-gallery h1 {
+.product-gallery .meta h1 {
   font-family: 'Playfair Display', serif;
   font-size: 42px;
   font-weight: 800;
@@ -588,21 +588,21 @@ body {
   letter-spacing: -0.02em;
 }
 
-.product-gallery .subtitle {
+.product-gallery .meta .subtitle {
   font-size: 18px;
   color: var(--muted);
   font-weight: 600;
   margin-bottom: 8px;
 }
 
-.product-gallery .desc {
+.product-gallery .meta .desc {
   font-size: 15px;
   color: var(--muted);
   opacity: 0.95;
   line-height: 1.5;
 }
 
-.product-gallery .info-grid {
+.product-gallery .meta .info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px 20px;
@@ -613,14 +613,14 @@ body {
   margin-top: 16px;
 }
 
-.product-gallery .info-grid b {
+.product-gallery .meta .info-grid b {
   display: block;
   font-size: 13px;
   color: var(--panel);
   font-weight: 700;
 }
 
-.product-gallery .info-grid span {
+.product-gallery .meta .info-grid span {
   font-size: 14px;
   color: var(--muted);
 }
@@ -773,7 +773,7 @@ body {
 
 /* Home Page Product Grid */
 .home-products-section {
-  padding: 80px 24px;
+  padding: 37px 24px;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -923,7 +923,7 @@ body {
   font-size: 48px;
   font-weight: 700;
   color: var(--panel);
-  margin-bottom: 60px;
+  margin-bottom: 27px;
   font-style: italic;
 }
 

@@ -2,10 +2,10 @@ import {LinksFunction, type LoaderFunctionArgs, useLoaderData} from 'react-route
 import {useMemo} from 'react';
 import homepageStyles from '~/styles/homepage.css?url';
 import productStyles from '~/styles/product.css?url';
-import Layout from '~/components/layout/Layout';
 import ProductGallery from '~/components/ProductGallery';
 import PurchaseCard from '~/components/PurchaseCard';
 import ProductCard from '~/components/ProductCard';
+import {loadHomepageData, type HomepageData} from '~/data/homepage.server';
 
 // Each bundle included via links() keeps the homepage visually consistent
 // while still reusing the product detail components for the showcase.
@@ -15,215 +15,32 @@ export const links: LinksFunction = () => [
   {rel: 'stylesheet', href: productStyles},
 ];
 
-// Minimal product shape for grid + footer cards.
-type ProductLite = {
-  id: string;
-  title: string;
-  handle: string;
-  description?: string | null;
-  imageUrl?: string | null;
-  price?: {amount: string; currencyCode: string} | null;
-};
-
-// Rich product shape for the hero showcase, including variants and gallery.
-type ShowcaseProduct = {
-  id: string;
-  title: string;
-  handle: string;
-  description?: string | null;
-  descriptionHtml?: string | null;
-  imageUrl?: string | null;
-  gallery: Array<{url: string; altText: string | null}>;
-  price?: {amount: string; currencyCode: string} | null;
-  available?: boolean;
-  options: Array<{name: string; values: string[]}>;
-  selectedOptions: Array<{name: string; value: string}>;
-  variants: Array<{
-    id: string;
-    title: string;
-    availableForSale: boolean;
-    price: {amount: string; currencyCode: string};
-  }>;
-};
-
-// Loader pulls homepage data from Shopify collections:
-//   - grid collection for the main product list
-//   - showcase collection (first product) for the hero card
-//   - fallback query ensures we always have products to show
+// Loader pulls homepage data from Shopify via consolidated data helpers.
 export async function loader({context}: LoaderFunctionArgs) {
   const {storefront, env} = context as unknown as {
     storefront: any;
     env?: Record<string, string | undefined>;
   };
+
   const collectionHandle = env?.HOMEPAGE_COLLECTION_HANDLE || 'frontpage';
   const showcaseHandle = env?.HOMEPAGE_SHOWCASE_COLLECTION_HANDLE || 'product-showcase';
-  try {
-    const data = await storefront.query(`#graphql
-      query HomeProducts(
-        $gridHandle: String!
-        $showcaseHandle: String!
-        $gridCount: Int!
-        $galleryCount: Int!
-      ) {
-        grid: collection(handle: $gridHandle) {
-          id
-          title
-          products(first: $gridCount) {
-            nodes {
-              id
-              title
-              handle
-              description
-              images(first: 1) { nodes { url } }
-              variants(first: 1) { nodes { price { amount currencyCode } } }
-            }
-          }
-        }
-        showcase: collection(handle: $showcaseHandle) {
-          id
-          title
-          products(first: 1) {
-            nodes {
-              id
-              title
-              handle
-              description
-              descriptionHtml
-              featuredImage { url altText }
-              images(first: $galleryCount) { nodes { url altText } }
-              options { name values }
-              variants(first: 10) {
-                nodes {
-                  id
-                  title
-                  availableForSale
-                  price { amount currencyCode }
-                  selectedOptions { name value }
-                }
-              }
-            }
-          }
-        }
-        fallback: products(first: $gridCount) {
-          nodes {
-            id
-            title
-            handle
-            description
-            images(first: 1) { nodes { url } }
-            variants(first: 1) { nodes { price { amount currencyCode } } }
-          }
-        }
-      }
-    `, {
-      variables: {
-        gridHandle: collectionHandle,
-        showcaseHandle,
-        gridCount: 6,
-        galleryCount: 4,
-      },
-    });
 
-    const gridProducts = ((data as any)?.grid?.products?.nodes || []) as any[];
-    const fallbackProducts = ((data as any)?.fallback?.nodes || []) as any[];
-
-    const seen = new Set<string>();
-    const merged = [...gridProducts, ...fallbackProducts].filter((p) => {
-      const key = p?.id || p?.handle;
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-
-    const showcaseNode = ((data as any)?.showcase?.products?.nodes || [])[0] as any | undefined;
-    const showcaseProductId = showcaseNode?.id ?? null;
-    const showcaseHandleId = showcaseNode?.handle ?? null;
-
-    // Grid products exclude the item featured in the showcase
-    const items: ProductLite[] = merged
-      .filter((p: any) => {
-        const id = p?.id;
-        const handle = p?.handle;
-        if (showcaseProductId && id === showcaseProductId) return false;
-        if (showcaseHandleId && handle === showcaseHandleId) return false;
-        return true;
-      })
-      .slice(0, 6)
-      .map((p: any) => ({
-        id: p.id,
-        title: p.title,
-        handle: p.handle,
-        description: p.description,
-        imageUrl: p.images?.nodes?.[0]?.url ?? null,
-        price: p.variants?.nodes?.[0]?.price ?? null,
-      }));
-
-    const showcaseProduct: ShowcaseProduct | null = showcaseNode
-      ? {
-          id: showcaseNode.id,
-          title: showcaseNode.title,
-          handle: showcaseNode.handle,
-          description: showcaseNode.description,
-          descriptionHtml: showcaseNode.descriptionHtml,
-          imageUrl: showcaseNode.featuredImage?.url ?? showcaseNode.images?.nodes?.[0]?.url ?? null,
-          gallery: (showcaseNode.images?.nodes || []).map((img: any) => ({
-            url: img?.url,
-            altText: img?.altText ?? null,
-          })),
-          price: showcaseNode.variants?.nodes?.[0]?.price ?? null,
-          available: showcaseNode.variants?.nodes?.[0]?.availableForSale ?? false,
-          options: (showcaseNode.options || []).map((opt: any) => ({
-            name: opt?.name,
-            values: Array.isArray(opt?.values) ? opt.values : [],
-          })),
-          selectedOptions: (showcaseNode.variants?.nodes?.[0]?.selectedOptions || []).map((opt: any) => ({
-            name: opt?.name,
-            value: opt?.value,
-          })),
-          variants: ((showcaseNode.variants?.nodes || [])
-            .map((variant: any) => {
-              const price = variant?.price;
-              if (!variant?.id || !price) return null;
-              return {
-                id: variant.id,
-                title: variant.title,
-                availableForSale: Boolean(variant?.availableForSale),
-                price,
-              };
-            })
-            .filter(Boolean)) as ShowcaseProduct['variants'],
-        }
-      : null;
-
-    return {
-      products: items,
-      collectionHandle,
-      showcaseHandle,
-      showcaseCollectionTitle: (data as any)?.showcase?.title ?? null,
-      productShowcase: showcaseProduct,
-    };
-  } catch {
-    return {
-      products: [] as ProductLite[],
-      collectionHandle,
-      showcaseHandle,
-      showcaseCollectionTitle: null,
-      productShowcase: null,
-    };
-  }
+  return loadHomepageData(storefront, {
+    gridHandle: collectionHandle,
+    showcaseHandle,
+  });
 }
 
 // Home route renders the layout, hero CTA, showcase, grid, and footer collection.
 export default function Index() {
-  const data = useLoaderData<typeof loader>();
+  const data = useLoaderData<HomepageData>();
   const products = data?.products ?? [];
   const collectionHandle = data?.collectionHandle;
   const showcase = data?.productShowcase ?? null;
   const showcaseHandle = data?.showcaseHandle;
   const showcaseCollectionTitle = data?.showcaseCollectionTitle;
 
-  // Metafield-driven subtitle fallback if Shopify has no options.
-  const showcaseSubtitle = useMemo(() => {
+  const fallbackSubtitle = useMemo(() => {
     if (!showcase?.selectedOptions?.length) {
       return 'Engineered for those who seek paths less traveled, delivering uncompromising performance.';
     }
@@ -233,25 +50,46 @@ export default function Index() {
       .join(' • ');
   }, [showcase]);
 
-  // Keep the showcase product out of the grid so it doesn't repeat.
-  const gridProducts = useMemo(
-    () => (showcase ? products.filter((p) => p?.id !== showcase.id && p?.handle !== showcase.handle) : products),
-    [products, showcase],
-  );
+  const heroSubtitle = showcase?.heroSubtitle ?? fallbackSubtitle;
+
+  const gridProducts = products;
 
   // Footer tiles reuse the first three grid products.
   const footerCards = useMemo(() => gridProducts.slice(0, 3), [gridProducts]);
 
+  const heroBackgroundStyle = showcase?.heroBackgroundUrl
+    ? {
+        backgroundImage: `url(${showcase.heroBackgroundUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }
+    : undefined;
+
+  const heroCtaLabel = showcase?.heroCta?.label?.trim() || 'Explore Collection';
+  const defaultHeroHref = showcase ? `/products/${showcase.handle}` : '#product-showcase';
+  const heroCtaHref = showcase?.heroCta?.href?.trim() || defaultHeroHref;
+  const heroCtaIsExternal = /^https?:/i.test(heroCtaHref) && !heroCtaHref.startsWith('/');
+  const heroCtaTarget = heroCtaIsExternal ? '_blank' : undefined;
+  const heroCtaRel = heroCtaIsExternal ? 'noopener noreferrer' : undefined;
+
   return (
-    <Layout>
+    <>
       {/* Hero Section */}
       <section className="hero-section full-width">
         <div className="hero-card">
-          <div className="hero-content">
+          <div className="hero-content" style={heroBackgroundStyle}>
             <div className="hero-badge">Handcrafted Performance</div>
             <h1 className="hero-title">Run Beyond Limits</h1>
-            {/* <p className="hero-subtitle">Premium running shoes crafted for the passionate runner</p> */}
-            <a href="#product-showcase" className="hero-cta">Explore Collection</a>
+            <p className="hero-subtitle">{heroSubtitle}</p>
+            <a
+              href={heroCtaHref}
+              className="hero-cta"
+              target={heroCtaTarget}
+              rel={heroCtaRel}
+            >
+              {heroCtaLabel}
+            </a>
           </div>
         </div>
       </section>
@@ -303,7 +141,7 @@ export default function Index() {
             <div className="product-gallery">
               <ProductGallery
                 title={showcaseCollectionTitle || 'Featured Product'}
-                subtitle={showcaseSubtitle}
+                subtitle={heroSubtitle}
                 description={showcase.description || undefined}
                 images={showcase.gallery}
               />
@@ -313,6 +151,11 @@ export default function Index() {
                 price={showcase.price || undefined}
                 available={showcase.available}
                 variants={showcase.variants}
+                sizeOptions={showcase.sizeOptions}
+                widthOptions={showcase.widthOptions}
+                colorOptions={showcase.colorOptions}
+                shippingNote={showcase.shippingNote}
+                benefits={showcase.benefits}
               />
             </div>
           </div>
@@ -343,6 +186,6 @@ export default function Index() {
           </div>
         </div>
       </section>
-    </Layout>
+    </>
   );
 }

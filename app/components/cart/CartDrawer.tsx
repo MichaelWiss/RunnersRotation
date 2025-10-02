@@ -8,6 +8,12 @@ interface CartDrawerProps {
 export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { cart, removeFromCart, updateCartLine } = useCart();
 
+  const formatMoney = (amount: string | number, currency: string) =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency,
+    }).format(typeof amount === 'string' ? Number(amount) : amount);
+
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -181,8 +187,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <div style={{ color: 'var(--panel)', fontWeight: 'bold' }}>
-                          {line.cost.totalAmount.currencyCode === 'GBP' ? '£' : '$'}
-                          {line.cost.totalAmount.amount}
+                          {formatMoney(line.cost.totalAmount.amount, line.cost.totalAmount.currencyCode)}
                         </div>
                         <button 
                           onClick={() => removeFromCart(line.id)}
@@ -223,8 +228,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               }}>
                 <span>Total:</span>
                 <span>
-                  {cart.cost.totalAmount.currencyCode === 'GBP' ? '£' : '$'}
-                  {cart.cost.totalAmount.amount}
+                  {formatMoney(cart.cost.totalAmount.amount, cart.cost.totalAmount.currencyCode)}
                 </span>
               </div>
             </div>

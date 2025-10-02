@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
-  "postbuild": "node -e \"const fs=require('fs');const path=require('path');const src='build/client/assets';if(!fs.existsSync(src)){console.warn('[postbuild] No build/client/assets to copy');process.exit(0);}const copy=(from,to)=>{fs.mkdirSync(path.dirname(to),{recursive:true});fs.cpSync(from,to,{recursive:true,force:true});};try{fs.rmSync('public/assets',{recursive:true,force:true})}catch{};fs.mkdirSync('public',{recursive:true});copy(src,'public/assets');console.log('[postbuild] Copied assets to public/assets');const vercelOutput='.vercel/output';try{fs.rmSync(vercelOutput,{recursive:true,force:true})}catch{};fs.mkdirSync(path.join(vercelOutput,'static','assets'),{recursive:true});copy(src,path.join(vercelOutput,'static','assets'));fs.writeFileSync(path.join(vercelOutput,'config.json'),JSON.stringify({version:3},null,2));console.log('[postbuild] Created Vercel Build Output');\"",
+    "postbuild": "node ./scripts/postbuild.cjs",
     "dev": "cross-env NODE_ENV=development nodemon --require dotenv/config ./server.mjs --watch ./server.mjs",
     "start": "cross-env NODE_ENV=production node ./server.mjs",
     "typecheck": "tsc --noEmit"

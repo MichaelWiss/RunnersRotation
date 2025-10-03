@@ -40,17 +40,7 @@ export default function Index() {
   const showcaseHandle = data?.showcaseHandle;
   const showcaseCollectionTitle = data?.showcaseCollectionTitle;
 
-  const fallbackSubtitle = useMemo(() => {
-    if (!showcase?.selectedOptions?.length) {
-      return 'Engineered for those who seek paths less traveled, delivering uncompromising performance.';
-    }
-    return showcase.selectedOptions
-      .filter((opt) => opt?.name && opt?.value)
-      .map((opt) => `${opt.name}: ${opt.value}`)
-      .join(' • ');
-  }, [showcase]);
-
-  const heroSubtitle = showcase?.heroSubtitle ?? fallbackSubtitle;
+  // Hero subtitle disabled (no computation, no admin-driven subtitle)
 
   const gridProducts = products;
 
@@ -81,7 +71,6 @@ export default function Index() {
           <div className="hero-content" style={heroBackgroundStyle}>
             <div className="hero-badge">Handcrafted Performance</div>
             <h1 className="hero-title">Run Beyond Limits</h1>
-            <p className="hero-subtitle">{heroSubtitle}</p>
             <a
               href={heroCtaHref}
               className="hero-cta"
@@ -141,7 +130,6 @@ export default function Index() {
             <div className="product-gallery">
               <ProductGallery
                 title={showcaseCollectionTitle || 'Featured Product'}
-                subtitle={heroSubtitle}
                 description={showcase.description || undefined}
                 images={showcase.gallery}
               />

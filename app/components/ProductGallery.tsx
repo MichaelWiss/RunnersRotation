@@ -80,7 +80,9 @@ export default function ProductGallery({title, subtitle, description, images}: P
         <div>
           <div className="kicker">{title ?? 'Trail Runner Pro'}</div>
           <h1 id="product-title">Bold, grippy & ultra-responsive</h1>
-          <div className="subtitle">{subtitle ?? 'Engineered for those who seek paths less traveled, this shoe delivers uncompromising performance on any terrain.'}</div>
+          {subtitle ? (
+            <div className="subtitle">{subtitle}</div>
+          ) : null}
         </div>
 
         <p className="desc">{description ?? 'A love letter to trail runners and mountain enthusiasts. This design combines three revolutionary technologies giving it the perfect balance of grip, protection, and comfort – the ultimate trail companion developed by our passionate design team.'}</p>

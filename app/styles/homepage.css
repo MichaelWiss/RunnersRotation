@@ -10,6 +10,24 @@ html, body {
 
 /* tokens provided via root links */
 
+/* Self-hosted hero and circular text font */
+@font-face {
+  font-family: 'SafiniaBold';
+  src: url('/fonts/SafiniaBold/font.woff2') format('woff2'),
+       url('/fonts/SafiniaBold/font.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SafiniaBold';
+  src: url('/fonts/SafiniaBold/font.woff2') format('woff2'),
+       url('/fonts/SafiniaBold/font.woff') format('woff');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   background: var(--warm-gradient);
@@ -149,6 +167,18 @@ body {
   }
 }
 
+/* Slide/fade in from the left for hero title */
+@keyframes heroTitleLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .nav-circle:hover {
   transform: rotate(calc(var(--scroll-percentage, 0) * 360deg)) scale(1.01);
   box-shadow: 0 12px 36px rgba(233, 76, 38, 0.15);
@@ -165,7 +195,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Playfair Display', serif;
+  font-family: 'SafiniaBold', 'Playfair Display', serif;
   font-size: 16px;
   font-weight: 700; /* Bold text */
   color: #2C2C2C;
@@ -370,8 +400,13 @@ body {
   width: 100%;
   position: relative;
   z-index: 1;
-  background: url('/images/runners-feet.jpg') center/cover no-repeat;
-  background-color: #1c1c1c;
+  /* First layer is a soft brand gradient placeholder, second layer is the image */
+  background-image: linear-gradient(135deg, rgba(233, 76, 38, 0.08), rgba(11, 37, 69, 0.08)), url('/images/runners-feet.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  /* Light brand surface to avoid dark flash before the image loads */
+  background-color: var(--card);
   border: 1px solid rgba(0, 0, 0, 0.12);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   overflow: hidden;
@@ -413,15 +448,20 @@ body {
   letter-spacing: 1px;
   margin-bottom: 24px;
   box-shadow: 0 6px 20px rgba(233, 76, 38, 0.2);
+  /* Scroll-driven fade/translate using global --scroll-percentage */
+  will-change: opacity, transform;
+  opacity: clamp(0, calc(1 - (var(--scroll-percentage, 0) * 2.5)), 1);
+  transform: translateY(calc(-40px * var(--scroll-percentage, 0)));
+  transition: opacity 120ms linear, transform 120ms linear;
 }
 
 .hero-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 72px;
-  font-weight: 800;
+  font-family: 'SafiniaBold', 'Playfair Display', serif;
+  font-size: 84px;
+  font-weight: 900;
   margin-bottom: 16px;
   font-style: italic;
-  line-height: 1.05;
+  line-height: 1.04;
   letter-spacing: -0.02em;
   background: linear-gradient(120deg, #f56c6c, #ff9a44, #f8e71c, #ec008c, #4b2bbf, #f56c6c);
   background-size: 400% 400%;
@@ -430,8 +470,8 @@ body {
   color: transparent;
   -webkit-text-fill-color: transparent;
   opacity: 0;
-  transform: translateY(12px);
-  animation: heroTitleGradient 14s ease infinite, heroTitleFade 900ms ease forwards;
+  transform: translateX(-18px);
+  animation: heroTitleGradient 14s ease infinite, heroTitleLeft 900ms ease forwards;
 }
 
 .hero-subtitle {
@@ -1074,9 +1114,9 @@ body {
 }
 
 .velocity-logo {
-  font-family: 'Playfair Display', serif;
+  font-family: 'SafiniaBold', 'Playfair Display', serif;
   font-size: 40px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--panel);
   text-decoration: none;
   font-style: italic;

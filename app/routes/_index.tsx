@@ -69,6 +69,15 @@ export default function Index() {
       <section className="hero-section full-width">
         <div className="hero-card">
           <div className="hero-content" style={heroBackgroundStyle}>
+            {/* Preload hero image aggressively, even when set as CSS background */}
+            <img
+              src={showcase?.heroBackgroundUrl || '/images/runners-feet.jpg'}
+              alt=""
+              aria-hidden="true"
+              decoding="async"
+              fetchPriority="high"
+              style={{position: 'absolute', width: 0, height: 0, opacity: 0, pointerEvents: 'none'}}
+            />
             <div className="hero-badge">Handcrafted Performance</div>
             <h1 className="hero-title">Run Beyond Limits</h1>
             <a

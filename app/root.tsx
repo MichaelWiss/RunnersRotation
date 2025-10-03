@@ -62,6 +62,8 @@ export const links: LinksFunction = () => [
   // Preload homepage bundle for faster first paint (optional; harmless if duplicated by browser)
   {rel: 'preload', as: 'style', href: homepageStylesheet},
   {rel: 'preload', as: 'script', href: hydrationGuardScriptUrl},
+  // Warm up default hero fallback image (works even if dynamic hero is used later)
+  {rel: 'preload', as: 'image', href: '/images/runners-feet.jpg'},
   {rel: 'stylesheet', href: tokensStylesheet},
   {
     rel: 'stylesheet',

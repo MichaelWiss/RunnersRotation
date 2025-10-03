@@ -18,13 +18,25 @@ body{
 .page-container{background: var(--surface); transition: background 120ms linear}
 
 /* --- Page layout --- */
-.container{
+.product-container {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  background: var(--surface);
+  padding: 0 0 72px;
+}
+
+.product-container__inner{
   max-width:1200px;
   margin:0 auto;
   display:grid;
   grid-template-columns: 1fr 380px;
   gap:40px;
   align-items:start;
+  padding: 0 24px;
 }
 
 /* --- Left column (hero + details) --- */

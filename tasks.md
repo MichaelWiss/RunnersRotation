@@ -156,6 +156,9 @@ Product System:
 - [ ] Create real social media links and profiles
 - [ ] Add authentic customer reviews and testimonials
 - [ ] Add "New Arrivals" collection section on homepage
+- [ ] Create placeholder landing pages for pending links (`/blog`, `/sustainability`, etc.)
+- [ ] Implement `/run-club` copy or repoint to placeholder until content ready
+- [ ] Add `/faq`, `/careers` content or hook to CMS
 
 ### Functionality
 - [ ] Implement working cart functionality

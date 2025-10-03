@@ -2,7 +2,6 @@ import {type LinksFunction, type LoaderFunctionArgs, useLoaderData, useNavigate}
 import {useEffect} from 'react';
 import productStyles from '~/styles/product.css?url';
 import homepageStyles from '~/styles/homepage.css?url';
-import Layout from '~/components/layout/Layout';
 import ProductGallery from '~/components/ProductGallery';
 import PurchaseCard from '~/components/PurchaseCard';
 
@@ -181,8 +180,8 @@ export default function Product() {
   }, [navigate]);
 
   return (
-    <Layout>
-      <div className="container">
+    <div className="product-container">
+      <div className="product-container__inner">
         <main>
           <ProductGallery
             title={product.title}
@@ -198,6 +197,6 @@ export default function Product() {
           variants={product.variants}
         />
       </div>
-    </Layout>
+    </div>
   );
 }

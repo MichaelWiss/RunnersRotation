@@ -1,16 +1,30 @@
-import {useEffect} from 'react';
+import {createContext, useContext, useEffect, useState} from 'react';
+import {useRouteLoaderData} from 'react-router';
 import AnnouncementBar from './AnnouncementBar';
 import Header from './Header';
 import Footer from './Footer';
 import type {NavigationItem} from '~/types';
+import type {loader as rootLoader} from '~/root';
 
 interface LayoutProps {
   children: React.ReactNode;
-  navigationCollections?: NavigationItem[];
-  footerCollections?: NavigationItem[];
 }
 
-export default function Layout({children, navigationCollections, footerCollections}: LayoutProps) {
+type LayoutContextValue = {
+  setDisableMainOffset: (value: boolean) => void;
+};
+
+const LayoutContext = createContext<LayoutContextValue | null>(null);
+
+export function useLayoutContext() {
+  return useContext(LayoutContext);
+}
+
+export default function Layout({children}: LayoutProps) {
+  const rootData = useRouteLoaderData<typeof rootLoader>('root');
+  const navigationLinks = rootData?.navigationLinks as NavigationItem[] | undefined;
+  const footerLinks = rootData?.footerLinks as NavigationItem[] | undefined;
+  const [disableMainOffset, setDisableMainOffset] = useState(false);
   // Dynamically set header/announcement heights so content never overlaps
   useEffect(() => {
     const setHeights = () => {
@@ -51,14 +65,13 @@ export default function Layout({children, navigationCollections, footerCollectio
   }, []);
 
   return (
-    <>
+    <LayoutContext.Provider value={{setDisableMainOffset}}>
       <AnnouncementBar />
       <div className="page-container">
-        <Header collections={navigationCollections}
-        />
-        <main>{children}</main>
+        <Header collections={navigationLinks} />
+        <main className={disableMainOffset ? 'main-no-offset' : undefined}>{children}</main>
       </div>
-      <Footer links={footerCollections} />
-    </>
+      <Footer links={footerLinks} />
+    </LayoutContext.Provider>
   );
 }

@@ -24,6 +24,10 @@ body {
   padding-top: calc(var(--header-h) + var(--announcement-h));
 }
 
+.page-container > main.main-no-offset {
+  padding-top: 0;
+}
+
 /* Header with Glass Effect */
 .header {
   position: fixed;

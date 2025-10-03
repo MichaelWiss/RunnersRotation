@@ -17,7 +17,31 @@ import hydrationGuardScriptUrl from './scripts/hydration-guard.global.js?url';
 import { CartProvider } from '~/context/CartContext';
 import SiteLayout from '~/components/layout/Layout';
 import {loadCollectionsByHandles} from '~/data/collections.server';
+import {NAV_LINKS, FOOTER_LINKS, type SiteLink} from '~/config/links';
 import type {NavigationItem} from '~/types';
+
+function resolveSiteLinks(siteLinks: SiteLink[], collectionMap: Map<string, NavigationItem>): NavigationItem[] {
+  return siteLinks
+    .map((link) => {
+      if (link.type === 'collection' && link.handle) {
+        const collection = collectionMap.get(link.handle);
+        if (collection) return collection;
+        return {
+          title: link.fallbackTitle || link.title,
+          handle: link.handle,
+          url: `/collections/${link.handle}`,
+        } satisfies NavigationItem;
+      }
+      const slug = link.handle || link.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      if (link.type === 'static') {
+        const url = link.url || `/${slug}`;
+        return {title: link.title, handle: slug, url};
+      }
+      const url = link.url || `/coming-soon/${slug}`;
+      return {title: link.title, handle: slug, url};
+    })
+    .filter((item): item is NavigationItem => Boolean(item?.url));
+}
 
 /**
  * The main and reset stylesheets are added in the Layout component
@@ -60,8 +84,14 @@ export async function loader({context}: LoaderFunctionArgs) {
       .map((handle) => handle.trim())
       .filter(Boolean);
 
-  const navHandles = parseHandles(env.HEADER_COLLECTION_HANDLES);
-  const footerHandles = parseHandles(env.FOOTER_COLLECTION_HANDLES);
+  const envNavHandles = parseHandles(env.HEADER_COLLECTION_HANDLES);
+  const envFooterHandles = parseHandles(env.FOOTER_COLLECTION_HANDLES);
+
+  const configNavHandles = NAV_LINKS.filter((link) => link.type === 'collection' && link.handle).map((link) => link.handle!) ;
+  const configFooterHandles = FOOTER_LINKS.filter((link) => link.type === 'collection' && link.handle).map((link) => link.handle!);
+
+  const navHandles = envNavHandles.length ? envNavHandles : configNavHandles;
+  const footerHandles = envFooterHandles.length ? envFooterHandles : configFooterHandles;
 
   const layoutPromise = context.storefront
     .query<{shop: Shop}>(LAYOUT_QUERY, {
@@ -74,11 +104,11 @@ export async function loader({context}: LoaderFunctionArgs) {
 
   const navigationPromise = navHandles.length
     ? loadCollectionsByHandles(context.storefront, navHandles)
-    : Promise.resolve([] as NavigationItem[]);
+    : Promise.resolve(new Map<string, NavigationItem>());
 
   const footerPromise = footerHandles.length
     ? loadCollectionsByHandles(context.storefront, footerHandles)
-    : Promise.resolve([] as NavigationItem[]);
+    : Promise.resolve(new Map<string, NavigationItem>());
 
   const cartPromise = cartId
     ? context.storefront
@@ -117,8 +147,8 @@ export async function loader({context}: LoaderFunctionArgs) {
       isLoggedIn: Boolean(customerAccessToken),
       cart,
       layout,
-      navigationCollections,
-      footerCollections,
+      navigationLinks: resolveSiteLinks(NAV_LINKS, navigationCollections),
+      footerLinks: resolveSiteLinks(FOOTER_LINKS, footerCollections),
     };
   } catch (error) {
     const err = error instanceof Error ? error : new Error(typeof error === 'string' ? error : 'Unknown error');
@@ -165,10 +195,7 @@ export default function App() {
 
   return (
     <CartProvider initialCart={data?.cart || null}>
-      <SiteLayout
-        navigationCollections={data?.navigationCollections}
-        footerCollections={data?.footerCollections}
-      >
+      <SiteLayout>
         <Outlet />
       </SiteLayout>
     </CartProvider>

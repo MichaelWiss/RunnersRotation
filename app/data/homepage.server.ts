@@ -417,24 +417,25 @@ export async function loadHomepageData(
     const rawFallback = data?.fallback?.nodes ?? [];
 
     const seen = new Set<string>();
-    const dedupedProducts: ProductLite[] = [...rawGrid, ...rawFallback]
+    const allUnique: ProductLite[] = [...rawGrid, ...rawFallback]
       .map((node) => normalizeProductLite(node))
       .filter((product): product is ProductLite => {
         if (!product) return false;
         if (seen.has(product.id)) return false;
         seen.add(product.id);
         return true;
-      })
-      .slice(0, gridCount);
+      });
 
     const showcaseNode = data?.showcase?.products?.nodes?.[0] ?? null;
     const productShowcase = normalizeShowcaseProduct(showcaseNode);
 
-    const products = productShowcase
-      ? dedupedProducts.filter(
+    const filtered = productShowcase
+      ? allUnique.filter(
           (product) => product.id !== productShowcase.id && product.handle !== productShowcase.handle,
         )
-      : dedupedProducts;
+      : allUnique;
+
+    const products = filtered.slice(0, gridCount);
 
     const featuredRaw = data?.featured?.products?.nodes ?? [];
     const featuredProducts = featuredRaw

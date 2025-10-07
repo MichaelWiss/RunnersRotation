@@ -931,10 +931,22 @@ body {
   border-radius: 12px;
 }
 
-/* Force exactly 3 columns on wide screens */
-@media (min-width: 1024px) {
+/* Responsive grid: 6 products on very wide screens, 3 on medium, 2 on small, 1 on mobile */
+@media (min-width: 1400px) {
+  .home-products-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1399px) {
   .home-products-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .home-products-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

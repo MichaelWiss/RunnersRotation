@@ -931,14 +931,8 @@ body {
   border-radius: 12px;
 }
 
-/* Responsive grid: 6 products on very wide screens, 3 on medium, 2 on small, 1 on mobile */
-@media (min-width: 1400px) {
-  .home-products-grid {
-    grid-template-columns: repeat(6, 1fr);
-  }
-}
-
-@media (min-width: 1024px) and (max-width: 1399px) {
+/* Responsive grid: 3 columns on ≥1024px, 2 columns on 768–1023px, 1 column below 768px */
+@media (min-width: 1024px) {
   .home-products-grid {
     grid-template-columns: repeat(3, 1fr);
   }

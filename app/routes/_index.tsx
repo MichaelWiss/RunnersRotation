@@ -1,5 +1,4 @@
 import {LinksFunction, type LoaderFunctionArgs, useLoaderData} from 'react-router';
-import {useMemo} from 'react';
 import homepageStyles from '~/styles/homepage.css?url';
 import productStyles from '~/styles/product.css?url';
 import ProductGallery from '~/components/ProductGallery';
@@ -24,10 +23,12 @@ export async function loader({context}: LoaderFunctionArgs) {
 
   const collectionHandle = env?.HOMEPAGE_COLLECTION_HANDLE || 'frontpage';
   const showcaseHandle = env?.HOMEPAGE_SHOWCASE_COLLECTION_HANDLE || 'product-showcase';
+  const featuredHandle = env?.HOMEPAGE_FEATURED_COLLECTION_HANDLE || 'featured-section';
 
   return loadHomepageData(storefront, {
     gridHandle: collectionHandle,
     showcaseHandle,
+    featuredHandle,
   });
 }
 
@@ -39,13 +40,13 @@ export default function Index() {
   const showcase = data?.productShowcase ?? null;
   const showcaseHandle = data?.showcaseHandle;
   const showcaseCollectionTitle = data?.showcaseCollectionTitle;
+  const featuredProducts = data?.featuredProducts ?? [];
+  const featuredCollectionTitle = data?.featuredCollectionTitle;
+  const featuredHandle = data?.featuredHandle;
 
   // Hero subtitle disabled (no computation, no admin-driven subtitle)
 
   const gridProducts = products;
-
-  // Footer tiles reuse the first three grid products.
-  const footerCards = useMemo(() => gridProducts.slice(0, 3), [gridProducts]);
 
   const heroBackgroundStyle = showcase?.heroBackgroundUrl
     ? {
@@ -163,23 +164,29 @@ export default function Index() {
         )}
       </section>
 
-      {/* Collection Section */}
+      {/* Featured Section (separate collection) */}
       <section className="featured-section" id="featured">
         <div className="collection-container">
-          <h2 className="collection-title">The Complete Runner's Arsenal</h2>
+          <h2 className="collection-title">{featuredCollectionTitle || "The Complete Runner's Arsenal"}</h2>
           <div className="products-grid">
-            {[0, 1, 2].map((idx) => (
-              <ProductCard
-                key={`footer-${idx}`}
-                variant="footer"
-                title={footerCards[idx]?.title}
-                description={footerCards[idx]?.description?.slice(0, 120) || undefined}
-                imageUrl={footerCards[idx]?.imageUrl || undefined}
-                price={footerCards[idx]?.price || null}
-                handle={footerCards[idx]?.handle}
-                fallbackLabel={['ROAD RACER', 'ULTRA LIGHT', 'TRAIL MASTER'][idx]}
-              />
-            ))}
+            {featuredProducts.length === 0 ? (
+              <div className="home-products-empty">
+                Add products to the {featuredHandle ? `"${featuredHandle}"` : 'featured-section'} collection in Shopify to populate this section.
+              </div>
+            ) : (
+              featuredProducts.slice(0, 3).map((p, idx) => (
+                <ProductCard
+                  key={`featured-${p?.id || idx}`}
+                  variant="footer"
+                  title={p?.title}
+                  description={p?.description?.slice(0, 120) || undefined}
+                  imageUrl={p?.imageUrl || undefined}
+                  price={p?.price || null}
+                  handle={p?.handle}
+                  fallbackLabel={['ROAD RACER', 'ULTRA LIGHT', 'TRAIL MASTER'][idx]}
+                />
+              ))
+            )}
           </div>
         </div>
       </section>

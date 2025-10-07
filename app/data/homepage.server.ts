@@ -98,7 +98,9 @@ const HOMEPAGE_QUERY = `#graphql
   query HomepageData(
     $gridHandle: String!
     $showcaseHandle: String!
+    $featuredHandle: String!
     $gridCount: Int!
+    $featuredCount: Int!
     $galleryCount: Int!
     $metafieldIdentifiers: [HasMetafieldsIdentifier!]!
   ) {
@@ -117,6 +119,15 @@ const HOMEPAGE_QUERY = `#graphql
       products(first: 1) {
         nodes {
           ...ShowcaseProductFields
+        }
+      }
+    }
+    featured: collection(handle: $featuredHandle) {
+      id
+      title
+      products(first: $featuredCount) {
+        nodes {
+          ...ProductCardFields
         }
       }
     }
@@ -174,6 +185,10 @@ type HomepageQuery = {
     title?: string | null;
     products?: {nodes?: Array<RawShowcaseProduct | null> | null} | null;
   } | null;
+  featured?: {
+    title?: string | null;
+    products?: {nodes?: Array<RawProductCard | null> | null} | null;
+  } | null;
   fallback?: {nodes?: Array<RawProductCard | null> | null} | null;
 };
 
@@ -220,6 +235,9 @@ export interface HomepageData {
   showcaseCollectionTitle: string | null;
   collectionHandle: string;
   showcaseHandle: string;
+  featuredProducts: ProductLite[];
+  featuredCollectionTitle: string | null;
+  featuredHandle: string;
 }
 
 const cleanString = (value: string | null | undefined) => {
@@ -367,12 +385,16 @@ export async function loadHomepageData(
   {
     gridHandle,
     showcaseHandle,
+    featuredHandle,
     gridCount = 6,
+    featuredCount = 3,
     galleryCount = 4,
   }: {
     gridHandle: string;
     showcaseHandle: string;
+    featuredHandle: string;
     gridCount?: number;
+    featuredCount?: number;
     galleryCount?: number;
   },
 ): Promise<HomepageData> {
@@ -383,7 +405,9 @@ export async function loadHomepageData(
       variables: {
         gridHandle,
         showcaseHandle,
+        featuredHandle,
         gridCount,
+        featuredCount,
         galleryCount,
         metafieldIdentifiers: SHOWCASE_METAFIELD_IDENTIFIERS.map(({namespace, key}) => ({namespace, key})),
       },
@@ -412,12 +436,21 @@ export async function loadHomepageData(
         )
       : dedupedProducts;
 
+    const featuredRaw = data?.featured?.products?.nodes ?? [];
+    const featuredProducts = featuredRaw
+      .map((node) => normalizeProductLite(node))
+      .filter((p): p is ProductLite => Boolean(p))
+      .slice(0, featuredCount);
+
     return {
       products,
       productShowcase,
       showcaseCollectionTitle: data?.showcase?.title ?? null,
       collectionHandle: gridHandle,
       showcaseHandle,
+      featuredProducts,
+      featuredCollectionTitle: data?.featured?.title ?? null,
+      featuredHandle,
     };
   } catch (error) {
     console.error('[homepage] failed to load data', error);
@@ -427,6 +460,9 @@ export async function loadHomepageData(
       showcaseCollectionTitle: null,
       collectionHandle: gridHandle,
       showcaseHandle,
+      featuredProducts: [],
+      featuredCollectionTitle: null,
+      featuredHandle,
     };
   }
 }

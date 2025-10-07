@@ -6,9 +6,9 @@ interface MainNavigationProps {
 }
 
 const defaultNavItems: NavigationItem[] = [
-  { title: 'Trail Running', handle: 'trail-running', url: '/trail-running' },
-  { title: 'Road Running', handle: 'road-running', url: '/road-running' },
-  { title: 'Ultralight', handle: 'ultralight', url: '/ultralight' },
+  { title: 'Trail Running', handle: 'trail-running', url: '/collections/trail-running' },
+  { title: 'Road Running', handle: 'road-running', url: '/collections/road-running' },
+  { title: 'Ultralight', handle: 'ultralight', url: '/collections/ultralight' },
   { title: 'Racing', handle: 'racing', url: '/racing' },
   { title: 'Gear', handle: 'gear', url: '/gear' },
 ];

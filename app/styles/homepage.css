@@ -1099,6 +1099,24 @@ body {
   color: var(--panel);
 }
 
+/* Uniform centering and sizing for product images in cards */
+.home-products-grid .card-image,
+.products-grid .card-image {
+  display: grid;        /* center via CSS grid */
+  place-items: center;  /* horizontal and vertical centering */
+}
+
+.home-products-grid .card-image img,
+.products-grid .card-image img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: 100%;         /* fill the 220px container height */
+  object-fit: contain;  /* preserve aspect ratio, no cropping */
+  object-position: center;
+  display: block;       /* remove inline baseline gaps */
+}
+
 /* Animations */
 @keyframes subtle-gradient {
   0% {

@@ -210,6 +210,67 @@ body {
   margin-left: auto; /* Push to the right */
 }
 
+/* Expanding search box in header (overlays and expands to the left) */
+.nav-search-wrap {
+  position: relative;
+  height: 40px;
+  display: inline-block;
+}
+
+.nav-search-button.nav-link {
+  line-height: 36px;
+  height: 40px;
+  padding: 0 14px;
+  position: relative;
+  z-index: 2;
+  background: var(--surface);
+  border-color: var(--panel);
+  color: var(--panel);
+}
+
+/* Disable per-button transform; group handles the effect */
+.nav-search-button.nav-link:hover,
+.nav-search-button.nav-link:focus,
+.nav-search-button.nav-link:active { transform: none; }
+
+.nav-search-input {
+  position: absolute;
+  right: 0; /* expand to the left */
+  left: auto;
+  top: 0;
+  height: 40px;
+  width: 0;
+  opacity: 0;
+  border: 2px solid var(--panel);
+  background: var(--card);
+  color: var(--panel);
+  outline: none;
+  padding: 0;
+  transition: width 240ms ease, opacity 160ms ease, padding 160ms ease, border-color 160ms ease;
+  border-radius: 0;
+  z-index: 1;
+}
+
+.nav-search-wrap:focus-within .nav-search-input {
+  width: min(360px, 70vw);
+  opacity: 1;
+  padding: 6px 10px;
+  z-index: 3;
+  border-color: var(--accent);
+}
+
+/* Group-level effect for uniform movement and color */
+.nav-search-wrap { transition: transform 0.3s ease; }
+.nav-search-wrap:focus-within { transform: translateY(-2px); }
+.nav-search-wrap:focus-within .nav-search-button { border-color: transparent; color: var(--accent); pointer-events: none; }
+
+.nav-search-input::placeholder { color: var(--muted); }
+
+@media (max-width: 768px) {
+  /* Hide desktop search control on small screens; mobile menu provides links */
+  .nav-search-wrap { display: none; }
+}
+
 .nav-link {
   color: var(--panel);
   text-decoration: none;
@@ -382,10 +443,14 @@ body {
   margin-right: -50vw;
   margin-top: 0;
   margin-bottom: 27px;
-  background: var(--card-gradient);
+  /* Background image now applied to full-width hero-card */
+  background-image: linear-gradient(135deg, rgba(233, 76, 38, 0.08), rgba(11, 37, 69, 0.08)), url('/images/runners-feet.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-color: var(--card);
   border-radius: 0px;
   box-shadow: var(--shadow-strong);
-  border: 1px solid var(--line);
   text-align: center;
   overflow: hidden;
   isolation: isolate;
@@ -399,25 +464,17 @@ body {
   display: block;
   width: 100%;
   position: relative;
-  z-index: 1;
-  /* First layer is a soft brand gradient placeholder, second layer is the image */
-  background-image: linear-gradient(135deg, rgba(233, 76, 38, 0.08), rgba(11, 37, 69, 0.08)), url('/images/runners-feet.jpg');
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  /* Light brand surface to avoid dark flash before the image loads */
-  background-color: var(--card);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  z-index: 2;
+  /* Content container no longer needs background - it's now on hero-card */
   overflow: hidden;
 }
 
-.hero-content::before {
+.hero-card::after {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, rgba(18, 18, 20, 0.55), rgba(7, 7, 8, 0.25));
-  z-index: 0;
+  z-index: 1;
 }
 
 .hero-content > * {
@@ -433,7 +490,7 @@ body {
   right: 0;
   height: 4px;
   background: var(--accent-gradient);
-  z-index: 2;
+  z-index: 3;
 }
 
 .hero-badge {

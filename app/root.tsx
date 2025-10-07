@@ -163,7 +163,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
   const data = useRouteLoaderData<typeof loader>('root');
   const nonce = useNonce();
 
-  const shop = data?.layout.shop;
+  const shop = data?.layout?.shop;
 
   return (
     <html lang="en">
@@ -179,7 +179,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
         {/* Runtime CSS readiness diagnostic (development / debug only) */}
-        {process.env.DEBUG_INSTRUMENTATION === '1' ? (
+        {(typeof globalThis !== 'undefined' && (globalThis as any).process?.env?.DEBUG_INSTRUMENTATION === '1') ? (
           <script
             nonce={nonce}
             dangerouslySetInnerHTML={{

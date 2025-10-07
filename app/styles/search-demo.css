@@ -1,0 +1,86 @@
+/* Search UI demo, inspired by CodePen PQajXE but aligned to site styles */
+
+.demo-page-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.demo-search-container {
+  display: flex;
+  justify-content: center;
+}
+
+.demo-search-wrap {
+  position: relative;
+  height: 40px;
+  display: inline-block;
+}
+
+/* Keep the site’s button look for the trigger */
+.demo-search-button.nav-link {
+  line-height: 36px; /* align text vertically in 40px tall area with 2px borders */
+  height: 40px;
+  padding: 0 14px;
+  position: relative;
+  z-index: 2; /* ensure it stays above the input border seam */
+  background: var(--surface); /* match header background */
+  border-color: var(--panel);
+  color: var(--panel);
+}
+
+/* Disable per-button transform so only the group moves and avoids pulse */
+.demo-search-button.nav-link:hover,
+.demo-search-button.nav-link:focus,
+.demo-search-button.nav-link:active { transform: none; }
+
+/* The input overlays the button and expands when focused */
+.demo-search-input {
+  position: absolute;
+  right: 0; /* anchor to the button’s right edge so it expands to the left */
+  left: auto;
+  top: 0;
+  height: 40px;
+  width: 0;
+  opacity: 0;
+  border: 2px solid var(--panel);
+  background: var(--card);
+  color: var(--panel);
+  outline: none;
+  padding: 0; /* expand on focus */
+  transition: width 240ms ease, opacity 160ms ease, padding 160ms ease, border-color 160ms ease;
+  border-radius: 0;
+  z-index: 1; /* sits below button until focused */
+}
+
+.demo-search-wrap:focus-within .demo-search-input {
+  width: min(360px, 70vw);
+  opacity: 1;
+  padding: 6px 10px;
+  z-index: 3; /* rise above the button so it appears to replace it */
+}
+
+/* Optional: soften the button while input is focused */
+.demo-search-wrap:focus-within .demo-search-button {
+  background: var(--surface); /* keep consistent with header */
+  color: var(--panel);
+  border-color: var(--panel);
+}
+
+/* Group hover/focus applies uniformly to the combined control */
+.demo-search-wrap { transition: transform 0.3s ease; }
+.demo-search-wrap:focus-within { transform: translateY(-2px); }
+
+/* When expanded, apply a uniform accent border/color */
+.demo-search-wrap:focus-within .demo-search-button { border-color: transparent; color: var(--accent); pointer-events: none; }
+.demo-search-wrap:focus-within .demo-search-input { border-color: var(--accent); }
+
+.demo-search-input::placeholder {
+  color: var(--muted);
+}
+
+/* Small helper text area */
+.demo-note {
+  text-align: center;
+  margin-top: 16px;
+  color: var(--muted);
+}

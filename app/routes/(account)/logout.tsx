@@ -16,7 +16,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   ctx.customerSession.clearCustomerToken();
-  const [, headers] = ctx.customerSession.commitWithHeaders();
+  const [, headers] = await ctx.customerSession.commitWithHeaders();
   return redirect('/', { headers });
 }
 

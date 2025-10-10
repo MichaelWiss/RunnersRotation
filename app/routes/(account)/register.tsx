@@ -37,7 +37,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
       if (loginResult.customerAccessToken) {
         ctx.customerSession.setCustomerToken(loginResult.customerAccessToken.accessToken);
-        const [, headers] = ctx.customerSession.commitWithHeaders();
+        const [, headers] = await ctx.customerSession.commitWithHeaders();
         return redirect('/account', { headers });
       } else {
         // Registration succeeded but login failed - redirect to login

@@ -38,7 +38,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     if (result.customerAccessToken) {
       ctx.customerSession.setCustomerToken(result.customerAccessToken.accessToken);
-      const [, headers] = ctx.customerSession.commitWithHeaders();
+      const [, headers] = await ctx.customerSession.commitWithHeaders();
       return redirect(redirectTo, { headers });
     } else {
       const errors = normalizeStorefrontErrors(result.customerUserErrors || []);

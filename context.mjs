@@ -61,8 +61,16 @@ export class CustomerSession {
     this.session.unset('customerAccessToken');
   }
 
-  commitWithHeaders() {
-    const cookie = this.session.commit();
+  get(key) {
+    return this.session.get(key);
+  }
+
+  set(key, value) {
+    this.session.set(key, value);
+  }
+
+  async commitWithHeaders() {
+    const cookie = await this.session.commit();
     const headers = new Headers();
     headers.set('Set-Cookie', cookie);
     return [cookie, headers];

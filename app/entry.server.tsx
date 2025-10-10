@@ -51,6 +51,21 @@ function handleBotRequest(
         // Only storeDomain is required for baseline CSP; checkout domain optional and removed for minimal env surface.
         storeDomain: context.env.PUBLIC_STORE_DOMAIN,
       },
+      fontSrc: [
+        "'self'",
+        "https://fonts.gstatic.com",
+      ],
+      styleSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://fonts.googleapis.com",
+      ],
+      connectSrc: [
+        "'self'",
+        "https://monorail-edge.shopifysvc.com",
+        "https://fonts.googleapis.com",
+        "https://fonts.gstatic.com",
+      ],
     });
 
     const {pipe, abort} = renderToPipeableStream(
@@ -106,7 +121,24 @@ function handleBrowserRequest(
   const storeDomain = process.env.PUBLIC_STORE_DOMAIN;
   const {nonce, header, NonceProvider} = createContentSecurityPolicy(
     storeDomain
-      ? {shop: {storeDomain}}
+      ? {
+          shop: {storeDomain},
+          fontSrc: [
+            "'self'",
+            "https://fonts.gstatic.com",
+          ],
+          styleSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            "https://fonts.googleapis.com",
+          ],
+          connectSrc: [
+            "'self'",
+            "https://monorail-edge.shopifysvc.com",
+            "https://fonts.googleapis.com",
+            "https://fonts.gstatic.com",
+          ],
+        }
       : undefined,
   );
 

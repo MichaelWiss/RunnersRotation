@@ -25,6 +25,10 @@ declare global {
      * created products in Admin.
      */
     DEV_MOCK_PRODUCTS?: string;
+    /**
+     * Number of products to show per page in collection views.
+     */
+    COLLECTION_PAGE_COUNT?: string;
   }
 }
 

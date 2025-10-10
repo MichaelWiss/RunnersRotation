@@ -152,7 +152,22 @@ export async function searchProducts(storefront: Storefront, params: SearchParam
       const fallbackQuery = `title:*${simpleTerm}* OR tag:*${simpleTerm}*`;
       
       try {
-        const fallbackData = await client.query(PRODUCT_SEARCH_QUERY, {
+        const fallbackData = await client.query<{
+          products: {
+            edges: Array<{
+              cursor: string;
+              node: {
+                id: string;
+                title: string;
+                handle: string;
+                description?: string | null;
+                featuredImage?: {url: string; altText: string | null} | null;
+                variants: {nodes: Array<{price: {amount: string; currencyCode: string}}>} ;
+              };
+            }>;
+            pageInfo: {hasNextPage: boolean; hasPreviousPage: boolean; endCursor: string | null; startCursor: string | null};
+          };
+        }>(PRODUCT_SEARCH_QUERY, {
           variables: {
             query: fallbackQuery,
             first,
@@ -165,7 +180,17 @@ export async function searchProducts(storefront: Storefront, params: SearchParam
         const fallbackEdges = fallbackData?.products?.edges || [];
         if (fallbackEdges.length > 0) {
           // Use fallback results
-          const fallbackItems: SearchItem[] = fallbackEdges.map((edge) => {
+          const fallbackItems: SearchItem[] = fallbackEdges.map((edge: {
+            cursor: string;
+            node: {
+              id: string;
+              title: string;
+              handle: string;
+              description?: string | null;
+              featuredImage?: {url: string; altText: string | null} | null;
+              variants: {nodes: Array<{price: {amount: string; currencyCode: string}}>} ;
+            };
+          }) => {
             const n = edge.node;
             const priceNode = n.variants?.nodes?.[0]?.price || null;
             return {

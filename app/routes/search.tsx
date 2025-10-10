@@ -2,6 +2,7 @@ import {type LoaderFunctionArgs, type LinksFunction} from 'react-router';
 import {useLoaderData, useSearchParams, Link} from 'react-router';
 import ProductCard from '~/components/ProductCard';
 import homepageStyles from '~/styles/homepage.css?url';
+import type {SearchItem} from '~/data/products.server';
 
 export const links: LinksFunction = () => [
   {rel: 'stylesheet', href: homepageStyles},
@@ -264,7 +265,7 @@ export default function Search() {
           
           {searchResult.items.length > 0 ? (
             <div className="home-products-grid grid-container">
-              {searchResult.items.map((item) => (
+              {searchResult.items.map((item: SearchItem) => (
                 <ProductCard
                   key={item.id}
                   variant="home"

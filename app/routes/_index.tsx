@@ -76,7 +76,7 @@ export default function Index() {
               alt=""
               aria-hidden="true"
               decoding="async"
-              fetchpriority="high"
+              fetchPriority="high"
               style={{position: 'absolute', width: 0, height: 0, opacity: 0, pointerEvents: 'none'}}
             />
             <div className="hero-badge">Handcrafted Performance</div>

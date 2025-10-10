@@ -227,8 +227,21 @@ export default function Search() {
         <div className="home-products-kicker">Explore</div>
         <h2 className="home-products-title">Search Results</h2>
         <p className="home-products-subtitle">
-          {query ? `Results for "${query}"` : 'Enter a search term to find products'}
+          {query ? `Results for \"${query}\"` : 'Enter a search term to find products'}
         </p>
+        <form method="get" action="/search" role="search" className="search-page-search-wrap">
+          <label htmlFor="page-q" className="visually-hidden">Search</label>
+          <input
+            id="page-q"
+            name="q"
+            type="search"
+            className="nav-search-input"
+            placeholder="Search products..."
+            aria-label="Search products"
+            defaultValue={query}
+          />
+          <button type="submit" className="nav-link nav-search-button">Search</button>
+        </form>
       </div>
       
       

@@ -11,20 +11,23 @@ export default function MobileMenu({ isOpen, cartCount, onClose }: MobileMenuPro
 
   return (
     <>
-      <div className="mobile-nav-section">
-        <h4>Account</h4>
-        <Link to="/search" onClick={onClose}>Search</Link>
-        <Link to="/account" onClick={onClose}>My Account</Link>
-        <Link to="/cart" onClick={onClose}>Cart ({cartCount})</Link>
-      </div>
-      <div className="mobile-nav-section">
-        <h4>Quick Links</h4>
-        <Link to="/faqs" onClick={onClose}>FAQ's</Link>
-        <Link to="/careers" onClick={onClose}>Careers</Link>
-        <Link to="/run-club" onClick={onClose}>Run Club</Link>
-        <Link to="/blog" onClick={onClose}>Blog</Link>
-        <Link to="/sustainability" onClick={onClose}>Sustainability</Link>
-      </div>
+      <form
+        method="get"
+        action="/search"
+        className="mobile-search-wrap"
+        role="search"
+      >
+        <label htmlFor="mobile-q" className="visually-hidden">Search</label>
+        <input
+          id="mobile-q"
+          name="q"
+          type="search"
+          className="nav-link mobile-search-input"
+          placeholder="Search products..."
+          aria-label="Search products"
+        />
+        <button type="submit" className="nav-link nav-search-button">Search</button>
+      </form>
     </>
   );
 }

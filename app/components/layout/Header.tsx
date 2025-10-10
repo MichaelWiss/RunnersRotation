@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router';
 import type { HeaderProps } from '~/types';
 import { useCart } from '~/context/CartContext';
 import NavigationCircle from './NavigationCircle';
@@ -39,6 +40,12 @@ export default function Header({ collections }: Omit<HeaderProps, 'cartCount'>) 
   const handleMobileClose = () => {
     setMobileOpen(false);
   };
+
+  // Close mobile nav on route change to avoid interrupting form submission
+  const location = useLocation();
+  useEffect(() => {
+    if (mobileOpen) setMobileOpen(false);
+  }, [location.pathname, location.search]);
 
   // Convert collections to navigation items format
   const navigationItems = collections?.map(collection => ({

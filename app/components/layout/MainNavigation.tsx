@@ -19,7 +19,7 @@ export default function MainNavigation({ collections }: MainNavigationProps) {
   return (
     <ul className="nav-menu">
       {navItems.map((item) => (
-        <li key={item.handle}>
+        <li key={item.handle} data-handle={item.handle}>
           <Link to={item.url}>{item.title}</Link>
         </li>
       ))}

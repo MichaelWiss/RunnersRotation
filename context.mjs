@@ -1,7 +1,6 @@
 import {createCookieSessionStorage} from 'react-router';
 import {createStorefrontClient, InMemoryCache} from '@shopify/hydrogen';
 import crypto from 'node:crypto';
-import { CustomerSession } from './app/lib/session.server.js';
 
 // Session abstraction extracted from server.mjs
 export class AppSession {
@@ -34,6 +33,44 @@ export class AppSession {
   unset(key) { this.session.unset(key); }
   set(key, value) { this.session.set(key, value); }
   commit() { return this.sessionStorage.commitSession(this.session); }
+}
+
+/**
+ * Session helpers for customer authentication.
+ * Wraps the AppSession class with customer-specific methods.
+ */
+export class CustomerSession {
+  constructor(session) {
+    this.session = session;
+  }
+
+  static async init(request, secrets) {
+    const appSession = await AppSession.init(request, secrets);
+    return new this(appSession);
+  }
+
+  getCustomerToken() {
+    return this.session.get('customerAccessToken');
+  }
+
+  setCustomerToken(token) {
+    this.session.set('customerAccessToken', token);
+  }
+
+  clearCustomerToken() {
+    this.session.unset('customerAccessToken');
+  }
+
+  commitWithHeaders() {
+    const cookie = this.session.commit();
+    const headers = new Headers();
+    headers.set('Set-Cookie', cookie);
+    return [cookie, headers];
+  }
+
+  destroy() {
+    return this.session.destroy();
+  }
 }
 
 /**

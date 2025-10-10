@@ -1,6 +1,7 @@
 import {createCookieSessionStorage} from 'react-router';
 import {createStorefrontClient, InMemoryCache} from '@shopify/hydrogen';
 import crypto from 'node:crypto';
+import { CustomerSession } from './app/lib/session.server.js';
 
 // Session abstraction extracted from server.mjs
 export class AppSession {
@@ -43,7 +44,7 @@ export class AppSession {
  * @param {(storefront:any)=>any} wrapStorefront optional instrumentation wrapper
  */
 export async function getContext(req, env, debugEnabled, wrapStorefront) {
-  const session = await AppSession.init(req, [env.SESSION_SECRET]);
+  const customerSession = await CustomerSession.init(req, [env.SESSION_SECRET]);
 
   // Derive buyer IP safely (may vary in serverless environment)
   const forwardedFor = req.headers['x-forwarded-for'];
@@ -68,5 +69,5 @@ export async function getContext(req, env, debugEnabled, wrapStorefront) {
   if (debugEnabled && wrapStorefront) {
     storefront = wrapStorefront(storefront);
   }
-  return {session, storefront, env};
+  return {customerSession, storefront, env};
 }

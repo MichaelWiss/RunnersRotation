@@ -74,12 +74,13 @@ export const links: LinksFunction = () => [
 ];
 
 export async function loader({context}: LoaderFunctionArgs) {
+  const ctx = context as unknown as { customerSession: any; env?: Record<string, string | undefined> };
   const [customerAccessToken, cartId] = await Promise.all([
-    context.session.get('customerAccessToken'),
-    context.session.get('cartId'),
+    ctx.customerSession.getCustomerToken(),
+    ctx.customerSession.get('cartId'),
   ]);
 
-  const env = (context as unknown as {env?: Record<string, string | undefined>})?.env ?? {};
+  const env = ctx.env ?? {};
   const parseHandles = (value: string | undefined) =>
     (value || '')
       .split(',')

@@ -46,12 +46,20 @@ function handleBotRequest(
   context: AppLoadContext,
 ) {
   return new Promise((resolve, reject) => {
-    const {nonce, header, NonceProvider} = createContentSecurityPolicy({
-      shop: {
-        // Only storeDomain is required for baseline CSP; checkout domain optional and removed for minimal env surface.
-        storeDomain: context.env.PUBLIC_STORE_DOMAIN,
-      },
-    });
+    const cspConfig = context.env.PUBLIC_STORE_DOMAIN
+      ? {
+          shop: {
+            // Only storeDomain is required for baseline CSP; checkout domain optional and removed for minimal env surface.
+            storeDomain: context.env.PUBLIC_STORE_DOMAIN,
+          },
+          // Add explicit support for Google Fonts and other required domains
+          connectSrc: ['https://fonts.googleapis.com', 'https://fonts.gstatic.com'],
+          fontSrc: ['https://fonts.googleapis.com', 'https://fonts.gstatic.com'],
+          styleSrc: ['https://fonts.googleapis.com'],
+        }
+      : undefined;
+
+    const {nonce, header, NonceProvider} = createContentSecurityPolicy(cspConfig);
 
     const {pipe, abort} = renderToPipeableStream(
       <NonceProvider>
@@ -104,11 +112,21 @@ function handleBrowserRequest(
   const host = request.headers.get('host') || '';
   // We can't access full loadContext here easily, so rely on env injection from process (ok in server env)
   const storeDomain = process.env.PUBLIC_STORE_DOMAIN;
-  const {nonce, header, NonceProvider} = createContentSecurityPolicy(
-    storeDomain
-      ? {shop: {storeDomain}}
-      : undefined,
-  );
+  
+  let cspConfig;
+  if (storeDomain) {
+    cspConfig = {
+      shop: {storeDomain},
+      // Add explicit support for Google Fonts and other required domains
+      connectSrc: ['https://fonts.googleapis.com', 'https://fonts.gstatic.com'],
+      fontSrc: ['https://fonts.googleapis.com', 'https://fonts.gstatic.com'],
+      styleSrc: ['https://fonts.googleapis.com'],
+    };
+  } else {
+    cspConfig = undefined; // Let Hydrogen generate fallback CSP
+  }
+  
+  const {nonce, header, NonceProvider} = createContentSecurityPolicy(cspConfig);
 
   return new Promise((resolve, reject) => {
     const {pipe, abort} = renderToPipeableStream(

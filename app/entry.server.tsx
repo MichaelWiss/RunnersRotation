@@ -60,6 +60,11 @@ function handleBotRequest(
         "'unsafe-inline'",
         "https://fonts.googleapis.com",
       ],
+      imgSrc: [
+        "'self'",
+        "data:",
+        "https://images.unsplash.com",
+      ],
       connectSrc: [
         "'self'",
         "https://monorail-edge.shopifysvc.com",
@@ -131,6 +136,11 @@ function handleBrowserRequest(
             "'self'",
             "'unsafe-inline'",
             "https://fonts.googleapis.com",
+          ],
+          imgSrc: [
+            "'self'",
+            "data:",
+            "https://images.unsplash.com",
           ],
           connectSrc: [
             "'self'",

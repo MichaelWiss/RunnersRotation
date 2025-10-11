@@ -47,12 +47,7 @@ export default function Header({ collections, isLoggedIn, viewerName }: Omit<Hea
     if (mobileOpen) setMobileOpen(false);
   }, [location.pathname, location.search]);
 
-  // Convert collections to navigation items format
-  const navigationItems = collections?.map(collection => ({
-    title: collection.title,
-    handle: collection.handle,
-    url: `/collections/${collection.handle}`
-  }));
+  const navigationItems = collections && collections.length ? collections : undefined;
 
   return (
     <header className="header full-width">

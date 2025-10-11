@@ -5,11 +5,11 @@ interface FooterProps {
 }
 
 const defaultLinks: NavigationItem[] = [
-  {title: "FAQ's", handle: 'faqs', url: '#'},
-  {title: 'Careers', handle: 'careers', url: '#'},
-  {title: 'Run Club', handle: 'run-club', url: '#'},
-  {title: 'Blog', handle: 'blog', url: '#'},
-  {title: 'Sustainability', handle: 'sustainability', url: '#'},
+  {title: 'FAQ', handle: 'faq', url: '/faq'},
+  {title: 'Careers', handle: 'careers', url: '/careers'},
+  {title: 'Run Club', handle: 'run-club', url: '/run-club'},
+  {title: 'Blog', handle: 'blog', url: '/blog'},
+  {title: 'Sustainability', handle: 'sustainability', url: '/sustainability'},
 ];
 
 export default function Footer({links}: FooterProps) {

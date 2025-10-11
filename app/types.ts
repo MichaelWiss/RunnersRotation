@@ -41,6 +41,8 @@ export interface Collection {
 export interface HeaderProps {
   cartCount?: number;
   collections?: NavigationItem[];
+  isLoggedIn?: boolean;
+  viewerName?: string | null;
 }
 
 export interface Shop {

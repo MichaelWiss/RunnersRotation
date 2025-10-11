@@ -24,6 +24,8 @@ export default function Layout({children}: LayoutProps) {
   const rootData = useRouteLoaderData<typeof rootLoader>('root');
   const navigationLinks = rootData?.navigationLinks as NavigationItem[] | undefined;
   const footerLinks = rootData?.footerLinks as NavigationItem[] | undefined;
+  const isLoggedIn = Boolean(rootData?.isLoggedIn);
+  const viewerName = rootData?.viewer?.displayName || rootData?.viewer?.email || null;
   const [disableMainOffset, setDisableMainOffset] = useState(false);
   // Dynamically set header/announcement heights so content never overlaps
   useEffect(() => {
@@ -68,7 +70,7 @@ export default function Layout({children}: LayoutProps) {
     <LayoutContext.Provider value={{setDisableMainOffset}}>
       <AnnouncementBar />
       <div className="page-container">
-        <Header collections={navigationLinks} />
+        <Header collections={navigationLinks} isLoggedIn={isLoggedIn} viewerName={viewerName} />
         <main className={disableMainOffset ? 'main-no-offset' : undefined}>{children}</main>
       </div>
       <Footer links={footerLinks} />

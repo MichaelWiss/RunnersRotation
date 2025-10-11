@@ -7,26 +7,51 @@ export type AppLoadContext = {
   env: Record<string, string | undefined>;
 };
 
-function assertAppContext(context: unknown): AppLoadContext {
-  if (!context || typeof context !== 'object' || context === null) {
-    throw new Error('App load context is unavailable.');
-  }
+type MaybeContext = {
+  customerSession?: unknown;
+  env?: Record<string, string | undefined>;
+};
 
-  const maybeContext = context as Partial<AppLoadContext>;
+function isCustomerSession(value: unknown): value is CustomerSession {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    typeof (value as CustomerSession).getCustomerToken === 'function' &&
+    typeof (value as CustomerSession).get === 'function' &&
+    typeof (value as CustomerSession).commitHeaders === 'function' &&
+    typeof (value as CustomerSession).destroyHeaders === 'function'
+  );
+}
 
-  if (!(maybeContext.customerSession instanceof CustomerSession)) {
-    throw new Error('Expected customerSession to be present on the load context.');
-  }
-
-  if (!maybeContext.env) {
-    throw new Error('Expected env to be present on the load context.');
-  }
-
-  return maybeContext as AppLoadContext;
+function createNoopSession(): CustomerSession {
+  const noop = {
+    getCustomerToken: () => undefined,
+    setCustomerToken: () => {},
+    clearCustomerToken: () => {},
+    get: () => undefined,
+    set: () => {},
+    commit: async () => '',
+    commitHeaders: async () => new Headers(),
+    destroy: async () => '',
+    destroyHeaders: async () => new Headers(),
+  };
+  return noop as unknown as CustomerSession;
 }
 
 export function getAppContext(context: unknown): AppLoadContext {
-  return assertAppContext(context);
+  if (context && typeof context === 'object') {
+    const maybe = context as MaybeContext;
+    const env = maybe.env ?? {};
+    const session = isCustomerSession(maybe.customerSession)
+      ? (maybe.customerSession as CustomerSession)
+      : createNoopSession();
+    return {customerSession: session, env};
+  }
+
+  return {
+    customerSession: createNoopSession(),
+    env: {},
+  };
 }
 
 export function getCustomerSession(context: unknown): CustomerSession {

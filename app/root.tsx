@@ -20,6 +20,10 @@ import SiteLayout from '~/components/layout/Layout';
 import {loadCollectionsByHandles} from '~/data/collections.server';
 import {NAV_LINKS, FOOTER_LINKS, type SiteLink} from '~/config/links';
 import type {NavigationItem} from '~/types';
+import {
+  getAppContext,
+  getCustomerToken,
+} from '~/lib/session.server';
 
 function resolveSiteLinks(siteLinks: SiteLink[], collectionMap: Map<string, NavigationItem>): NavigationItem[] {
   return siteLinks
@@ -76,13 +80,12 @@ export const links: LinksFunction = () => [
 ];
 
 export async function loader({context}: LoaderFunctionArgs) {
-  const ctx = context as unknown as { customerSession: any; env?: Record<string, string | undefined> };
+  const {customerSession, env} = getAppContext(context);
   const [customerAccessToken, cartId] = await Promise.all([
-    ctx.customerSession.getCustomerToken(),
-    ctx.customerSession.get('cartId'),
+    getCustomerToken(customerSession),
+    customerSession.get('cartId'),
   ]);
 
-  const env = ctx.env ?? {};
   const parseHandles = (value: string | undefined) =>
     (value || '')
       .split(',')
@@ -150,6 +153,12 @@ export async function loader({context}: LoaderFunctionArgs) {
 
     return {
       isLoggedIn: Boolean(customerAccessToken),
+      viewer: customerAccessToken
+        ? {
+            displayName: cart?.buyerIdentity?.customer?.displayName ?? null,
+            email: cart?.buyerIdentity?.customer?.email ?? cart?.buyerIdentity?.email ?? null,
+          }
+        : null,
       cart,
       layout,
       navigationLinks: resolveSiteLinks(NAV_LINKS, navigationCollections),

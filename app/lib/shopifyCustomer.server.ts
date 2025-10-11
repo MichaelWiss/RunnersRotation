@@ -164,7 +164,7 @@ export async function recoverCustomer(
  */
 export async function updateCustomer(
   token: string,
-  updates: { firstName?: string; lastName?: string; email?: string },
+  updates: { firstName?: string; lastName?: string; email?: string; password?: string },
   env: Record<string, string | undefined>
 ) {
   const storefront = getStorefront(env);

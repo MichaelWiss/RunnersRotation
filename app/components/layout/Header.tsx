@@ -8,7 +8,7 @@ import MainNavigation from './MainNavigation';
 import MobileMenu from './MobileMenu';
 import CartDrawer from '~/components/cart/CartDrawer';
 
-export default function Header({ collections }: Omit<HeaderProps, 'cartCount'>) {
+export default function Header({ collections, isLoggedIn, viewerName }: Omit<HeaderProps, 'cartCount'>) {
   const { cartCount } = useCart();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
@@ -59,8 +59,10 @@ export default function Header({ collections }: Omit<HeaderProps, 'cartCount'>) 
       <div className="nav-container">
         <div className="nav-top">
           <NavigationCircle />
-          <NavigationActions 
-            cartCount={cartCount} 
+          <NavigationActions
+            cartCount={cartCount}
+            isLoggedIn={isLoggedIn}
+            viewerName={viewerName}
             onCartClick={() => setCartDrawerOpen(true)} 
           />
           <button

@@ -2,10 +2,17 @@ import { Link } from 'react-router';
 
 interface NavigationActionsProps {
   cartCount: number;
+  isLoggedIn?: boolean;
+  viewerName?: string | null;
   onCartClick?: () => void;
 }
 
-export default function NavigationActions({ cartCount, onCartClick }: NavigationActionsProps) {
+export default function NavigationActions({ cartCount, isLoggedIn, viewerName, onCartClick }: NavigationActionsProps) {
+  const trimmedName = viewerName?.trim();
+  const firstName = trimmedName ? trimmedName.split(/\s+/)[0] : null;
+  const authLabel = isLoggedIn ? (firstName ? `Hi, ${firstName}` : 'Account') : 'Sign In';
+  const authHref = isLoggedIn ? '/account' : '/account/login';
+
   return (
     <div className="nav-actions">
       <form method="get" action="/search" className="nav-search-wrap" role="search">
@@ -34,7 +41,10 @@ export default function NavigationActions({ cartCount, onCartClick }: Navigation
           Search
         </button>
       </form>
-      <Link to="/account" className="nav-link">Account</Link>
+      <Link to={authHref} className="nav-link">{authLabel}</Link>
+      {!isLoggedIn ? (
+        <Link to="/account/register" className="nav-link">Join</Link>
+      ) : null}
       <button 
         onClick={onCartClick} 
         className="nav-link"

@@ -10,6 +10,7 @@ import {
 } from 'react-router';
 import type {Cart, Shop} from '@shopify/hydrogen/storefront-api-types';
 import appStylesheet from './styles/app.css?url';
+import fontsStylesheet from './styles/fonts.css?url';
 import homepageStylesheet from './styles/homepage.css?url';
 import tokensStylesheet from './styles/tokens.css?url';
 import {useNonce} from '@shopify/hydrogen';
@@ -64,10 +65,11 @@ export const links: LinksFunction = () => [
   {rel: 'preload', as: 'script', href: hydrationGuardScriptUrl},
   // Warm up default hero fallback image (works even if dynamic hero is used later)
   {rel: 'preload', as: 'image', href: '/images/runners-feet.jpg'},
+  {rel: 'stylesheet', href: fontsStylesheet},
   {rel: 'stylesheet', href: tokensStylesheet},
   {
     rel: 'stylesheet',
-    href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap',
+    href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap',
   },
   {rel: 'stylesheet', href: appStylesheet},
   {rel: 'stylesheet', href: homepageStylesheet},

@@ -4,6 +4,11 @@ import homepageStyles from '~/styles/homepage.css?url';
 import { createCustomer, createCustomerAccessToken } from '~/lib/shopifyCustomer.server';
 import { validateEmail, validatePassword, normalizeStorefrontErrors } from '~/lib/validation.server';
 import { RegisterForm } from '~/components/auth';
+import {
+  getAppContext,
+  setCustomerToken,
+  commitSession,
+} from '~/lib/session.server';
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: homepageStyles },
@@ -26,18 +31,18 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return Response.json({ errors: { password: passwordValidation.error } }, { status: 400 });
   }
 
-  const ctx = context as unknown as { customerSession: any; env: Record<string, string | undefined> };
+  const {customerSession, env} = getAppContext(context);
 
   try {
-    const createResult = await createCustomer(ctx.env, email, password, firstName, lastName);
+    const createResult = await createCustomer(env, email, password, firstName, lastName);
 
     if (createResult.customer) {
       // Auto-login after successful registration
-      const loginResult = await createCustomerAccessToken(email, password, ctx.env);
+      const loginResult = await createCustomerAccessToken(email, password, env);
 
       if (loginResult.customerAccessToken) {
-        ctx.customerSession.setCustomerToken(loginResult.customerAccessToken.accessToken);
-        const [, headers] = await ctx.customerSession.commitWithHeaders();
+        setCustomerToken(customerSession, loginResult.customerAccessToken.accessToken);
+        const headers = await commitSession(customerSession);
         return redirect('/account', { headers });
       } else {
         // Registration succeeded but login failed - redirect to login

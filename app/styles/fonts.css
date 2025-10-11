@@ -72,3 +72,12 @@
   font-style: italic;
   font-display: swap;
 }
+
+/* Times CG Bold Italic */
+@font-face {
+  font-family: 'Times CG';
+  src: url('/fonts/times-cg-cufonfonts-webfont/Times CG Bold Italic.woff') format('woff');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}

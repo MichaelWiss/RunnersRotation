@@ -44,6 +44,12 @@ export class CustomerSession {
     this.session = session;
   }
 
+  static headersFromCookie(cookie) {
+    const headers = new Headers();
+    if (cookie) headers.set('Set-Cookie', cookie);
+    return headers;
+  }
+
   static async init(request, secrets) {
     const appSession = await AppSession.init(request, secrets);
     return new this(appSession);
@@ -69,15 +75,22 @@ export class CustomerSession {
     this.session.set(key, value);
   }
 
-  async commitWithHeaders() {
-    const cookie = await this.session.commit();
-    const headers = new Headers();
-    headers.set('Set-Cookie', cookie);
-    return [cookie, headers];
+  async commit() {
+    return this.session.commit();
   }
 
-  destroy() {
+  async commitHeaders() {
+    const cookie = await this.commit();
+    return CustomerSession.headersFromCookie(cookie);
+  }
+
+  async destroy() {
     return this.session.destroy();
+  }
+
+  async destroyHeaders() {
+    const cookie = await this.destroy();
+    return CustomerSession.headersFromCookie(cookie);
   }
 }
 

@@ -4,6 +4,7 @@ import homepageStyles from '~/styles/homepage.css?url';
 import { recoverCustomer } from '~/lib/shopifyCustomer.server';
 import { validateEmail, normalizeStorefrontErrors } from '~/lib/validation.server';
 import { RecoverForm } from '~/components/auth';
+import { getEnv } from '~/lib/session.server';
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: homepageStyles },
@@ -18,10 +19,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return Response.json({ errors: { email: emailValidation.error } }, { status: 400 });
   }
 
-  const ctx = context as unknown as { env: Record<string, string | undefined> };
+  const env = getEnv(context);
 
   try {
-    const result = await recoverCustomer(email, ctx.env);
+    const result = await recoverCustomer(email, env);
 
     if (result.customerUserErrors && result.customerUserErrors.length > 0) {
       const errors = normalizeStorefrontErrors(result.customerUserErrors);

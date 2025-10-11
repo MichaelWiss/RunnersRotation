@@ -1,22 +1,28 @@
 import { type ActionFunctionArgs, redirect } from 'react-router';
 import { deleteCustomerAccessToken } from '~/lib/shopifyCustomer.server';
+import {
+  getAppContext,
+  getCustomerToken,
+  clearCustomerToken,
+  commitSession,
+} from '~/lib/session.server';
 
 export async function action({ request, context }: ActionFunctionArgs) {
-  const ctx = context as unknown as { customerSession: any; env: Record<string, string | undefined> };
+  const {customerSession, env} = getAppContext(context);
 
-  const token = ctx.customerSession.getCustomerToken();
+  const token = getCustomerToken(customerSession);
   if (token) {
     try {
       // Optionally delete the token on Shopify side
-      await deleteCustomerAccessToken(token, ctx.env);
+      await deleteCustomerAccessToken(token, env);
     } catch (error) {
       // Log but don't fail the logout
       console.error('Error deleting customer access token:', error);
     }
   }
 
-  ctx.customerSession.clearCustomerToken();
-  const [, headers] = await ctx.customerSession.commitWithHeaders();
+  clearCustomerToken(customerSession);
+  const headers = await commitSession(customerSession);
   return redirect('/', { headers });
 }
 

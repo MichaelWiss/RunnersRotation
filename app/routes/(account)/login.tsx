@@ -2,6 +2,11 @@ import { type ActionFunctionArgs, type LoaderFunctionArgs, redirect, useActionDa
 import { LinksFunction } from 'react-router';
 import homepageStyles from '~/styles/homepage.css?url';
 import { createCustomerAccessToken } from '~/lib/shopifyCustomer.server';
+import {
+  getAppContext,
+  setCustomerToken,
+  commitSession,
+} from '~/lib/session.server';
 import { validateEmail, validatePassword, normalizeStorefrontErrors } from '~/lib/validation.server';
 import { LoginForm } from '~/components/auth';
 
@@ -31,14 +36,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return Response.json({ errors: { password: passwordValidation.error } }, { status: 400 });
   }
 
-  const ctx = context as unknown as { customerSession: any; env: Record<string, string | undefined> };
+  const {customerSession, env} = getAppContext(context);
 
   try {
-    const result = await createCustomerAccessToken(email, password, ctx.env);
+    const result = await createCustomerAccessToken(email, password, env);
 
     if (result.customerAccessToken) {
-      ctx.customerSession.setCustomerToken(result.customerAccessToken.accessToken);
-      const [, headers] = await ctx.customerSession.commitWithHeaders();
+      setCustomerToken(customerSession, result.customerAccessToken.accessToken);
+      const headers = await commitSession(customerSession);
       return redirect(redirectTo, { headers });
     } else {
       const errors = normalizeStorefrontErrors(result.customerUserErrors || []);

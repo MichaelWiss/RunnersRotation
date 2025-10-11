@@ -73,7 +73,9 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               margin: 0, 
               color: 'var(--panel)',
               fontFamily: 'Playfair Display, serif',
-              fontSize: '24px'
+              fontSize: '24px',
+              fontStyle: 'italic',
+              fontWeight: 700
             }}>
               Cart ({cart?.totalQuantity || 0})
             </h2>
@@ -132,7 +134,10 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     <h4 style={{ 
                       margin: '0 0 5px 0',
                       color: 'var(--panel)',
-                      fontSize: '16px'
+                      fontSize: '16px',
+                      fontFamily: 'Playfair Display, serif',
+                      fontStyle: 'italic',
+                      fontWeight: 700
                     }}>
                       {line.merchandise.product.title}
                     </h4>

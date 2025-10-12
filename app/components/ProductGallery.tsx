@@ -14,66 +14,34 @@ export default function ProductGallery({title, subtitle, description, images}: P
     images?.[1],
     images?.[2],
   ].filter(Boolean) as ImageNode[];
+  const fallbackLabel = 'TRAIL RUNNER PRO';
   return (
     <section className="gallery" aria-labelledby="product-title">
       <div className="images">
-        <div
-          className="main-img"
-          role="img"
-          aria-label={main?.altText ?? 'Trail Runner Pro'}
-          style={
-            main
-              ? {
-                  backgroundImage: `url(${main.url})`,
-                  backgroundSize: 'contain',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                }
-              : undefined
-          }
-        >
-          {main ? '' : 'TRAIL RUNNER PRO'}
+        <div className={`main-img${main ? '' : ' main-img--fallback'}`} data-fallback-label={fallbackLabel}>
+          {main ? <img src={main.url} alt={main.altText ?? 'Product image'} loading="lazy" /> : null}
+          <span className="main-img__label">{main ? '' : fallbackLabel}</span>
         </div>
         <div className="thumb-row">
-          <div
-            className="thumb"
-            style={
-              thumbList[0]
-                ? {
-                    backgroundImage: `url(${thumbList[0].url})`,
-                    backgroundSize: 'contain',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                  }
-                : {background: 'linear-gradient(135deg, var(--panel), var(--accent))'}
-            }
-          ></div>
-          <div
-            className="thumb"
-            style={
-              thumbList[1]
-                ? {
-                    backgroundImage: `url(${thumbList[1].url})`,
-                    backgroundSize: 'contain',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                  }
-                : {background: 'linear-gradient(135deg, var(--accent), var(--cta-hover))'}
-            }
-          ></div>
-          <div
-            className="thumb"
-            style={
-              thumbList[2]
-                ? {
-                    backgroundImage: `url(${thumbList[2].url})`,
-                    backgroundSize: 'contain',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                  }
-                : {background: 'linear-gradient(135deg, var(--muted), var(--panel))'}
-            }
-          ></div>
+          {[0, 1, 2].map((index) => {
+            const thumb = thumbList[index];
+            const gradients = [
+              'linear-gradient(135deg, var(--panel), var(--accent))',
+              'linear-gradient(135deg, var(--accent), var(--cta-hover))',
+              'linear-gradient(135deg, var(--muted), var(--panel))',
+            ];
+            return (
+              <div
+                key={index}
+                className="thumb"
+                data-image-src={thumb?.url ?? ''}
+                data-image-alt={thumb?.altText ?? ''}
+                style={!thumb ? {background: gradients[index] || gradients[0]} : undefined}
+              >
+                {thumb ? <img src={thumb.url} alt={thumb.altText ?? ''} loading="lazy" /> : null}
+              </div>
+            );
+          })}
         </div>
       </div>
       <aside className="meta">

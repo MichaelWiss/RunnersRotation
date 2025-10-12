@@ -6,8 +6,8 @@ const featuredPost = {
   release: 'March 28, 2025',
   readingTime: '8 min read',
   image: {
-    src: 'https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=1600&q=80',
-    alt: 'Large group of runners gathered under city lights before a night run.',
+    src: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=1600&q=80',
+    alt: 'Silhouette of three runners charging along a concrete stretch at sunrise.',
   },
 };
 
@@ -20,8 +20,8 @@ const posts = [
     release: 'March 12, 2025',
     readingTime: '6 min read',
     image: {
-      src: 'https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?auto=format&fit=crop&w=1600&q=80',
-      alt: 'Coach timing a runner sprinting on an outdoor track.',
+      src: 'https://plus.unsplash.com/premium_photo-1674605365723-15e6749630f4?auto=format&fit=crop&w=1600&q=80',
+      alt: 'Runner striding up an open road beneath a wide morning sky.',
     },
   },
   {
@@ -32,8 +32,8 @@ const posts = [
     release: 'February 27, 2025',
     readingTime: '5 min read',
     image: {
-      src: 'https://images.unsplash.com/photo-1534790566855-4cb788d389ec?auto=format&fit=crop&w=1600&q=80',
-      alt: 'Engineer adjusting a prototype running shoe in a design studio.',
+      src: 'https://images.unsplash.com/photo-1706550633858-dcf3983fdf86?auto=format&fit=crop&w=1600&q=80',
+      alt: 'Two athletes balancing together on a longboard before training.',
     },
   },
   {
@@ -44,8 +44,8 @@ const posts = [
     release: 'January 30, 2025',
     readingTime: '4 min read',
     image: {
-      src: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1600&q=80',
-      alt: 'Runners sharing a laugh during a sunrise jog beside mountains.',
+      src: 'https://images.unsplash.com/photo-1436380138417-a2dcbd582f35?auto=format&fit=crop&w=1600&q=80',
+      alt: 'Solo runner cruising past rocky canyon walls during sunrise.',
     },
   },
 ];

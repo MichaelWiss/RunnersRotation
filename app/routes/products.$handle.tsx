@@ -158,6 +158,8 @@ export default function Product() {
       if (!thumb) return;
       const mainImg = document.querySelector('.main-img') as HTMLElement | null;
       if (!mainImg) return;
+      const imgEl = mainImg.querySelector('img') as HTMLImageElement | null;
+      const labelEl = mainImg.querySelector('.main-img__label') as HTMLElement | null;
       const thumbs = Array.from(thumb.parentElement?.querySelectorAll('.thumb') || []);
       const index = thumbs.indexOf(thumb);
       const colors = [
@@ -165,9 +167,20 @@ export default function Product() {
         'linear-gradient(135deg, var(--accent), var(--cta-hover))',
         'linear-gradient(135deg, var(--muted), var(--panel))',
       ];
-      const names = ['MIDNIGHT/ORANGE', 'FOREST/LIME', 'CHARCOAL/RED'];
       mainImg.style.background = colors[index] || colors[0];
-      mainImg.textContent = `TRAIL RUNNER PRO\n${names[index] || names[0]}`;
+      const src = thumb.dataset.imageSrc || '';
+      const alt = thumb.dataset.imageAlt || 'Product image';
+      if (src && imgEl) {
+        imgEl.src = src;
+        imgEl.alt = alt;
+        imgEl.style.display = 'block';
+        if (labelEl) labelEl.textContent = '';
+        mainImg.classList.remove('main-img--fallback');
+      } else if (labelEl) {
+        labelEl.textContent = mainImg.dataset.fallbackLabel || 'TRAIL RUNNER PRO';
+        mainImg.classList.add('main-img--fallback');
+        if (imgEl) imgEl.style.display = 'none';
+      }
     };
     document.addEventListener('click', onPill);
     document.addEventListener('click', onQty);

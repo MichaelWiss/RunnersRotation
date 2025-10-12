@@ -1,7 +1,7 @@
 export default function RunClub() {
   const heroImage = {
-    src: 'https://images.unsplash.com/photo-1526401485004-46910ecc8e51?auto=format&fit=crop&w=1600&q=80',
-    alt: 'Group of runners launching into a sunrise workout on city streets.',
+    src: 'https://plus.unsplash.com/premium_photo-1663134254080-a3e9f79ae748?auto=format&fit=crop&w=1600&q=80',
+    alt: 'Group of young athletes cruising through a sunlit park path during a run.',
   };
 
   const weeklySessions = [
@@ -12,8 +12,8 @@ export default function RunClub() {
         'Tempo runs along the Cherry Creek trail with structured warm-ups, drills, and post-run mobility led by our coaching staff.',
       details: ['Meet • Union Station', 'Pace • 7:00–9:30 min/mile'],
       image: {
-        src: 'https://images.unsplash.com/photo-1530822847156-5df684ec5cb4?auto=format&fit=crop&w=1200&q=80',
-        alt: 'Coach leading runners along a riverside path in downtown Denver.',
+        src: 'https://images.unsplash.com/photo-1568556989497-cbea3ab63a46?auto=format&fit=crop&w=1200&q=80',
+        alt: 'Runner warming up across the Denver greenway at Cherry Creek.',
       },
     },
     {
@@ -23,8 +23,8 @@ export default function RunClub() {
         'Laps through Central Park focused on speed development and hill repeats with staggered groups to accommodate every pace.',
       details: ['Meet • Bethesda Terrace', 'Pace • 6:30–9:00 min/mile'],
       image: {
-        src: 'https://images.unsplash.com/photo-1520975869010-6a5632509d1b?auto=format&fit=crop&w=1200&q=80',
-        alt: 'Run crew gliding through Central Park with skyline views at dusk.',
+        src: 'https://plus.unsplash.com/premium_photo-1726481621787-66edd0e52ea0?auto=format&fit=crop&w=1200&q=80',
+        alt: 'Runner cruising across the Central Park bridge on a fall morning.',
       },
     },
     {
@@ -34,8 +34,8 @@ export default function RunClub() {
         'Long runs on the Lady Bird Lake loop with soft-surface options, pit stops stocked with Velocity hydration and gels.',
       details: ['Meet • South Congress Pop-up', 'Pace • 7:30–10:00 min/mile'],
       image: {
-        src: 'https://images.unsplash.com/photo-1518310383802-640c2de311b2?auto=format&fit=crop&w=1200&q=80',
-        alt: 'Runners on a shaded trail beside Lady Bird Lake in Austin.',
+        src: 'https://plus.unsplash.com/premium_photo-1753737684933-324ca471b06a?auto=format&fit=crop&w=1200&q=80',
+        alt: 'Athlete levelling up on the Lady Bird Lake trail at sunset.',
       },
     },
   ];

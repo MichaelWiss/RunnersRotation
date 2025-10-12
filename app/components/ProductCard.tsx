@@ -59,16 +59,12 @@ export default function ProductCard({
 
   const card = (
     <div className="home-product-card">
-      <div
-        className="home-product-image"
-        style={imageUrl ? {
-          backgroundImage: `url(${imageUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        } : undefined}
-      >
-        {!imageUrl ? fallbackLabel || title || 'Featured Product' : null}
+      <div className="home-product-image">
+        {imageUrl ? (
+          <img src={imageUrl} alt={title ?? ''} loading="lazy" />
+        ) : (
+          fallbackLabel || title || 'Featured Product'
+        )}
       </div>
       <div className="home-product-content">
         <h3>{title || 'Featured Product'}</h3>

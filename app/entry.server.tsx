@@ -64,6 +64,8 @@ function handleBotRequest(
         "'self'",
         "data:",
         "https://images.unsplash.com",
+        "https://plus.unsplash.com",
+        "https://cdn.shopify.com",
       ],
       connectSrc: [
         "'self'",
@@ -141,6 +143,8 @@ function handleBrowserRequest(
             "'self'",
             "data:",
             "https://images.unsplash.com",
+            "https://plus.unsplash.com",
+            "https://cdn.shopify.com",
           ],
           connectSrc: [
             "'self'",

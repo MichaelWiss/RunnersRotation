@@ -56,7 +56,9 @@ body{
   gap:16px;
 }
 .main-img{
-  height:420px;
+  aspect-ratio: 4 / 5;
+  height:auto;
+  min-height:420px;
   border-radius:0px; /* Changed from 12px */
   background: linear-gradient(135deg, var(--panel), var(--muted));
   background-size:cover;
@@ -75,7 +77,26 @@ body{
   /* Use panel-toned shadow instead of black to satisfy no black/white/grey rule */
   text-shadow: 2px 2px 4px rgba(11,37,69,0.28);
   white-space: pre-line;
+  overflow:hidden;
+  position:relative;
 }
+.main-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.main-img--fallback img{
+  display:none;
+}
+.main-img__label{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+.main-img__label:empty{display:none;}
 .thumb-row{
   display:flex;
   gap:12px;
@@ -83,7 +104,8 @@ body{
 }
 .thumb{
   flex:1;
-  height:72px;
+  aspect-ratio:1/1;
+  height:auto;
   border-radius:0px; /* Changed from 8px */
   background: linear-gradient(135deg, var(--accent), var(--cta-hover));
   background-size:cover;
@@ -92,10 +114,16 @@ body{
   border:4px solid var(--line);
   cursor: pointer;
   transition: all 0.3s ease;
+  overflow:hidden;
 }
 .thumb:hover{
   transform: scale(1.05);
   border-color: var(--accent);
+}
+.thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
 .meta{

@@ -35,7 +35,7 @@ const ProductGallery = memo(function ProductGallery({title, subtitle, descriptio
     <section className="gallery" aria-labelledby="product-title">
       <div className="images">
         <div className={`main-img${main ? '' : ' main-img--fallback'}`} data-fallback-label={fallbackLabel}>
-          {main ? <img src={main.url} alt={main.altText ?? 'Product image'} loading="eager" width="1200" height="1500" /> : null}
+          {main ? <img src={main.url} alt={main.altText ?? 'Product image'} loading="eager" decoding="async" fetchPriority="high" width="1200" height="1500" /> : null}
           <span className="main-img__label">{main ? '' : fallbackLabel}</span>
         </div>
         <div className="thumb-row">
@@ -49,7 +49,7 @@ const ProductGallery = memo(function ProductGallery({title, subtitle, descriptio
                 data-image-alt={thumb?.altText ?? ''}
                 style={!thumb ? {background: gradients[index] || gradients[0]} : undefined}
               >
-                {thumb ? <img src={thumb.url} alt={thumb.altText ?? ''} loading="lazy" width="400" height="500" /> : null}
+                {thumb ? <img src={thumb.url} alt={thumb.altText ?? ''} loading="lazy" decoding="async" width="400" height="500" /> : null}
               </div>
             );
           })}

@@ -84,7 +84,7 @@ export default function RunClub() {
           </p>
         </header>
         <figure className="static-page__figure">
-          <img src={heroImage.src} alt={heroImage.alt} loading="lazy" />
+          <img src={heroImage.src} alt={heroImage.alt} loading="lazy" decoding="async" />
         </figure>
 
         <div className="static-page__content">
@@ -102,6 +102,7 @@ export default function RunClub() {
                       src={session.image.src}
                       alt={session.image.alt}
                       loading="lazy"
+                      decoding="async"
                       className="static-card__image"
                     />
                   ) : null}

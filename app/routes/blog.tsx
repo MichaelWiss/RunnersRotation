@@ -89,6 +89,7 @@ export default function Blog() {
                   src={featuredPost.image.src}
                   alt={featuredPost.image.alt}
                   loading="lazy"
+                  decoding="async"
                   className="featured-card__image"
                 />
               ) : null}
@@ -113,6 +114,7 @@ export default function Blog() {
                         src={post.image.src}
                         alt={post.image.alt}
                         loading="lazy"
+                        decoding="async"
                         className="static-card__image"
                       />
                     ) : null}

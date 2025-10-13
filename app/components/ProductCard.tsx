@@ -43,6 +43,7 @@ const ProductCard = memo(function ProductCard({
               src={imageUrl}
               alt={title ?? ''}
               loading="lazy"
+              decoding="async"
               width="800"
               height="1000"
               className="card-image-media"
@@ -65,7 +66,7 @@ const ProductCard = memo(function ProductCard({
     <div className="home-product-card">
       <div className="home-product-image">
         {imageUrl ? (
-          <img src={imageUrl} alt={title ?? ''} loading="lazy" width="800" height="1000" />
+          <img src={imageUrl} alt={title ?? ''} loading="lazy" decoding="async" width="800" height="1000" />
         ) : (
           fallbackLabel || title || 'Featured Product'
         )}

@@ -72,14 +72,16 @@ export default function ProductCard({
         <h3>{title || 'Featured Product'}</h3>
         <p>{description || 'Curated from your featured collection in Shopify.'}</p>
         <div className="home-product-price">{formattedPrice || 'View details'}</div>
-        {handle ? (
-          <Link to={`/products/${handle}`} className="home-product-cta">Shop Now</Link>
-        ) : (
-          <a href="#" className="home-product-cta">Shop Now</a>
-        )}
+        <div className="home-product-cta">Shop Now</div>
       </div>
     </div>
   );
 
-  return card;
+  return handle ? (
+    <Link to={`/products/${handle}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+      {card}
+    </Link>
+  ) : (
+    card
+  );
 }

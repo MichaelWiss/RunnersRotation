@@ -444,6 +444,7 @@ body {
   margin-right: -50vw;
   margin-top: 0;
   margin-bottom: 27px;
+  min-height: 500px;
   /* Background image now applied to full-width hero-card */
   background-image: linear-gradient(135deg, rgba(233, 76, 38, 0.08), rgba(11, 37, 69, 0.08)), url('/images/runners-feet.jpg');
   background-position: center;
@@ -461,7 +462,7 @@ body {
 .hero-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 48px 24px;
+  padding: 80px 24px;
   display: block;
   width: 100%;
   position: relative;
@@ -950,6 +951,10 @@ body {
   padding: 32px 32px 28px;
   transition: all 0.3s ease;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  cursor: pointer;
 }
 
 .home-product-card:hover {
@@ -986,6 +991,12 @@ body {
   transform-origin: center;
 }
 
+.home-product-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 .home-product-content h3 {
   font-family: 'Times CG', 'Times New Roman', Times, serif;
   font-size: 28px;
@@ -993,6 +1004,13 @@ body {
   margin-bottom: 12px;
   font-style: italic;
   font-weight: 700;
+  line-height: 1.25;
+  min-height: 2.5em;
+  max-height: 2.5em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .home-product-content p {
@@ -1004,14 +1022,16 @@ body {
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: 6em;
 }
 
 .home-product-price {
   font-family: 'Playfair Display', serif;
   font-size: 24px;
   font-weight: 800;
-  color: var(--accent);
-  margin-bottom: 20px;
+  color: var(--panel);
+  margin-top: auto;
+  margin-bottom: 16px;
 }
 
 .home-product-cta {
@@ -1023,6 +1043,7 @@ body {
   border-radius: 0px;
   font-weight: 600;
   font-size: 14px;
+  text-align: center;
   transition: all 0.3s ease;
   box-shadow: 0 6px 20px rgba(233, 76, 38, 0.15);
 }

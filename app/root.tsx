@@ -106,7 +106,7 @@ export async function loader({context}: LoaderFunctionArgs) {
 
   const layoutPromise = context.storefront
     .query<{shop: Shop}>(LAYOUT_QUERY, {
-      cache: context.storefront.CacheShort(),
+      cache: context.storefront.CacheLong(), // Cache shop info for 24 hours
     })
     .catch((error) => {
       console.error('[root.loader] layout query failed', error);
@@ -243,15 +243,11 @@ const CART_QUERY = `#graphql
       email
       phone
     }
-    lines(first: 100) {
+    lines(first: 20) {
       edges {
         node {
           id
           quantity
-          attributes {
-            key
-            value
-          }
           cost {
             totalAmount {
               amount
@@ -261,22 +257,14 @@ const CART_QUERY = `#graphql
               amount
               currencyCode
             }
-            compareAtAmountPerQuantity {
-              amount
-              currencyCode
-            }
           }
           merchandise {
             ... on ProductVariant {
               id
               availableForSale
-              compareAtPrice {
-                ...MoneyFragment
-              }
               price {
                 ...MoneyFragment
               }
-              requiresShipping
               title
               image {
                 ...ImageFragment
@@ -285,10 +273,6 @@ const CART_QUERY = `#graphql
                 handle
                 title
                 id
-              }
-              selectedOptions {
-                name
-                value
               }
             }
           }

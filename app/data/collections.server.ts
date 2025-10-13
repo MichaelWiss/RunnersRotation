@@ -34,6 +34,7 @@ export async function loadCollectionsByHandles(
   try {
     const client = getStorefront({storefront});
     const data = await client.query<Record<string, CollectionNode | null>>(query);
+    // Note: Collections are naturally cached by Shopify's CDN
 
     const map = new Map<string, NavigationItem>();
     uniqueHandles.forEach((handle, index) => {

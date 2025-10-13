@@ -27,7 +27,10 @@ export async function loader({params, context}: LoaderFunctionArgs) {
 
   const query = `#graphql
     fragment MoneyFragment on MoneyV2 { amount currencyCode }
-    fragment ImageFragment on Image { url altText }
+    fragment ImageFragment on Image { 
+      url(transform: {maxWidth: 800}) 
+      altText 
+    }
     fragment ProductCardFields on Product {
       id
       title

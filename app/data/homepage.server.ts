@@ -10,7 +10,14 @@ const MONEY_FRAGMENT = `#graphql
 
 const IMAGE_FRAGMENT = `#graphql
   fragment ImageFragment on Image {
-    url
+    url(transform: {maxWidth: 800})
+    altText
+  }
+`;
+
+const HIGH_RES_IMAGE_FRAGMENT = `#graphql
+  fragment HighResImageFragment on Image {
+    url(transform: {maxWidth: 1200})
     altText
   }
 `;
@@ -56,18 +63,18 @@ const SHOWCASE_PRODUCT_FRAGMENT = `#graphql
     description
     descriptionHtml
     featuredImage {
-      ...ImageFragment
+      ...HighResImageFragment
     }
     images(first: $galleryCount) {
       nodes {
-        ...ImageFragment
+        ...HighResImageFragment
       }
     }
     options {
       name
       values
     }
-    variants(first: 10) {
+    variants(first: 3) {
       nodes {
         id
         title
@@ -93,6 +100,7 @@ const SHOWCASE_PRODUCT_FRAGMENT = `#graphql
 const HOMEPAGE_QUERY = `#graphql
   ${MONEY_FRAGMENT}
   ${IMAGE_FRAGMENT}
+  ${HIGH_RES_IMAGE_FRAGMENT}
   ${PRODUCT_CARD_FRAGMENT}
   ${SHOWCASE_PRODUCT_FRAGMENT}
   query HomepageData(
@@ -420,6 +428,7 @@ export async function loadHomepageData(
         galleryCount,
         metafieldIdentifiers: SHOWCASE_METAFIELD_IDENTIFIERS.map(({namespace, key}) => ({namespace, key})),
       },
+      // Note: Could add cache: storefront.CacheShort() if needed
     });
 
     const rawGrid = data?.grid?.products?.nodes ?? [];

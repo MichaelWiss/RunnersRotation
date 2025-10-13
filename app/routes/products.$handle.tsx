@@ -45,9 +45,24 @@ export async function loader({params, context}: LoaderFunctionArgs) {
         handle
         description
         descriptionHtml
-        featuredImage { url altText }
-        images(first: 10) { nodes { url altText } }
-        variants(first: 10) { nodes { id title availableForSale price { amount currencyCode } } }
+        featuredImage { 
+          url(transform: {maxWidth: 1200}) 
+          altText 
+        }
+        images(first: 6) { 
+          nodes { 
+            url(transform: {maxWidth: 1200}) 
+            altText 
+          } 
+        }
+        variants(first: 5) { 
+          nodes { 
+            id 
+            title 
+            availableForSale 
+            price { amount currencyCode } 
+          } 
+        }
       }
     }`,
       {variables: {handle}},

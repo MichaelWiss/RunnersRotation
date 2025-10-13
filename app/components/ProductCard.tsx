@@ -37,15 +37,17 @@ export default function ProductCard({
   if (variant === 'footer') {
     const content = (
       <div className="product-card">
-        <div
-          className="card-image"
-          style={imageUrl ? {
-            backgroundImage: `url(${imageUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          } : undefined}
-        >
-          {!imageUrl ? fallbackLabel || title || 'Featured Product' : null}
+        <div className={`card-image${imageUrl ? '' : ' card-image--placeholder'}`}>
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={title ?? ''}
+              loading="lazy"
+              className="card-image-media"
+            />
+          ) : (
+            <span>{fallbackLabel || title || 'Featured Product'}</span>
+          )}
         </div>
         <div className="card-content">
           <h3 className="card-title">{title || 'Featured Product'}</h3>

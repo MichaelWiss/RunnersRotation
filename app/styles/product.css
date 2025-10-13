@@ -60,9 +60,7 @@ body{
   height:auto;
   min-height:420px;
   border-radius:0px; /* Changed from 12px */
-  background: linear-gradient(135deg, var(--panel), var(--muted));
-  background-size:cover;
-  background-position:center;
+  background:#ffffff;
   box-shadow: 0 6px 20px rgba(11,37,69,0.12);
   border:6px solid var(--line);
   display: flex;
@@ -79,11 +77,18 @@ body{
   white-space: pre-line;
   overflow:hidden;
   position:relative;
+  padding:32px;
+}
+.main-img--fallback{
+  background: linear-gradient(135deg, var(--panel), var(--muted));
 }
 .main-img img{
   width:100%;
   height:100%;
-  object-fit:cover;
+  object-fit:contain;
+  object-position:center;
+  transform:scale(1.2);
+  transform-origin:center;
 }
 .main-img--fallback img{
   display:none;

@@ -1,3 +1,5 @@
+import {memo, useMemo} from 'react';
+
 type ImageNode = {url: string; altText: string | null};
 
 interface ProductGalleryProps {
@@ -7,14 +9,28 @@ interface ProductGalleryProps {
   images?: ImageNode[];
 }
 
-export default function ProductGallery({title, subtitle, description, images}: ProductGalleryProps) {
-  const main = images && images.length > 0 ? images[0] : undefined;
-  const thumbList: ImageNode[] = [
-    images?.[0],
-    images?.[1],
-    images?.[2],
-  ].filter(Boolean) as ImageNode[];
+const ProductGallery = memo(function ProductGallery({title, subtitle, description, images}: ProductGalleryProps) {
+  // Memoize expensive calculations
+  const main = useMemo(() => {
+    return images && images.length > 0 ? images[0] : undefined;
+  }, [images]);
+
+  const thumbList = useMemo(() => {
+    return [
+      images?.[0],
+      images?.[1], 
+      images?.[2],
+    ].filter(Boolean) as ImageNode[];
+  }, [images]);
+
   const fallbackLabel = 'TRAIL RUNNER PRO';
+
+  // Memoize gradient styles
+  const gradients = useMemo(() => [
+    'linear-gradient(135deg, var(--panel), var(--accent))',
+    'linear-gradient(135deg, var(--accent), var(--cta-hover))',
+    'linear-gradient(135deg, var(--muted), var(--panel))',
+  ], []);
   return (
     <section className="gallery" aria-labelledby="product-title">
       <div className="images">
@@ -25,11 +41,6 @@ export default function ProductGallery({title, subtitle, description, images}: P
         <div className="thumb-row">
           {[0, 1, 2].map((index) => {
             const thumb = thumbList[index];
-            const gradients = [
-              'linear-gradient(135deg, var(--panel), var(--accent))',
-              'linear-gradient(135deg, var(--accent), var(--cta-hover))',
-              'linear-gradient(135deg, var(--muted), var(--panel))',
-            ];
             return (
               <div
                 key={index}
@@ -66,10 +77,12 @@ export default function ProductGallery({title, subtitle, description, images}: P
 
         <div className="reviews">
           <div className="stars">★★★★★</div>
-          <div style={{fontWeight:700, marginTop:8}}>89 reviews</div>
+          <div className="review-count">89 reviews</div>
           <div className="muted-note">94% positive – trusted by elite ultrarunners worldwide</div>
         </div>
       </aside>
     </section>
   );
-}
+});
+
+export default ProductGallery;

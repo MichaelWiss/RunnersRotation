@@ -1,4 +1,5 @@
 import {Link} from 'react-router';
+import {memo, useMemo} from 'react';
 
 export type ProductCardVariant = 'home' | 'footer';
 
@@ -12,19 +13,7 @@ export interface ProductCardProps {
   fallbackLabel?: string;
 }
 
-function formatPrice(price?: {amount: string; currencyCode: string} | null) {
-  if (!price) return null;
-  try {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: price.currencyCode,
-    }).format(Number(price.amount));
-  } catch {
-    return `${price.currencyCode} ${price.amount}`;
-  }
-}
-
-export default function ProductCard({
+const ProductCard = memo(function ProductCard({
   variant = 'home',
   title,
   description,
@@ -33,7 +22,18 @@ export default function ProductCard({
   price,
   fallbackLabel,
 }: ProductCardProps) {
-  const formattedPrice = formatPrice(price);
+  // Memoize expensive price formatting
+  const formattedPrice = useMemo(() => {
+    if (!price) return null;
+    try {
+      return new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: price.currencyCode,
+      }).format(Number(price.amount));
+    } catch {
+      return `${price.currencyCode} ${price.amount}`;
+    }
+  }, [price]);
   if (variant === 'footer') {
     const content = (
       <div className="product-card">
@@ -80,10 +80,12 @@ export default function ProductCard({
   );
 
   return handle ? (
-    <Link to={`/products/${handle}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+    <Link to={`/products/${handle}`} className="product-card-link">
       {card}
     </Link>
   ) : (
     card
   );
-}
+});
+
+export default ProductCard;

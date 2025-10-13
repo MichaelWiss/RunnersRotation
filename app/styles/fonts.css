@@ -1,75 +1,33 @@
-/* Self-hosted font-face declarations.
- * Add the actual .woff2 files into /public/fonts.
- * Keep only the weights/styles actually used to slim payload.
+/* Self-hosted font-face declarations for fonts that actually exist in /public/fonts.
+ * Removed declarations for Inter, Playfair Display, and Libre Baskerville 
+ * since these are loaded from Google Fonts and the self-hosted files don't exist.
  */
 
-/* Inter variable (preferred) with static fallbacks */
+/* Safinia fonts - used for hero title and navigation circle */
 @font-face {
-  font-family: 'Inter';
-  src: url('/fonts/Inter-Variable.woff2') format('woff2'),
-       url('/fonts/Inter-Variable.ttf') format('truetype'); /* fallback if woff2 unsupported */
-  font-weight: 100 900;
-  font-display: swap;
-  font-style: normal;
-}
-
-/* Playfair Display */
-@font-face {
-  font-family: 'Playfair Display';
-  src: url('/fonts/PlayfairDisplay-Regular.woff2') format('woff2'),
-       url('/fonts/PlayfairDisplay-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Playfair Display';
-  src: url('/fonts/PlayfairDisplay-Italic.woff2') format('woff2'),
-       url('/fonts/PlayfairDisplay-Italic.ttf') format('truetype');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Playfair Display';
-  src: url('/fonts/PlayfairDisplay-SemiBold.woff2') format('woff2'),
-       url('/fonts/PlayfairDisplay-SemiBold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Playfair Display';
-  src: url('/fonts/PlayfairDisplay-Bold.woff2') format('woff2'),
-       url('/fonts/PlayfairDisplay-Bold.ttf') format('truetype');
+  font-family: 'SafiniaBold';
+  src: url('/fonts/SafiniaBold/font.woff2') format('woff2'),
+       url('/fonts/SafiniaBold/font.woff') format('woff');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
-/* Libre Baskerville */
 @font-face {
-  font-family: 'Libre Baskerville';
-  src: url('/fonts/LibreBaskerville-Regular.woff2') format('woff2'),
-       url('/fonts/LibreBaskerville-Regular.ttf') format('truetype');
-  font-weight: 400;
+  font-family: 'SafiniaMedium';
+  src: url('/fonts/SafiniaMedium/font.woff2') format('woff2'),
+       url('/fonts/SafiniaMedium/font.woff') format('woff');
+  font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
-  font-family: 'Libre Baskerville';
-  src: url('/fonts/LibreBaskerville-Bold.woff2') format('woff2'),
-       url('/fonts/LibreBaskerville-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Libre Baskerville';
-  src: url('/fonts/LibreBaskerville-Italic.woff2') format('woff2'),
-       url('/fonts/LibreBaskerville-Italic.ttf') format('truetype');
+  font-family: 'SafiniaRegular';
+  src: url('/fonts/SafiniaRegular/font.woff2') format('woff2'),
+       url('/fonts/SafiniaRegular/font.woff') format('woff');
   font-weight: 400;
-  font-style: italic;
+  font-style: normal;
   font-display: swap;
 }
 

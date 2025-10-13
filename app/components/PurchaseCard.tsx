@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, memo, useCallback } from 'react';
 import { useCart } from '~/context/CartContext';
 
 interface Variant {
@@ -24,7 +24,7 @@ interface PurchaseCardProps {
   benefits?: string[];
 }
 
-export default function PurchaseCard({
+const PurchaseCard = memo(function PurchaseCard({
   price,
   available = true,
   variants = [],
@@ -37,52 +37,77 @@ export default function PurchaseCard({
   const { addToCart, isLoading } = useCart();
   const [quantity, setQuantity] = useState(1);
 
-  // Use first variant as default, or create a fallback
-  const selectedVariant = variants[0] || {
-    id: 'mock-variant-id',
-    title: 'Default',
-    price: price || {amount: '185.00', currencyCode: 'USD'},
-    availableForSale: available
-  };
+  // Memoize expensive calculations
+  const selectedVariant = useMemo(() => {
+    return variants[0] || {
+      id: 'mock-variant-id',
+      title: 'Default',
+      price: price || {amount: '185.00', currencyCode: 'USD'},
+      availableForSale: available
+    };
+  }, [variants, price, available]);
 
-  const sizes = sizeOptions && sizeOptions.length ? sizeOptions : DEFAULT_SIZE_OPTIONS;
-  const widths = widthOptions && widthOptions.length ? widthOptions : DEFAULT_WIDTH_OPTIONS;
-  const colors = colorOptions && colorOptions.length ? colorOptions : DEFAULT_COLOR_OPTIONS;
-  const shippingNoteText = shippingNote || 'Free U.S. shipping over $150 • 30-day trail guarantee • Expert fit support';
-  const benefitsList = benefits && benefits.length ? benefits : DEFAULT_BENEFITS;
+  const sizes = useMemo(() => {
+    return sizeOptions && sizeOptions.length ? sizeOptions : DEFAULT_SIZE_OPTIONS;
+  }, [sizeOptions]);
 
-  const handleAddToCart = () => {
+  const widths = useMemo(() => {
+    return widthOptions && widthOptions.length ? widthOptions : DEFAULT_WIDTH_OPTIONS;
+  }, [widthOptions]);
+
+  const colors = useMemo(() => {
+    return colorOptions && colorOptions.length ? colorOptions : DEFAULT_COLOR_OPTIONS;
+  }, [colorOptions]);
+
+  const shippingNoteText = useMemo(() => {
+    return shippingNote || 'Free U.S. shipping over $150 • 30-day trail guarantee • Expert fit support';
+  }, [shippingNote]);
+
+  const benefitsList = useMemo(() => {
+    return benefits && benefits.length ? benefits : DEFAULT_BENEFITS;
+  }, [benefits]);
+
+  // Memoize formatted price
+  const formattedPrice = useMemo(() => {
+    if (!price) return '$185.00';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: price.currencyCode,
+    }).format(Number(price.amount));
+  }, [price]);
+
+  // Memoize benefits text
+  const benefitsText = useMemo(() => {
+    return benefitsList.join(' • ');
+  }, [benefitsList]);
+
+  const handleAddToCart = useCallback(() => {
     if (selectedVariant.id === 'mock-variant-id') {
       return;
     }
     addToCart(selectedVariant.id, quantity);
-  };
+  }, [selectedVariant.id, quantity, addToCart]);
 
-  const handleQuantityChange = (newQuantity: number) => {
+  const handleQuantityChange = useCallback((newQuantity: number) => {
     setQuantity(Math.max(1, newQuantity));
-  };
+  }, []);
   return (
     <aside className="card" aria-labelledby="purchase">
       <div className="price-row">
         <div>
           <div className="old">Regular price</div>
           <div className="price">
-            {price
-              ? new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: price.currencyCode,
-                }).format(Number(price.amount))
-              : '$185.00'}
+            {formattedPrice}
           </div>
         </div>
-        <div style={{textAlign:'right'}}>
-          <div style={{fontSize:13,color:'var(--muted)',fontWeight:700}}>Unit price</div>
-          <div style={{fontSize:13,color:'var(--muted)'}}>per pair</div>
+        <div className="unit-price">
+          <div className="unit-price-label">Unit price</div>
+          <div className="unit-price-unit">per pair</div>
         </div>
       </div>
 
       <div className="selectors">
-        <div style={{fontSize:13,color:'var(--muted)',fontWeight:700}}>Size (US)</div>
+        <div className="selector-label">Size (US)</div>
         <div className="select" role="list">
           {sizes.map((size, index) => (
             <button className={`pill${index === 0 ? ' active' : ''}`} role="listitem" key={`size-${size}`}>
@@ -91,7 +116,7 @@ export default function PurchaseCard({
           ))}
         </div>
 
-        <div style={{fontSize:13,color:'var(--muted)',fontWeight:700}}>Width</div>
+        <div className="selector-label">Width</div>
         <div className="select">
           {widths.map((width, index) => (
             <button className={`pill${index === 0 ? ' active' : ''}`} key={`width-${width}`}>
@@ -100,7 +125,7 @@ export default function PurchaseCard({
           ))}
         </div>
 
-        <div style={{fontSize:13,color:'var(--muted)',fontWeight:700}}>Color</div>
+        <div className="selector-label">Color</div>
         <div className="select">
           {colors.map((color, index) => (
             <button className={`pill${index === 0 ? ' active' : ''}`} key={`color-${color}`}>
@@ -110,9 +135,9 @@ export default function PurchaseCard({
         </div>
 
         <div className="qty">
-          <div style={{fontSize:13,color:'var(--muted)',fontWeight:700}}>Quantity</div>
-          <div style={{flex:1}}></div>
-          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+          <div className="selector-label">Quantity</div>
+          <div className="qty-spacer"></div>
+          <div className="qty-controls">
             <button 
               aria-label="Decrease" 
               onClick={() => handleQuantityChange(quantity - 1)}
@@ -150,7 +175,9 @@ export default function PurchaseCard({
 
       <div className="divider"></div>
 
-      <div style={{fontSize:13,color:'var(--muted)'}}>{benefitsList.join(' • ')}</div>
+      <div className="benefits-text">{benefitsText}</div>
     </aside>
   );
-}
+});
+
+export default PurchaseCard;

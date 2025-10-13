@@ -64,6 +64,9 @@ export const links: LinksFunction = () => [
   {rel: 'preconnect', href: 'https://fonts.googleapis.com'},
   {rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous'},
   {rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg'},
+  // Preload critical fonts used above-the-fold (hero title and navigation circle)
+  {rel: 'preload', as: 'font', href: '/fonts/SafiniaBold/font.woff2', type: 'font/woff2', crossOrigin: 'anonymous'},
+  {rel: 'preload', as: 'font', href: '/fonts/SafiniaMedium/font.woff2', type: 'font/woff2', crossOrigin: 'anonymous'},
   // Preload homepage bundle for faster first paint (optional; harmless if duplicated by browser)
   {rel: 'preload', as: 'style', href: homepageStylesheet},
   {rel: 'preload', as: 'script', href: hydrationGuardScriptUrl},

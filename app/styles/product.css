@@ -247,6 +247,49 @@ h1{
 
 .muted-note{font-size:13px;color:var(--muted);margin-top:6px}
 
+/* Purchase card optimized styles */
+.unit-price{
+  text-align: right;
+}
+.unit-price-label{
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.unit-price-unit{
+  font-size: 13px;
+  color: var(--muted);
+}
+.selector-label{
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.qty-spacer{
+  flex: 1;
+}
+.qty-controls{
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.benefits-text{
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ProductCard optimizations */
+.product-card-link{
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ProductGallery optimizations */
+.review-count{
+  font-weight: 700;
+  margin-top: 8px;
+}
+
 /* Reviews block */
 .reviews{
   margin-top:28px;

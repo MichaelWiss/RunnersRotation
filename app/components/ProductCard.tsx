@@ -43,6 +43,8 @@ export default function ProductCard({
               src={imageUrl}
               alt={title ?? ''}
               loading="lazy"
+              width="800"
+              height="1000"
               className="card-image-media"
             />
           ) : (
@@ -63,7 +65,7 @@ export default function ProductCard({
     <div className="home-product-card">
       <div className="home-product-image">
         {imageUrl ? (
-          <img src={imageUrl} alt={title ?? ''} loading="lazy" />
+          <img src={imageUrl} alt={title ?? ''} loading="lazy" width="800" height="1000" />
         ) : (
           fallbackLabel || title || 'Featured Product'
         )}

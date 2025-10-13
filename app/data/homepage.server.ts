@@ -265,14 +265,22 @@ const parseList = (value: string | null | undefined): string[] => {
     .filter(Boolean);
 };
 
-function normalizeImage(image: RawImage | null | undefined): {url: string; altText: string | null} | null {
+function optimizeShopifyImage(url: string, width: number): string {
+  if (!url) return url;
+  // Shopify CDN supports width and quality params
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}width=${width}&quality=80`;
+}
+
+function normalizeImage(image: RawImage | null | undefined, width?: number): {url: string; altText: string | null} | null {
   if (!image?.url) return null;
-  return {url: image.url, altText: image.altText ?? null};
+  const url = width ? optimizeShopifyImage(image.url, width) : image.url;
+  return {url, altText: image.altText ?? null};
 }
 
 function normalizeProductLite(node: RawProductCard | null | undefined): ProductLite | null {
   if (!node?.id || !node.handle) return null;
-  const image = normalizeImage(node.images?.nodes?.[0] ?? null);
+  const image = normalizeImage(node.images?.nodes?.[0] ?? null, 800);
   const price = node.variants?.nodes?.[0]?.price ?? null;
   return {
     id: node.id,
@@ -323,10 +331,10 @@ function normalizeSelectedOptions(variants?: {nodes?: Array<RawVariant | null> |
 function normalizeShowcaseProduct(node: RawShowcaseProduct | null | undefined): ShowcaseProduct | null {
   if (!node?.id || !node.handle) return null;
   const gallery = (node.images?.nodes || [])
-    .map((img) => normalizeImage(img ?? null))
+    .map((img) => normalizeImage(img ?? null, 1200))
     .filter(Boolean) as Array<{url: string; altText: string | null}>;
 
-  const featured = normalizeImage(node.featuredImage ?? null);
+  const featured = normalizeImage(node.featuredImage ?? null, 1200);
   const variants = (node.variants?.nodes || [])
     .map((variant) => normalizeVariant(variant))
     .filter(Boolean) as ShowcaseProduct['variants'];
@@ -340,7 +348,8 @@ function normalizeShowcaseProduct(node: RawShowcaseProduct | null | undefined): 
   const getMeta = (namespace: string, key: string) => metafieldMap.get(`${namespace}:${key}`) ?? null;
 
   const heroSubtitle = cleanString(getMeta('homepage', 'hero_subtitle'));
-  const heroBackgroundUrl = cleanString(getMeta('homepage', 'hero_background'));
+  const heroBackgroundUrlRaw = cleanString(getMeta('homepage', 'hero_background'));
+  const heroBackgroundUrl = heroBackgroundUrlRaw ? optimizeShopifyImage(heroBackgroundUrlRaw, 1600) : null;
   const heroCtaText = cleanString(getMeta('homepage', 'hero_cta_text'));
   const heroCtaLink = cleanString(getMeta('homepage', 'hero_cta_link'));
   const sizeOptions = parseList(getMeta('homepage', 'size_options'));

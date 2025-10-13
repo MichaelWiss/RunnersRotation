@@ -19,7 +19,7 @@ export default function ProductGallery({title, subtitle, description, images}: P
     <section className="gallery" aria-labelledby="product-title">
       <div className="images">
         <div className={`main-img${main ? '' : ' main-img--fallback'}`} data-fallback-label={fallbackLabel}>
-          {main ? <img src={main.url} alt={main.altText ?? 'Product image'} loading="lazy" /> : null}
+          {main ? <img src={main.url} alt={main.altText ?? 'Product image'} loading="eager" width="1200" height="1500" /> : null}
           <span className="main-img__label">{main ? '' : fallbackLabel}</span>
         </div>
         <div className="thumb-row">
@@ -38,7 +38,7 @@ export default function ProductGallery({title, subtitle, description, images}: P
                 data-image-alt={thumb?.altText ?? ''}
                 style={!thumb ? {background: gradients[index] || gradients[0]} : undefined}
               >
-                {thumb ? <img src={thumb.url} alt={thumb.altText ?? ''} loading="lazy" /> : null}
+                {thumb ? <img src={thumb.url} alt={thumb.altText ?? ''} loading="lazy" width="400" height="500" /> : null}
               </div>
             );
           })}

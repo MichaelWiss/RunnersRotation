@@ -5,14 +5,17 @@ import ProductGallery from '~/components/ProductGallery';
 import PurchaseCard from '~/components/PurchaseCard';
 import ProductCard from '~/components/ProductCard';
 import {loadHomepageData, type HomepageData} from '~/data/homepage.server';
+import {useEffect} from 'react';
 
 // Each bundle included via links() keeps the homepage visually consistent
 // while still reusing the product detail components for the showcase.
 
-export const links: LinksFunction = () => [
-  {rel: 'stylesheet', href: homepageStyles},
-  {rel: 'stylesheet', href: productStyles},
-];
+export function links() {
+  return [
+    {rel: 'stylesheet', href: homepageStyles},
+    {rel: 'stylesheet', href: productStyles},
+  ];
+}
 
 // Loader pulls homepage data from Shopify via consolidated data helpers.
 export async function loader({context}: LoaderFunctionArgs) {
@@ -44,6 +47,21 @@ export default function Index() {
   const featuredCollectionTitle = data?.featuredCollectionTitle;
   const featuredHandle = data?.featuredHandle;
 
+  // Preload hero image for better performance
+  useEffect(() => {
+    if (showcase?.heroBackgroundUrl) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = showcase.heroBackgroundUrl;
+      link.fetchPriority = 'high';
+      document.head.appendChild(link);
+      return () => {
+        document.head.removeChild(link);
+      };
+    }
+  }, [showcase?.heroBackgroundUrl]);
+
   // Hero subtitle disabled (no computation, no admin-driven subtitle)
 
   const gridProducts = products;
@@ -70,15 +88,6 @@ export default function Index() {
       <section className="hero-section full-width">
         <div className="hero-card">
           <div className="hero-content" style={heroBackgroundStyle}>
-            {/* Preload hero image aggressively, even when set as CSS background */}
-            <img
-              src={showcase?.heroBackgroundUrl || '/images/runners-feet.jpg'}
-              alt=""
-              aria-hidden="true"
-              decoding="async"
-              fetchPriority="high"
-              style={{position: 'absolute', width: 0, height: 0, opacity: 0, pointerEvents: 'none'}}
-            />
             <div className="hero-badge">Handcrafted Performance</div>
             <h1 className="hero-title">Run Beyond Limits</h1>
             <a

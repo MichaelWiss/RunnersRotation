@@ -76,11 +76,40 @@ body {
   z-index: 1000;
   background: var(--accent-gradient);
   color: var(--card);
-  text-align: center;
-  padding: 10px 16px;
+  padding: 10px 0;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.5px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee {
+  width: 100%;
+  overflow: hidden;
+}
+
+.marquee-content {
+  display: flex;
+  animation: marqueeScroll 45s linear infinite;
+  will-change: transform;
+}
+
+.marquee-content span {
+  display: inline-block;
+  padding-right: 200px;
+  flex-shrink: 0;
+  min-width: max-content;
+}
+
+
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .nav-container {

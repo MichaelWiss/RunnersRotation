@@ -35,7 +35,16 @@ const ProductGallery = memo(function ProductGallery({title, subtitle, descriptio
     <section className="gallery" aria-labelledby="product-title">
       <div className="images">
         <div className={`main-img${main ? '' : ' main-img--fallback'}`} data-fallback-label={fallbackLabel}>
-          {main ? <img src={main.url} alt={main.altText ?? 'Product image'} loading="eager" decoding="async" fetchPriority="high" width="1200" height="1500" /> : null}
+          {main ? (
+            <img
+              src={main.url}
+              alt={main.altText ?? 'Product image'}
+              loading="eager"
+              decoding="async"
+              width="1200"
+              height="1500"
+            />
+          ) : null}
           <span className="main-img__label">{main ? '' : fallbackLabel}</span>
         </div>
         <div className="thumb-row">

@@ -13,6 +13,7 @@ import type {ProductCollectionSortKeys, ProductFilter} from '@shopify/hydrogen/s
 import homepageStyles from '~/styles/homepage.css?url';
 import collectionFiltersStyles from '~/styles/collection-filters.css?url';
 import ProductCard from '~/components/ProductCard';
+import ViewModeIcon from '~/components/ViewModeIcon';
 import {
   SORT_LABELS,
   clearFilterParams,
@@ -154,7 +155,6 @@ export async function loader({params, context, request}: LoaderFunctionArgs) {
       label
       count
       input
-      active
     }
     fragment FilterFields on Filter {
       id
@@ -175,7 +175,6 @@ export async function loader({params, context, request}: LoaderFunctionArgs) {
         id
         title
         description
-        productsCount
         products(first: $count, filters: $filters, sortKey: $sortKey, reverse: $reverse) {
           nodes { ...ProductCardFields }
           filters {
@@ -212,16 +211,28 @@ export async function loader({params, context, request}: LoaderFunctionArgs) {
         id: string;
         title: string | null;
         description: string | null;
-        productsCount?: number | null;
         products: {
           nodes: RawProduct[];
           filters?: RawFilter[] | null;
         };
       } | null;
-    }>(query, {variables});
+    }>(query, {variables, cache: storefront.CacheNone()});
+
+    const raw = data?.collection?.products?.nodes || [];
+
+    const inferredProductsCount = raw.length;
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[collections.loader]', {
+        handle,
+        selectedFilterCount: selectedFilters.length,
+        productNodes: raw.length,
+        productsCount: inferredProductsCount,
+      });
+      console.log('[collections.loader] rawNodes', raw);
+    }
 
     const title = data?.collection?.title || handle.replace(/-/g, ' ').replace(/\b\w/g, (m: string) => m.toUpperCase());
-    const raw = data?.collection?.products?.nodes || [];
 
     const products = raw.reduce<ProductSummary[]>((acc, node) => {
       if (!node?.id || !node.handle) return acc;
@@ -268,7 +279,7 @@ export async function loader({params, context, request}: LoaderFunctionArgs) {
       handle,
       products,
       filters,
-      productsCount: data?.collection?.productsCount ?? products.length,
+      productsCount: inferredProductsCount,
       selectedFilterInputs,
       selectedFilters,
       sort: sortState,
@@ -290,7 +301,8 @@ export default function CollectionRoute() {
   const navigate = useNavigate();
   const navigation = useNavigation();
 
-  const data = (fetcher.data as CollectionLoaderData | undefined) ?? loaderData;
+  const fetcherData = fetcher.data as CollectionLoaderData | undefined;
+  const data = fetcherData && fetcherData.handle === loaderData.handle ? fetcherData : loaderData;
 
   const {
     title,
@@ -587,9 +599,17 @@ export default function CollectionRoute() {
   const gridModeClass = GRID_CLASS_BY_MODE[viewMode];
   const gridClassName = `products-grid collection-filters__grid ${gridModeClass}`;
   const toolbarStyle: CSSProperties | undefined = toolbarStuck ? {top: `${navOffset}px`} : undefined;
+  const sectionStyle = useMemo(
+    () =>
+      ({
+        '--collection-toolbar-height': `${toolbarHeight}px`,
+        '--collection-nav-offset': `${navOffset}px`,
+      }) as CSSProperties,
+    [toolbarHeight, navOffset],
+  );
 
   return (
-    <section className={`collection-section ${rootClassName}`}>
+    <section className={`collection-section ${rootClassName}`} style={sectionStyle}>
       <header
         ref={toolbarRef}
         className={`collection-filters__toolbar${toolbarStuck ? ' collection-filters__toolbar--fixed' : ''}`}
@@ -620,6 +640,14 @@ export default function CollectionRoute() {
           </button>
 
           <div className="collection-filters__toolbar-right">
+            <button
+              className="collection-filters__clear-button"
+              type="button"
+              onClick={handleClearFilters}
+              disabled={localFilterInputs.length === 0 || isLoading}
+            >
+              Clear filters
+            </button>
             <div className="collection-filters__sort">
               <label className="collection-filters__sort-label" htmlFor="collection-sort">
                 Sort
@@ -648,17 +676,7 @@ export default function CollectionRoute() {
                   aria-pressed={viewMode === mode.id}
                   title={`${mode.columns} column${mode.columns > 1 ? 's' : ''}`}
                 >
-                  <svg aria-hidden="true" viewBox="0 0 24 24">
-                    <rect x="3" y="5" width="4" height="4" />
-                    <rect x="3" y="11" width="4" height="4" />
-                    <rect x="3" y="17" width="4" height="4" />
-                    <rect x="10" y="5" width="4" height="4" />
-                    <rect x="10" y="11" width="4" height="4" />
-                    <rect x="10" y="17" width="4" height="4" />
-                    <rect x="17" y="5" width="4" height="4" />
-                    <rect x="17" y="11" width="4" height="4" />
-                    <rect x="17" y="17" width="4" height="4" />
-                  </svg>
+                  <ViewModeIcon mode={mode.id} />
                 </button>
               ))}
             </div>

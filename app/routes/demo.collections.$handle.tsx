@@ -6,6 +6,7 @@ import {loader as collectionLoader} from './collections.$handle';
 export {loader} from './collections.$handle';
 import type {CollectionLoaderData} from './collections.$handle';
 import ProductCard from '~/components/ProductCard';
+import ViewModeIcon from '~/components/ViewModeIcon';
 import homepageStyles from '~/styles/homepage.css?url';
 import filtersStyles from '~/styles/collection-filters.css?url';
 
@@ -234,17 +235,7 @@ export default function CollectionFiltersDemoRoute() {
                   aria-pressed={viewMode === mode.id}
                   title={`${mode.columns} columns`}
                 >
-                  <svg aria-hidden="true" viewBox="0 0 24 24">
-                    <rect x="3" y="5" width="4" height="4" />
-                    <rect x="3" y="11" width="4" height="4" />
-                    <rect x="3" y="17" width="4" height="4" />
-                    <rect x="10" y="5" width="4" height="4" />
-                    <rect x="10" y="11" width="4" height="4" />
-                    <rect x="10" y="17" width="4" height="4" />
-                    <rect x="17" y="5" width="4" height="4" />
-                    <rect x="17" y="11" width="4" height="4" />
-                    <rect x="17" y="17" width="4" height="4" />
-                  </svg>
+                  <ViewModeIcon mode={mode.id} />
                 </button>
               ))}
             </div>

@@ -1,4 +1,4 @@
-import {createContext, useContext, useEffect, useState} from 'react';
+import {createContext, useContext, useEffect, useLayoutEffect, useState} from 'react';
 import {useRouteLoaderData} from 'react-router';
 import AnnouncementBar from './AnnouncementBar';
 import Header from './Header';
@@ -15,6 +15,7 @@ type LayoutContextValue = {
 };
 
 const LayoutContext = createContext<LayoutContextValue | null>(null);
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export function useLayoutContext() {
   return useContext(LayoutContext);
@@ -28,7 +29,8 @@ export default function Layout({children}: LayoutProps) {
   const viewerName = rootData?.viewer?.displayName || rootData?.viewer?.email || null;
   const [disableMainOffset, setDisableMainOffset] = useState(false);
   // Dynamically set header/announcement heights so content never overlaps
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
     const setHeights = () => {
       const header = document.querySelector('.header') as HTMLElement | null;
       const bar = document.querySelector('.announcement-bar') as HTMLElement | null;

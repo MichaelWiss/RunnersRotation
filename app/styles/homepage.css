@@ -1474,6 +1474,12 @@ body {
   margin-top: 80px;
 }
 
+.collection-section.collection-filters {
+  background: var(--surface);
+  margin-top: 0;
+  padding: 0;
+}
+
 /* Search page form container */
 .search-page-search-wrap {
   display: flex;

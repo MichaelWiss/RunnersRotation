@@ -1478,6 +1478,8 @@ body {
   background: var(--surface);
   margin-top: 0;
   padding: 0;
+  grid-column: 1 / -1;
+  position: relative;
 }
 
 /* Search page form container */

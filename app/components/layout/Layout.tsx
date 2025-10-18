@@ -39,6 +39,7 @@ export default function Layout({children}: LayoutProps) {
       const root = document.documentElement;
       root.style.setProperty('--header-h', `${headerH}px`);
       root.style.setProperty('--announcement-h', `${barH}px`);
+      root.style.setProperty('--nav-stack-offset', `${headerH + barH}px`);
     };
     setHeights();
     window.addEventListener('resize', setHeights);

@@ -30,6 +30,7 @@
   /* Layout metrics (set precisely at runtime) */
   --header-h: 160px;
   --announcement-h: 40px;
+  --nav-stack-offset: calc(var(--announcement-h, 0px) + var(--header-h, 0px));
 }
 
 /* Progressive enhancement: only browsers supporting color-mix will override surfaces */

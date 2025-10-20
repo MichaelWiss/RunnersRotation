@@ -6,7 +6,6 @@
 
 import {startTransition, StrictMode} from 'react';
 import {hydrateRoot} from 'react-dom/client';
-import {HydratedRouter} from 'react-router/dom';
 
 declare global {
   interface Window {
@@ -25,7 +24,8 @@ const polyfillReady = (() => {
   return Promise.resolve();
 })();
 
-polyfillReady.then(() => {
+polyfillReady.then(async () => {
+  const {HydratedRouter} = await import('react-router/dom');
   startTransition(() => {
     try {
       const root = hydrateRoot(

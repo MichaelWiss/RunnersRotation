@@ -4,7 +4,7 @@ Date: 2025-09-23
 
 This document tracks current work, what's done, and what's next.
 
-## Completed
+## Completed #
 - Product route wired to live Storefront data (`app/routes/products.$handle.tsx`)
 - DEV mock fallback for product route (`DEV_MOCK_PRODUCTS=1`)
 - Shared Layout applied across routes (`app/components/layout/Layout.tsx`)

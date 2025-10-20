@@ -59,16 +59,22 @@ const ProductCard = memo(function ProductCard({
         </div>
       </div>
     );
-    return handle ? <Link to={`/products/${handle}`}>{content}</Link> : content;
+    return handle ? (
+      <Link to={`/products/${handle}`} className="product-card-link">
+        {content}
+      </Link>
+    ) : (
+      content
+    );
   }
 
   const card = (
     <div className="home-product-card">
-      <div className="home-product-image">
+      <div className={`home-product-image${imageUrl ? '' : ' home-product-image--fallback'}`}>
         {imageUrl ? (
           <img src={imageUrl} alt={title ?? ''} loading="lazy" decoding="async" width="800" height="1000" />
         ) : (
-          fallbackLabel || title || 'Featured Product'
+          <span>{fallbackLabel || title || 'Featured Product'}</span>
         )}
       </div>
       <div className="home-product-content">

@@ -12,19 +12,20 @@ import {ServerRouter} from 'react-router';
 import {isbot} from 'isbot';
 import {renderToPipeableStream} from 'react-dom/server';
 import {createContentSecurityPolicy} from '@shopify/hydrogen';
-import {polyfillWebStreamsIfNeeded} from './polyfills/web-streams';
+import {ensureWebStreams} from './polyfills/web-streams';
 
-polyfillWebStreamsIfNeeded();
+const webStreamsReady = ensureWebStreams();
 
 const ABORT_DELAY = 5_000;
 
-export default function handleRequest(
+export default async function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
   reactRouterContext: EntryContext,
   loadContext: AppLoadContext,
 ) {
+  await webStreamsReady;
   return isbot(request.headers.get('user-agent'))
     ? handleBotRequest(
         request,

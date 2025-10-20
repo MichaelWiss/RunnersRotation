@@ -1,15 +1,19 @@
-import {ReadableStream as PonyfillReadableStream, TransformStream as PonyfillTransformStream} from 'web-streams-polyfill';
+let polyfillPromise: Promise<void> | null = null;
 
-function isMissing(key: keyof typeof globalThis) {
-  return typeof globalThis[key] === 'undefined';
+function needsPolyfill() {
+  const readable = globalThis.ReadableStream;
+  const transform = globalThis.TransformStream;
+  return (
+    typeof readable !== 'function' ||
+    typeof transform !== 'function' ||
+    typeof readable.prototype?.pipeThrough !== 'function'
+  );
 }
 
-export function polyfillWebStreamsIfNeeded() {
-  if (isMissing('ReadableStream')) {
-    globalThis.ReadableStream = PonyfillReadableStream as unknown as typeof globalThis.ReadableStream;
+export function ensureWebStreams(): Promise<void> {
+  if (!needsPolyfill()) return Promise.resolve();
+  if (!polyfillPromise) {
+    polyfillPromise = import('web-streams-polyfill/polyfill').then(() => undefined);
   }
-
-  if (isMissing('TransformStream')) {
-    globalThis.TransformStream = PonyfillTransformStream as unknown as typeof globalThis.TransformStream;
-  }
+  return polyfillPromise;
 }

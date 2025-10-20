@@ -25,6 +25,8 @@ import {
   getCustomerToken,
 } from '~/lib/session.server';
 
+const webStreamsPolyfillInline = `(function(){try{var g=self||window;var hasReadable=typeof g.ReadableStream==='function';var proto=hasReadable&&g.ReadableStream&&g.ReadableStream.prototype;var hasPipeThrough=!!(proto&&proto.pipeThrough);var hasTransform=typeof g.TransformStream==='function';if(hasReadable&&hasPipeThrough&&hasTransform){return;}var tag='<script src="https://cdn.jsdelivr.net/npm/web-streams-polyfill@4.0.0/dist/polyfill.min.js" crossorigin="anonymous"><\\\\/script>';document.write(tag);}catch(e){}})();`;
+
 function resolveSiteLinks(siteLinks: SiteLink[], collectionMap: Map<string, NavigationItem>): NavigationItem[] {
   return siteLinks
     .map((link) => {
@@ -185,6 +187,11 @@ export function Layout({children}: {children?: React.ReactNode}) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: webStreamsPolyfillInline,
+          }}
+        />
         <Meta />
         <Links />
       </head>

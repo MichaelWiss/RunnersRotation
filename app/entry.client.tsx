@@ -4,7 +4,6 @@
  * For more information, see https://remix.run/file-conventions/entry.client
  */
 
-import {HydratedRouter} from 'react-router/dom';
 import {startTransition, StrictMode} from 'react';
 import {hydrateRoot} from 'react-dom/client';
 import {ensureWebStreams} from './polyfills/web-streams';
@@ -18,6 +17,7 @@ declare global {
 
 async function bootstrap() {
   await ensureWebStreams();
+  const {HydratedRouter} = await import('react-router/dom');
 
   startTransition(() => {
     try {

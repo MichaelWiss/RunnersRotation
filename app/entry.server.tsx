@@ -8,13 +8,12 @@ import {PassThrough} from 'node:stream';
 
 import type {AppLoadContext, EntryContext} from 'react-router';
 // import {Response} from '@remix-run/web-fetch';
-import {ServerRouter} from 'react-router';
 import {isbot} from 'isbot';
 import {renderToPipeableStream} from 'react-dom/server';
 import {createContentSecurityPolicy} from '@shopify/hydrogen';
 import {ensureWebStreams} from './polyfills/web-streams';
 
-const webStreamsReady = ensureWebStreams();
+const routerReady = ensureWebStreams().then(() => import('react-router'));
 
 const ABORT_DELAY = 5_000;
 
@@ -25,7 +24,7 @@ export default async function handleRequest(
   reactRouterContext: EntryContext,
   loadContext: AppLoadContext,
 ) {
-  await webStreamsReady;
+  const {ServerRouter} = await routerReady;
   return isbot(request.headers.get('user-agent'))
     ? handleBotRequest(
         request,
@@ -33,12 +32,14 @@ export default async function handleRequest(
         responseHeaders,
         reactRouterContext,
         loadContext,
+        ServerRouter,
       )
     : handleBrowserRequest(
         request,
         responseStatusCode,
         responseHeaders,
         reactRouterContext,
+        ServerRouter,
       );
 }
 
@@ -48,6 +49,7 @@ function handleBotRequest(
   responseHeaders: Headers,
   reactRouterContext: EntryContext,
   context: AppLoadContext,
+  ServerRouter: typeof import('react-router').ServerRouter,
 ) {
   return new Promise((resolve, reject) => {
     const {nonce, header, NonceProvider} = createContentSecurityPolicy({
@@ -125,6 +127,7 @@ function handleBrowserRequest(
   responseStatusCode: number,
   responseHeaders: Headers,
   reactRouterContext: EntryContext,
+  ServerRouter: typeof import('react-router').ServerRouter,
 ) {
   // Provide minimal shop config so Hydrogen generates a CSP including our nonce for inline tokens/style diagnostics
   const host = request.headers.get('host') || '';

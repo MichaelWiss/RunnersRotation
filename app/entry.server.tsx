@@ -12,6 +12,9 @@ import {ServerRouter} from 'react-router';
 import {isbot} from 'isbot';
 import {renderToPipeableStream} from 'react-dom/server';
 import {createContentSecurityPolicy} from '@shopify/hydrogen';
+import {polyfillWebStreamsIfNeeded} from './polyfills/web-streams';
+
+polyfillWebStreamsIfNeeded();
 
 const ABORT_DELAY = 5_000;
 

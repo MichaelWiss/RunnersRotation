@@ -7,6 +7,7 @@
 import {HydratedRouter} from 'react-router/dom';
 import {startTransition, StrictMode} from 'react';
 import {hydrateRoot} from 'react-dom/client';
+import {polyfillWebStreamsIfNeeded} from './polyfills/web-streams';
 
 declare global {
   interface Window {
@@ -14,6 +15,8 @@ declare global {
     __rrHydrationShowBanner?: (message: string) => void;
   }
 }
+
+polyfillWebStreamsIfNeeded();
 
 startTransition(() => {
   try {

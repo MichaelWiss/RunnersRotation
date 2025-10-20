@@ -82,6 +82,7 @@ body {
   letter-spacing: 0.5px;
   overflow: hidden;
   white-space: nowrap;
+  pointer-events: none; /* ensure it never blocks header interactions below */
 }
 
 .marquee {
@@ -506,6 +507,7 @@ body {
   inset: 0;
   background: linear-gradient(135deg, rgba(18, 18, 20, 0.55), rgba(7, 7, 8, 0.25));
   z-index: 1;
+  pointer-events: none;
 }
 
 .hero-content > * {

@@ -34,7 +34,7 @@ const PurchaseCard = memo(function PurchaseCard({
   shippingNote,
   benefits,
 }: PurchaseCardProps) {
-  const { addToCart, isLoading } = useCart();
+  const { addToCart, isLoading, error } = useCart();
   const [quantity, setQuantity] = useState(1);
 
   // Memoize expensive calculations
@@ -171,6 +171,15 @@ const PurchaseCard = memo(function PurchaseCard({
           {isLoading ? 'Adding...' : selectedVariant.availableForSale ? 'Add to cart' : 'Sold out'}
         </button>
         <div className="muted-note">{shippingNoteText}</div>
+        {error ? (
+          <p
+            role="alert"
+            aria-live="assertive"
+            style={{ color: 'var(--accent)', marginTop: '12px', fontSize: '14px' }}
+          >
+            {error}
+          </p>
+        ) : null}
       </div>
 
       <div className="divider"></div>

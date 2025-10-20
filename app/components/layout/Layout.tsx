@@ -72,8 +72,8 @@ export default function Layout({children}: LayoutProps) {
   return (
     <LayoutContext.Provider value={{setDisableMainOffset}}>
       <AnnouncementBar />
+      <Header collections={navigationLinks} isLoggedIn={isLoggedIn} viewerName={viewerName} />
       <div className="page-container">
-        <Header collections={navigationLinks} isLoggedIn={isLoggedIn} viewerName={viewerName} />
         <main className={disableMainOffset ? 'main-no-offset' : undefined}>{children}</main>
       </div>
       <Footer links={footerLinks} />

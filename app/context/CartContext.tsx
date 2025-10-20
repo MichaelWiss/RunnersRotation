@@ -1,6 +1,6 @@
-import { createContext, useContext, useReducer, useEffect } from 'react';
-import { useFetcher } from 'react-router';
-import type { Cart } from '@shopify/hydrogen/storefront-api-types';
+import {createContext, useContext, useReducer, useEffect} from 'react';
+import {useFetcher} from 'react-router';
+import type {Cart} from '@shopify/hydrogen/storefront-api-types';
 
 interface CartState {
   cart: Cart | null;
@@ -16,11 +16,11 @@ type CartAction =
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case 'SET_CART':
-      return { ...state, cart: action.cart };
+      return {...state, cart: action.cart, error: null};
     case 'SET_LOADING':
-      return { ...state, isLoading: action.loading };
+      return {...state, isLoading: action.loading};
     case 'SET_ERROR':
-      return { ...state, error: action.error };
+      return {...state, error: action.error};
     default:
       return state;
   }
@@ -82,6 +82,7 @@ export function CartProvider({
   }, [updateFetcher.data]);
 
   const addToCart = (variantId: string, quantity = 1) => {
+    dispatch({type: 'SET_ERROR', error: null});
     dispatch({ type: 'SET_LOADING', loading: true });
     addFetcher.submit(
       { variantId, quantity: quantity.toString() },
@@ -90,6 +91,7 @@ export function CartProvider({
   };
 
   const removeFromCart = (lineId: string) => {
+    dispatch({type: 'SET_ERROR', error: null});
     removeFetcher.submit(
       { lineId },
       { method: 'post', action: '/cart/remove' }
@@ -97,6 +99,7 @@ export function CartProvider({
   };
 
   const updateCartLine = (lineId: string, quantity: number) => {
+    dispatch({type: 'SET_ERROR', error: null});
     updateFetcher.submit(
       { lineId, quantity: quantity.toString() },
       { method: 'post', action: '/cart/update' }

@@ -56,7 +56,7 @@ The server already populates `customerAccessToken` in the root loader and expose
 
 ### Revised Implementation Plan (Granular Steps)
 
-**Phase 1: Session & API Foundation**
+**Phase 1: Session & API Foundation***
 1. Create a new file `app/lib/session.server.ts` that wraps the existing `AppSession` class. Add helper functions: `getCustomerToken()` to retrieve the token, `setCustomerToken(token)` to store it, `clearCustomerToken()` to remove it, and `commitWithHeaders()` to save changes and return response headers.
 2. Create a new file `app/lib/shopifyCustomer.server.ts` with functions to call Shopify's Storefront API for customer actions: `createCustomerAccessToken(email, password)` for login, `deleteCustomerAccessToken(token)` for logout, `renewCustomerAccessToken(token)` to refresh expiring tokens, `createCustomer(email, password, firstName, lastName)` for registration, `recoverCustomer(email)` for password reset, `updateCustomer(token, updates)` for profile changes, and `getCustomer(token)` to fetch user details.
 3. Create a new file `app/lib/validation.server.ts` with utility functions: `validateEmail(email)` to check email format, `validatePassword(password)` to enforce strength rules (e.g., minimum length), and `normalizeStorefrontErrors(errors)` to convert Shopify API errors into user-friendly messages.

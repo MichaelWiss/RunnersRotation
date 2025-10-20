@@ -15,6 +15,7 @@ import homepageStylesheet from './styles/homepage.css?url';
 import tokensStylesheet from './styles/tokens.css?url';
 import {useNonce} from '@shopify/hydrogen';
 import hydrationGuardScriptUrl from './scripts/hydration-guard.global.js?url';
+import safeStorageScriptUrl from './scripts/safe-storage.global.js?url';
 import { CartProvider } from '~/context/CartContext';
 import SiteLayout from '~/components/layout/Layout';
 import {loadCollectionsByHandles} from '~/data/collections.server';
@@ -186,6 +187,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <script nonce={nonce} src={safeStorageScriptUrl} />
         <script nonce={nonce} src="/polyfills/web-streams-loader.js" />
         <Meta />
         <Links />

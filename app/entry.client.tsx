@@ -4,7 +4,6 @@
  * For more information, see https://remix.run/file-conventions/entry.client
  */
 
-import './polyfills/safe-storage';
 import {startTransition, StrictMode} from 'react';
 import {hydrateRoot} from 'react-dom/client';
 

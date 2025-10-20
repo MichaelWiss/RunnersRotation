@@ -4,9 +4,10 @@
  * For more information, see https://remix.run/file-conventions/entry.client
  */
 
+import 'web-streams-polyfill/polyfill';
 import {startTransition, StrictMode} from 'react';
 import {hydrateRoot} from 'react-dom/client';
-import {ensureWebStreams} from './polyfills/web-streams';
+import {HydratedRouter} from 'react-router/dom';
 
 declare global {
   interface Window {
@@ -15,36 +16,29 @@ declare global {
   }
 }
 
-async function bootstrap() {
-  await ensureWebStreams();
-  const {HydratedRouter} = await import('react-router/dom');
+startTransition(() => {
+  try {
+    const root = hydrateRoot(
+      document,
+      <StrictMode>
+        <HydratedRouter />
+      </StrictMode>,
+    );
 
-  startTransition(() => {
-    try {
-      const root = hydrateRoot(
-        document,
-        <StrictMode>
-          <HydratedRouter />
-        </StrictMode>,
-      );
+    queueMicrotask(() => {
+      window.__rrHydrationConfirm?.();
+    });
 
-      queueMicrotask(() => {
-        window.__rrHydrationConfirm?.();
-      });
-
-      if (import.meta.env.DEV) {
-        // Keep a reference alive in dev so we can inspect and avoid unused var warnings.
-        (window as unknown as {__rrHydrationRoot?: unknown}).__rrHydrationRoot = root;
-      }
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : typeof error === 'string' ? error : 'Unknown hydration error';
-      window.__rrHydrationShowBanner?.(
-        `Interactive JS crashed during startup: ${message}. Check the console for stack traces.`,
-      );
-      throw error;
+    if (import.meta.env.DEV) {
+      // Keep a reference alive in dev so we can inspect and avoid unused var warnings.
+      (window as unknown as {__rrHydrationRoot?: unknown}).__rrHydrationRoot = root;
     }
-  });
-}
-
-void bootstrap();
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : typeof error === 'string' ? error : 'Unknown hydration error';
+    window.__rrHydrationShowBanner?.(
+      `Interactive JS crashed during startup: ${message}. Check the console for stack traces.`,
+    );
+    throw error;
+  }
+});

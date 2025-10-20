@@ -131,8 +131,8 @@ body {
 /* Fixed Navigation Circle - Pink that complements the design */
 .nav-circle {
   position: relative;
-  width: 140px;
-  height: 140px;
+  width: var(--nav-circle-size, 140px);
+  height: var(--nav-circle-size, 140px);
   border-radius: 50%;
   background: linear-gradient(45deg, #e94c26, #ff7a4a, #F4A6CD, #e94c26, #ff7a4a, #E8C2A0);
   background-size: 1200% 1200%;
@@ -226,11 +226,11 @@ body {
   align-items: center;
   justify-content: center;
   font-family: 'SafiniaBold', 'Playfair Display', serif;
-  font-size: 16px;
+  font-size: var(--nav-circle-font-size, 16px);
   font-weight: 700; /* Bold text */
   color: #2C2C2C;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--nav-circle-letter-spacing, 0.08em);
   text-shadow: 0 1px 2px rgba(44, 44, 44, 0.1);
 }
 
@@ -296,9 +296,43 @@ body {
 
 .nav-search-input::placeholder { color: var(--muted); }
 
+@media (max-width: 900px) {
+  :root {
+    --nav-circle-size: 120px;
+    --nav-circle-font-size: 15px;
+    --nav-circle-letter-spacing: 0.07em;
+  }
+  .nav-top {
+    padding: 14px 0 12px;
+    gap: 18px;
+  }
+  .nav-actions {
+    gap: 18px;
+  }
+}
+
 @media (max-width: 768px) {
   /* Hide desktop search control on small screens; mobile menu provides links */
   .nav-search-wrap { display: none; }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --nav-circle-size: 96px;
+    --nav-circle-font-size: 13px;
+    --nav-circle-letter-spacing: 0.06em;
+  }
+  .nav-top {
+    padding: 12px 0 10px;
+    gap: 14px;
+  }
+  .nav-actions {
+    gap: 12px;
+  }
+  .nav-link {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
 }
 
 .nav-link {
@@ -1694,6 +1728,12 @@ body {
 }
 
 @media (max-width: 480px) {
+  :root {
+    --nav-circle-size: 82px;
+    --nav-circle-font-size: 12px;
+    --nav-circle-letter-spacing: 0.05em;
+  }
+
   .footer-section {
     margin-bottom: 30px;
   }
@@ -1706,13 +1746,9 @@ body {
     font-size: 32px;
   }
 
-  .nav-top {
-    flex-direction: column;
-    gap: 15px;
-  }
-
   .nav-actions {
     justify-content: center;
+    gap: 10px;
   }
 
   .product-card {
@@ -1729,9 +1765,15 @@ body {
     font-size: 15px;
   }
 
+  .nav-link {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
   .nav-top {
     flex-direction: column;
-    gap: 15px;
     text-align: center;
+    padding: 10px 0;
+    gap: 12px;
   }
 }

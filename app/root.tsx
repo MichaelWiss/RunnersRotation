@@ -25,11 +25,6 @@ import {
   getCustomerToken,
 } from '~/lib/session.server';
 
-function buildWebStreamsPolyfillInline(nonce: string) {
-  const escapedNonce = nonce.replace(/"/g, '&quot;');
-  return `;(function(){try{var g=self||window;var hasReadable=typeof g.ReadableStream==='function';var proto=hasReadable&&g.ReadableStream&&g.ReadableStream.prototype;var hasPipeThrough=!!(proto&&proto.pipeThrough);var hasTransform=typeof g.TransformStream==='function';if(hasReadable&&hasPipeThrough&&hasTransform){return;}var tag='<script nonce="${escapedNonce}" src="/polyfills/web-streams-polyfill.js"><\\/script>';document.write(tag);}catch(e){}})();`;
-}
-
 
 function resolveSiteLinks(siteLinks: SiteLink[], collectionMap: Map<string, NavigationItem>): NavigationItem[] {
   return siteLinks
@@ -191,12 +186,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <script
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html: buildWebStreamsPolyfillInline(nonce || ''),
-          }}
-        />
+        <script nonce={nonce} src="/polyfills/web-streams-loader.js" />
         <Meta />
         <Links />
       </head>

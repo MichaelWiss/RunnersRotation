@@ -8,8 +8,11 @@
     if (hasReadable && hasPipeThrough && hasTransform) {
       return;
     }
-    document.write('<script src="/polyfills/web-streams-polyfill.js"><\\/script>');
+    var currentScript = document.currentScript;
+    var nonce = currentScript && currentScript.nonce ? currentScript.nonce : '';
+    var nonceAttr = nonce ? ' nonce="' + nonce.replace(/"/g, '&quot;') + '"' : '';
+    document.write('<script' + nonceAttr + ' src="/polyfills/web-streams-polyfill.js"><\\/script>');
   } catch (error) {
-    // Swallow – polyfill is best-effort.
+    // Polyfill is best-effort; ignore failures.
   }
 })();

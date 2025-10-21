@@ -175,3 +175,21 @@ export function setViewModeParam(searchParams: URLSearchParams, viewMode: ViewMo
   }
   return next;
 }
+
+export function normalizeFilterInputValue(input: string): string {
+  const parsed = decodeFilterParam(input);
+  return parsed ? encodeFilterParam(parsed) : input;
+}
+
+export function normalizeFilterInputList(inputs: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  inputs.forEach((input) => {
+    const normalized = normalizeFilterInputValue(input);
+    if (!seen.has(normalized)) {
+      seen.add(normalized);
+      result.push(normalized);
+    }
+  });
+  return result;
+}

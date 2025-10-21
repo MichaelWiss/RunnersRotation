@@ -29,28 +29,12 @@ import {
   type SortState,
   type SortParam,
   type ViewMode,
+  normalizeFilterInputValue,
+  normalizeFilterInputList,
 } from '~/utils/collectionFilters';
 
 const VIEW_MODE_STORAGE_KEY = 'collection:view-mode';
 const SIDEBAR_ID = 'collection-filters-sidebar';
-
-const normalizeFilterInputValue = (input: string): string => {
-  const parsed = decodeFilterParam(input);
-  return parsed ? encodeFilterParam(parsed) : input;
-};
-
-const normalizeFilterInputList = (inputs: string[]): string[] => {
-  const seen = new Set<string>();
-  const result: string[] = [];
-  inputs.forEach((input) => {
-    const normalized = normalizeFilterInputValue(input);
-    if (!seen.has(normalized)) {
-      seen.add(normalized);
-      result.push(normalized);
-    }
-  });
-  return result;
-};
 
 type ProductSummary = {
   id: string;

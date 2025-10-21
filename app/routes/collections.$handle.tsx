@@ -34,6 +34,24 @@ import {
 const VIEW_MODE_STORAGE_KEY = 'collection:view-mode';
 const SIDEBAR_ID = 'collection-filters-sidebar';
 
+const normalizeFilterInputValue = (input: string): string => {
+  const parsed = decodeFilterParam(input);
+  return parsed ? encodeFilterParam(parsed) : input;
+};
+
+const normalizeFilterInputList = (inputs: string[]): string[] => {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  inputs.forEach((input) => {
+    const normalized = normalizeFilterInputValue(input);
+    if (!seen.has(normalized)) {
+      seen.add(normalized);
+      result.push(normalized);
+    }
+  });
+  return result;
+};
+
 type ProductSummary = {
   id: string;
   title: string;
@@ -324,18 +342,10 @@ export default function CollectionRoute() {
   const [toolbarHeight, setToolbarHeight] = useState(0);
   const [navOffset, setNavOffset] = useState(0);
   const [toolbarStuck, setToolbarStuck] = useState(false);
-  const [localFilterInputs, setLocalFilterInputs] = useState<string[]>(selectedFilterInputs);
-  const localFilterInputSet = useMemo(() => {
-    const set = new Set<string>();
-    localFilterInputs.forEach((input) => {
-      set.add(input);
-      const parsed = decodeFilterParam(input);
-      if (parsed) {
-        set.add(encodeFilterParam(parsed));
-      }
-    });
-    return set;
-  }, [localFilterInputs]);
+  const [localFilterInputs, setLocalFilterInputs] = useState<string[]>(() =>
+    normalizeFilterInputList(selectedFilterInputs),
+  );
+  const localFilterInputSet = useMemo(() => new Set(localFilterInputs), [localFilterInputs]);
   const activeFilters = localFilterInputs.length;
   const filterToggleRef = useRef<HTMLButtonElement | null>(null);
   const sidebarRef = useRef<HTMLElement | null>(null);
@@ -351,7 +361,9 @@ export default function CollectionRoute() {
     const map = new Map<string, {label: string; groupLabel: string}>();
     filters.forEach((group) => {
       group.values.forEach((value) => {
-        map.set(value.input, {label: value.label, groupLabel: group.label});
+        const meta = {label: value.label, groupLabel: group.label};
+        map.set(value.input, meta);
+        map.set(normalizeFilterInputValue(value.input), meta);
       });
     });
     return map;
@@ -384,7 +396,7 @@ export default function CollectionRoute() {
     const parsed = decodeFilterParam(rawInput);
     if (!parsed) return;
     const nextParams = toggleFilterParam(new URLSearchParams(location.search), parsed);
-    setLocalFilterInputs(nextParams.getAll('filter'));
+    setLocalFilterInputs(normalizeFilterInputList(nextParams.getAll('filter')));
     submitSearchParams(nextParams);
   };
 
@@ -436,7 +448,7 @@ export default function CollectionRoute() {
   }, [initialViewMode]);
 
   useEffect(() => {
-    setLocalFilterInputs(selectedFilterInputs);
+    setLocalFilterInputs(normalizeFilterInputList(selectedFilterInputs));
   }, [selectedFilterInputs]);
 
   const getFocusableElements = () => {
@@ -771,12 +783,8 @@ export default function CollectionRoute() {
                           <span className="collection-filters__filter-value">No options</span>
                         ) : (
                           filter.values.map((value) => {
-                            const parsedValue = decodeFilterParam(value.input);
-                            const possibleInputs = parsedValue
-                              ? [value.input, encodeFilterParam(parsedValue)]
-                              : [value.input];
-                            const isChecked =
-                              value.active || possibleInputs.some((candidate) => localFilterInputSet.has(candidate));
+                            const normalizedValue = normalizeFilterInputValue(value.input);
+                            const isChecked = value.active || localFilterInputSet.has(normalizedValue);
                             return (
                               <div className="collection-filters__filter-value" key={value.id}>
                                 <label>

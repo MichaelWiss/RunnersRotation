@@ -88,21 +88,22 @@ body {
 .marquee {
   width: 100%;
   overflow: hidden;
+  position: relative;
 }
 
 .marquee-content {
   display: flex;
+  gap: clamp(48px, 14vw, 160px);
   animation: marqueeScroll 45s linear infinite;
   will-change: transform;
+  min-width: max-content;
 }
 
 .marquee-content span {
   display: inline-block;
-  padding-right: 200px;
   flex-shrink: 0;
   min-width: max-content;
 }
-
 
 @keyframes marqueeScroll {
   0% {
@@ -111,6 +112,14 @@ body {
   100% {
     transform: translateX(-50%);
   }
+}
+
+.marquee::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(233, 76, 38, 0.12), transparent 12%, transparent 88%, rgba(233, 76, 38, 0.12));
+  pointer-events: none;
 }
 
 .nav-container {
@@ -143,11 +152,12 @@ body {
   justify-content: center;
   cursor: pointer;
   z-index: 980; /* remain below announcement bar (1000) and within fixed header (990) */
-  transition: all 0.3s ease;
+  transition: box-shadow 0.3s ease, background 0.3s ease;
   box-shadow: 0 8px 32px rgba(212, 165, 116, 0.15);
   text-decoration: none;
   /* Rotation tied to scroll position (single source of truth) */
   transform: rotate(calc(var(--scroll-percentage, 0) * 360deg));
+  will-change: transform;
 }
 
 @keyframes gradientShift {

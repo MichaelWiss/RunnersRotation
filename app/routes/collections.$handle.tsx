@@ -18,6 +18,7 @@ import {
   SORT_LABELS,
   clearFilterParams,
   decodeFilterParam,
+  encodeFilterParam,
   parseFilterParams,
   parseSortParam,
   parseViewModeParam,
@@ -324,7 +325,17 @@ export default function CollectionRoute() {
   const [navOffset, setNavOffset] = useState(0);
   const [toolbarStuck, setToolbarStuck] = useState(false);
   const [localFilterInputs, setLocalFilterInputs] = useState<string[]>(selectedFilterInputs);
-  const localFilterInputSet = useMemo(() => new Set(localFilterInputs), [localFilterInputs]);
+  const localFilterInputSet = useMemo(() => {
+    const set = new Set<string>();
+    localFilterInputs.forEach((input) => {
+      set.add(input);
+      const parsed = decodeFilterParam(input);
+      if (parsed) {
+        set.add(encodeFilterParam(parsed));
+      }
+    });
+    return set;
+  }, [localFilterInputs]);
   const activeFilters = localFilterInputs.length;
   const filterToggleRef = useRef<HTMLButtonElement | null>(null);
   const sidebarRef = useRef<HTMLElement | null>(null);
@@ -760,7 +771,12 @@ export default function CollectionRoute() {
                           <span className="collection-filters__filter-value">No options</span>
                         ) : (
                           filter.values.map((value) => {
-                            const isChecked = localFilterInputSet.has(value.input);
+                            const parsedValue = decodeFilterParam(value.input);
+                            const possibleInputs = parsedValue
+                              ? [value.input, encodeFilterParam(parsedValue)]
+                              : [value.input];
+                            const isChecked =
+                              value.active || possibleInputs.some((candidate) => localFilterInputSet.has(candidate));
                             return (
                               <div className="collection-filters__filter-value" key={value.id}>
                                 <label>
@@ -770,7 +786,6 @@ export default function CollectionRoute() {
                                     value={value.input}
                                     checked={isChecked}
                                     onChange={() => handleFilterToggle(value.input)}
-                                    disabled={isLoading}
                                   />
                                   <span>{value.label}</span>
                                 </label>

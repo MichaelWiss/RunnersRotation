@@ -1435,10 +1435,9 @@ body {
 
 .home-products-grid .card-image img,
 .products-grid .card-image img {
-  max-width: 100%;
+  width: 100%;
+  height: auto;
   max-height: 100%;
-  width: auto;
-  height: 100%;         /* fill the 220px container height */
   object-fit: contain;  /* preserve aspect ratio, no cropping */
   object-position: center;
   display: block;       /* remove inline baseline gaps */

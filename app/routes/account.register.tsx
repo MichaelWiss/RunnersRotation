@@ -48,8 +48,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return Response.json({ errors: { password: passwordValidation.error } }, { status: 400 });
   }
 
-  const {customerSession, env} = getAppContext(context);
-
   try {
     const createResult = await createCustomer(env, email, password, firstName, lastName);
 

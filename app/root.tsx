@@ -1,6 +1,7 @@
 import {
   type LinksFunction,
   type LoaderFunctionArgs,
+  data,
   Links,
   Meta,
   Outlet,
@@ -161,7 +162,7 @@ export async function loader({context}: LoaderFunctionArgs) {
     const csrfToken = getCsrfToken(customerSession);
     const sessionHeaders = await commitSession(customerSession);
 
-    return Response.json(
+    return data(
       {
         isLoggedIn: Boolean(customerAccessToken),
         viewer: customerAccessToken

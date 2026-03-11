@@ -37,7 +37,6 @@ export async function action({request, context}: ActionFunctionArgs) {
     
   } catch (error) {
     console.error('Cart update error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return Response.json({error: errorMessage}, {status: 500});
+    return Response.json({error: 'Unable to update cart'}, {status: 500});
   }
 }

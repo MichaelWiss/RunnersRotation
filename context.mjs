@@ -16,6 +16,7 @@ export class AppSession {
         httpOnly: true,
         path: '/',
         sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
         secrets,
       },
     });

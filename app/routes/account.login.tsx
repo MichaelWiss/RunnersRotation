@@ -14,9 +14,19 @@ export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: homepageStyles },
 ];
 
+/** Only allow redirects to local paths (prevents open redirect attacks). */
+function safeRedirectTo(value: string | null): string {
+  if (!value || !value.startsWith('/') || value.startsWith('//')) return '/account';
+  return value;
+}
+
+export const links: LinksFunction = () => [
+  { rel: 'stylesheet', href: homepageStyles },
+];
+
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const redirectTo = url.searchParams.get('redirectTo') || '/account';
+  const redirectTo = safeRedirectTo(url.searchParams.get('redirectTo'));
   return Response.json({ redirectTo });
 }
 
@@ -24,7 +34,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
-  const redirectTo = formData.get('redirectTo') as string || '/account';
+  const redirectTo = safeRedirectTo(formData.get('redirectTo') as string | null);
 
   const emailValidation = validateEmail(email);
   if (!emailValidation.isValid) {

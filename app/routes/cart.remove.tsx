@@ -33,7 +33,6 @@ export async function action({request, context}: ActionFunctionArgs) {
     
   } catch (error) {
     console.error('Cart remove error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return Response.json({error: errorMessage}, {status: 500});
+    return Response.json({error: 'Unable to remove item from cart'}, {status: 500});
   }
 }

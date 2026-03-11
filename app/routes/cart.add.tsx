@@ -90,7 +90,6 @@ export async function action({request, context}: ActionFunctionArgs) {
     return respond({success: true, cart});
   } catch (error) {
     console.error('Cart add error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return respond({error: errorMessage}, 500);
+    return respond({error: 'Unable to add item to cart'}, 500);
   }
 }

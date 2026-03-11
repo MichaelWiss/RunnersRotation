@@ -40,9 +40,10 @@ import {createBuildResolver} from './build-loader.mjs';
 
 const {env: loadedEnv, missing} = loadEnv();
 const envMissing = missing.length > 0;
-const missingEnvHtml = `<!doctype html><html><head><meta charset='utf-8'><title>Missing env</title><style>body{font-family:system-ui;padding:40px;line-height:1.5;max-width:640px;margin:0 auto;}code{background:#eee;padding:2px 4px;border-radius:4px;}</style></head><body><h1>Configuration Required</h1><p>The server started but required environment variables are missing.</p><p>Add a <code>.env</code> file with:</p><pre style='background:#f7f7f7;padding:12px;border:1px solid #ddd;border-radius:6px;'>PUBLIC_STORE_DOMAIN=your-shop-name.myshopify.com
-PUBLIC_STOREFRONT_API_TOKEN=your_storefront_api_access_token
-SESSION_SECRET=$(openssl rand -hex 32)</pre><p>Then restart: <code>npm start</code>.</p><p>Missing: <strong>${missing.join(', ')}</strong></p></body></html>`;
+const isProd = process.env.NODE_ENV === 'production';
+const missingEnvHtml = isProd
+  ? `<!doctype html><html><head><meta charset='utf-8'><title>Service Unavailable</title></head><body><h1>Service Unavailable</h1><p>The application is not configured. Please contact the administrator.</p></body></html>`
+  : `<!doctype html><html><head><meta charset='utf-8'><title>Missing env</title><style>body{font-family:system-ui;padding:40px;line-height:1.5;max-width:640px;margin:0 auto;}code{background:#eee;padding:2px 4px;border-radius:4px;}</style></head><body><h1>Configuration Required</h1><p>The server started but required environment variables are missing.</p><p>Add a <code>.env</code> file with:</p><pre style='background:#f7f7f7;padding:12px;border:1px solid #ddd;border-radius:6px;'>PUBLIC_STORE_DOMAIN=your-shop-name.myshopify.com\nPUBLIC_STOREFRONT_API_TOKEN=your_storefront_api_access_token\nSESSION_SECRET=$(openssl rand -hex 32)</pre><p>Then restart: <code>npm start</code>.</p><p>Missing: <strong>${missing.join(', ')}</strong></p></body></html>`;
 if (envMissing) {
   console.warn('[env] Missing required vars at bootstrap:', missing.join(', '));
   console.warn('[env] The server will start in LIMITED mode and show a guidance page until you add them.');
@@ -51,7 +52,6 @@ const env = loadedEnv;
 // Log summary once at bootstrap (was previously done per-request in getContext)
 logEnvSummary();
 
-const isProd = process.env.NODE_ENV === 'production';
 const vite =
   isProd
     ? undefined
@@ -132,6 +132,17 @@ if (debugEnabled) {
 
 app.use(compression());
 
+// Security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  if (isProd) {
+    res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  }
+  next();
+});
+
 // (Per-request timing now handled only when debugEnabled)
 
 // http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header
@@ -156,13 +167,8 @@ app.use(express.static('public', {maxAge: '1h'}));
 
 if (debugEnabled) {
   app.get('/__health', (req, res) => {
-    const keys = [ 'PUBLIC_STORE_DOMAIN', 'PUBLIC_STOREFRONT_API_TOKEN', 'SESSION_SECRET', 'DEV_MOCK_PRODUCTS', 'DEBUG_INSTRUMENTATION' ];
-    const envPresence = Object.fromEntries(keys.map((k) => [k, env[k] ? true : false]));
     res.json({
       ok: true,
-      env: envPresence,
-      nodeEnv: process.env.NODE_ENV,
-      debug: true,
       timestamp: new Date().toISOString(),
     });
   });

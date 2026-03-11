@@ -18,12 +18,11 @@ public/assets/
 /.mf
 .shopify
 
-# Env files (keep examples separately)
+# Env files
 .env
 .env.local
 .env.example
 .env.*
-!.env.example
 !.env.d.ts
 
 # Logs

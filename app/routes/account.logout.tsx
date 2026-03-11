@@ -5,24 +5,20 @@ import {
   getCustomerToken,
   clearCustomerToken,
   commitSession,
-  validateCsrfToken,
+  requireCsrf,
 } from '~/lib/session.server';
 
 export async function action({ request, context }: ActionFunctionArgs) {
-  const {customerSession, env} = getAppContext(context);
+  const {customerSession} = getAppContext(context);
 
-  // CSRF validation
   const formData = await request.formData();
-  const csrfToken = formData.get('csrf') as string;
-  if (!validateCsrfToken(customerSession, csrfToken)) {
-    return Response.json({ error: 'Invalid form submission' }, { status: 403 });
-  }
+  requireCsrf(customerSession, formData);
 
   const token = getCustomerToken(customerSession);
   if (token) {
     try {
       // Optionally delete the token on Shopify side
-      await deleteCustomerAccessToken(token, env);
+      await deleteCustomerAccessToken(token, context.storefront);
     } catch (error) {
       // Log but don't fail the logout
       console.error('Error deleting customer access token:', error);

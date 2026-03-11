@@ -98,3 +98,14 @@ export async function commitSession(session: CustomerSession): Promise<Headers> 
 export async function destroySession(session: CustomerSession): Promise<Headers> {
   return session.destroyHeaders();
 }
+
+/**
+ * Validate CSRF token from form data. Throws a 403 Response if invalid.
+ * Use in route actions: `requireCsrf(customerSession, formData);`
+ */
+export function requireCsrf(session: CustomerSession, formData: FormData): void {
+  const token = String(formData.get('csrf') || '');
+  if (!validateCsrfToken(session, token)) {
+    throw Response.json({error: 'Invalid form submission'}, {status: 403});
+  }
+}

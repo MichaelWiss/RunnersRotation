@@ -4,7 +4,7 @@ import homepageStyles from '~/styles/homepage.css?url';
 import { recoverCustomer } from '~/lib/shopifyCustomer.server';
 import { validateEmail, normalizeStorefrontErrors } from '~/lib/validation.server';
 import { RecoverForm } from '~/components/auth';
-import { getAppContext, commitSession, getCsrfToken, validateCsrfToken } from '~/lib/session.server';
+import { getAppContext, commitSession, getCsrfToken, requireCsrf } from '~/lib/session.server';
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: homepageStyles },
@@ -21,13 +21,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
   const email = formData.get('email') as string;
 
-  const {customerSession, env} = getAppContext(context);
-
-  // CSRF validation
-  const csrfToken = formData.get('csrf') as string;
-  if (!validateCsrfToken(customerSession, csrfToken)) {
-    return Response.json({ errors: { general: 'Invalid form submission. Please reload and try again.' } }, { status: 403 });
-  }
+  const {customerSession} = getAppContext(context);
+  requireCsrf(customerSession, formData);
 
   const emailValidation = validateEmail(email);
   if (!emailValidation.isValid) {
@@ -35,7 +30,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   try {
-    const result = await recoverCustomer(email, env);
+    const result = await recoverCustomer(email, context.storefront);
 
     if (result.customerUserErrors && result.customerUserErrors.length > 0) {
       const errors = normalizeStorefrontErrors(result.customerUserErrors);

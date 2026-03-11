@@ -1,5 +1,6 @@
 import { useState, useMemo, memo, useCallback } from 'react';
 import { useCart } from '~/context/CartContext';
+import { formatPrice } from '~/utils/formatPrice';
 
 interface Variant {
   id: string;
@@ -70,10 +71,7 @@ const PurchaseCard = memo(function PurchaseCard({
   // Memoize formatted price
   const formattedPrice = useMemo(() => {
     if (!price) return '$185.00';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: price.currencyCode,
-    }).format(Number(price.amount));
+    return formatPrice(price.amount, price.currencyCode);
   }, [price]);
 
   // Memoize benefits text

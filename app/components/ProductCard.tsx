@@ -1,5 +1,6 @@
 import {Link} from 'react-router';
 import {memo, useMemo} from 'react';
+import {formatPrice} from '~/utils/formatPrice';
 
 export type ProductCardVariant = 'home' | 'footer';
 
@@ -25,14 +26,7 @@ const ProductCard = memo(function ProductCard({
   // Memoize expensive price formatting
   const formattedPrice = useMemo(() => {
     if (!price) return null;
-    try {
-      return new Intl.NumberFormat('en-GB', {
-        style: 'currency',
-        currency: price.currencyCode,
-      }).format(Number(price.amount));
-    } catch {
-      return `${price.currencyCode} ${price.amount}`;
-    }
+    return formatPrice(price.amount, price.currencyCode);
   }, [price]);
   if (variant === 'footer') {
     const content = (

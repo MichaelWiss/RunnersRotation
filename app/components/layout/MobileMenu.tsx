@@ -2,11 +2,10 @@ import { Link } from 'react-router';
 
 interface MobileMenuProps {
   isOpen: boolean;
-  cartCount: number;
   onClose: () => void;
 }
 
-export default function MobileMenu({ isOpen, cartCount, onClose }: MobileMenuProps) {
+export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   if (!isOpen) return null;
 
   return (

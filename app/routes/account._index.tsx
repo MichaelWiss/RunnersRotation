@@ -15,7 +15,7 @@ import {
   commitSession,
   isTokenExpired,
   getCsrfToken,
-  validateCsrfToken,
+  requireCsrf,
 } from '~/lib/session.server';
 import {
   getCustomer,
@@ -62,7 +62,7 @@ type ActionData = {
 };
 
 export async function loader({request, context}: LoaderFunctionArgs) {
-  const {customerSession, env} = getAppContext(context);
+  const {customerSession} = getAppContext(context);
   const token = getCustomerToken(customerSession);
   const redirectTarget = `/account/login?redirectTo=${encodeURIComponent(new URL(request.url).pathname)}`;
 
@@ -75,7 +75,7 @@ export async function loader({request, context}: LoaderFunctionArgs) {
   const csrfToken = getCsrfToken(customerSession);
 
   try {
-    const customer = await getCustomer(token, env);
+    const customer = await getCustomer(token, context.storefront);
 
     if (!customer) {
       clearCustomerToken(customerSession);
@@ -110,7 +110,7 @@ export async function loader({request, context}: LoaderFunctionArgs) {
 }
 
 export async function action({request, context}: ActionFunctionArgs) {
-  const {customerSession, env} = getAppContext(context);
+  const {customerSession} = getAppContext(context);
   const token = getCustomerToken(customerSession);
 
   if (!token || isTokenExpired(customerSession)) {
@@ -120,12 +120,7 @@ export async function action({request, context}: ActionFunctionArgs) {
   }
 
   const formData = await request.formData();
-
-  // CSRF validation
-  const csrfToken = formData.get('csrf') as string;
-  if (!validateCsrfToken(customerSession, csrfToken)) {
-    return Response.json({profile: {errors: {general: 'Invalid form submission. Please reload and try again.'}}}, {status: 403});
-  }
+  requireCsrf(customerSession, formData);
 
   const intent = typeof formData.get('intent') === 'string' ? (formData.get('intent') as string) : '';
 
@@ -150,7 +145,7 @@ export async function action({request, context}: ActionFunctionArgs) {
     }
 
     try {
-      const result = await updateCustomer(token, {firstName, lastName, email}, env);
+      const result = await updateCustomer(token, {firstName, lastName, email}, context.storefront);
       const userErrors = result?.customerUserErrors ?? [];
       if (userErrors.length) {
         const messages = normalizeStorefrontErrors(userErrors);
@@ -198,7 +193,7 @@ export async function action({request, context}: ActionFunctionArgs) {
     }
 
     try {
-      const verification = await createCustomerAccessToken(currentEmail, currentPassword, env);
+      const verification = await createCustomerAccessToken(currentEmail, currentPassword, context.storefront);
 
       if (!verification?.customerAccessToken) {
         const messages = normalizeStorefrontErrors(verification?.customerUserErrors || []);
@@ -207,12 +202,12 @@ export async function action({request, context}: ActionFunctionArgs) {
 
       const tempToken = verification.customerAccessToken.accessToken;
       try {
-        await deleteCustomerAccessToken(tempToken, env);
+        await deleteCustomerAccessToken(tempToken, context.storefront);
       } catch (tokenError) {
         console.warn('Failed to discard verification token', tokenError);
       }
 
-      const result = await updateCustomer(token, {password: newPassword}, env);
+      const result = await updateCustomer(token, {password: newPassword}, context.storefront);
       const userErrors = result?.customerUserErrors ?? [];
       if (userErrors.length) {
         const messages = normalizeStorefrontErrors(userErrors);

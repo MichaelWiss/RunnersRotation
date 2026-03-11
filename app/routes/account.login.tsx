@@ -7,7 +7,7 @@ import {
   setCustomerToken,
   commitSession,
   getCsrfToken,
-  validateCsrfToken,
+  requireCsrf,
 } from '~/lib/session.server';
 import { validateEmail, validatePassword, normalizeStorefrontErrors } from '~/lib/validation.server';
 import { LoginForm } from '~/components/auth';
@@ -37,13 +37,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const password = formData.get('password') as string;
   const redirectTo = safeRedirectTo(formData.get('redirectTo') as string | null);
 
-  const {customerSession, env} = getAppContext(context);
-
-  // CSRF validation
-  const csrfToken = formData.get('csrf') as string;
-  if (!validateCsrfToken(customerSession, csrfToken)) {
-    return Response.json({ errors: { general: 'Invalid form submission. Please reload and try again.' } }, { status: 403 });
-  }
+  const {customerSession} = getAppContext(context);
+  requireCsrf(customerSession, formData);
 
   const emailValidation = validateEmail(email);
   if (!emailValidation.isValid) {
@@ -56,7 +51,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   try {
-    const result = await createCustomerAccessToken(email, password, env);
+    const result = await createCustomerAccessToken(email, password, context.storefront);
 
     if (result.customerAccessToken) {
       setCustomerToken(customerSession, result.customerAccessToken.accessToken, result.customerAccessToken.expiresAt);

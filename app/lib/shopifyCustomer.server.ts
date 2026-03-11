@@ -1,18 +1,4 @@
-import { createStorefrontClient, InMemoryCache, type Storefront } from '@shopify/hydrogen';
-
-/**
- * Helper to create a Storefront client for customer operations.
- */
-function getStorefront(env: Record<string, string | undefined>) {
-  const { storefront } = createStorefrontClient({
-    cache: new InMemoryCache(),
-    waitUntil: undefined,
-    i18n: { language: 'EN', country: 'US' },
-    publicStorefrontToken: env.PUBLIC_STOREFRONT_API_TOKEN!,
-    storeDomain: env.PUBLIC_STORE_DOMAIN!,
-  });
-  return storefront;
-}
+import type { Storefront } from '@shopify/hydrogen';
 
 /**
  * Create a customer access token for login.
@@ -20,9 +6,8 @@ function getStorefront(env: Record<string, string | undefined>) {
 export async function createCustomerAccessToken(
   email: string,
   password: string,
-  env: Record<string, string | undefined>
+  storefront: Storefront
 ) {
-  const storefront = getStorefront(env);
   const result = await storefront.mutate(`
     mutation customerAccessTokenCreate($input: CustomerAccessTokenCreateInput!) {
       customerAccessTokenCreate(input: $input) {
@@ -48,9 +33,8 @@ export async function createCustomerAccessToken(
  */
 export async function deleteCustomerAccessToken(
   token: string,
-  env: Record<string, string | undefined>
+  storefront: Storefront
 ) {
-  const storefront = getStorefront(env);
   const result = await storefront.mutate(`
     mutation customerAccessTokenDelete($customerAccessToken: String!) {
       customerAccessTokenDelete(customerAccessToken: $customerAccessToken) {
@@ -73,9 +57,8 @@ export async function deleteCustomerAccessToken(
  */
 export async function renewCustomerAccessToken(
   token: string,
-  env: Record<string, string | undefined>
+  storefront: Storefront
 ) {
-  const storefront = getStorefront(env);
   const result = await storefront.mutate(`
     mutation customerAccessTokenRenew($customerAccessToken: String!) {
       customerAccessTokenRenew(customerAccessToken: $customerAccessToken) {
@@ -99,13 +82,12 @@ export async function renewCustomerAccessToken(
  * Create a new customer account.
  */
 export async function createCustomer(
-  env: Record<string, string | undefined>,
+  storefront: Storefront,
   email: string,
   password: string,
   firstName?: string,
   lastName?: string
 ) {
-  const storefront = getStorefront(env);
   const result = await storefront.mutate(`
     mutation customerCreate($input: CustomerCreateInput!) {
       customerCreate(input: $input) {
@@ -140,9 +122,8 @@ export async function createCustomer(
  */
 export async function recoverCustomer(
   email: string,
-  env: Record<string, string | undefined>
+  storefront: Storefront
 ) {
-  const storefront = getStorefront(env);
   const result = await storefront.mutate(`
     mutation customerRecover($email: String!) {
       customerRecover(email: $email) {
@@ -165,9 +146,8 @@ export async function recoverCustomer(
 export async function updateCustomer(
   token: string,
   updates: { firstName?: string; lastName?: string; email?: string; password?: string },
-  env: Record<string, string | undefined>
+  storefront: Storefront
 ) {
-  const storefront = getStorefront(env);
   const result = await storefront.mutate(`
     mutation customerUpdate($customerAccessToken: String!, $customer: CustomerUpdateInput!) {
       customerUpdate(customerAccessToken: $customerAccessToken, customer: $customer) {
@@ -198,9 +178,8 @@ export async function updateCustomer(
  */
 export async function getCustomer(
   token: string,
-  env: Record<string, string | undefined>
+  storefront: Storefront
 ) {
-  const storefront = getStorefront(env);
   const result = await storefront.query(`
     query getCustomer($customerAccessToken: String!) {
       customer(customerAccessToken: $customerAccessToken) {

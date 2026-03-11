@@ -21,23 +21,6 @@ export function getStorefront(context: {storefront: Storefront}) {
   return new StorefrontClient(context.storefront);
 }
 
-export const PRODUCT_MIN_QUERY = `#graphql
-  fragment MoneyFragment on MoneyV2 { amount currencyCode }
-  fragment ImageFragment on Image { id url altText width height }
-  query ProductMin($handle: String!) {
-    product(handle: $handle) {
-      id
-      title
-      handle
-      description
-      featuredImage { ...ImageFragment }
-      variants(first: 10) {
-        nodes { id title availableForSale price { ...MoneyFragment } }
-      }
-    }
-  }
-`;
-
 // Cart GraphQL Fragments and Mutations
 const CART_FRAGMENT = `#graphql
   fragment CartFragment on Cart {

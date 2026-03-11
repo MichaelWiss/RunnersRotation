@@ -1,5 +1,6 @@
 import type {Storefront} from '@shopify/hydrogen';
 import {getStorefront} from '~/lib/shopify';
+import type {Money} from '~/types';
 
 const MONEY_FRAGMENT = `#graphql
   fragment MoneyFragment on MoneyV2 {
@@ -146,8 +147,6 @@ const HOMEPAGE_QUERY = `#graphql
     }
   }
 `;
-
-type Money = {amount: string; currencyCode: string};
 
 type RawImage = {url: string | null; altText: string | null};
 

@@ -80,7 +80,6 @@ export default function Header({ collections, isLoggedIn, viewerName }: Omit<Hea
           <MainNavigation collections={navigationItems} />
           <MobileMenu 
             isOpen={mobileOpen} 
-            cartCount={cartCount} 
             onClose={handleMobileClose} 
           />
         </nav>

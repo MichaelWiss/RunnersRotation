@@ -1,9 +1,16 @@
 import type {ActionFunctionArgs} from 'react-router';
 import {CART_CREATE_MUTATION, CART_ADD_MUTATION} from '~/lib/shopify';
-import {getAppContext, commitSession} from '~/lib/session.server';
+import {getAppContext, commitSession, validateCsrfToken} from '~/lib/session.server';
 
 export async function action({request, context}: ActionFunctionArgs) {
   const formData = await request.formData();
+  const {customerSession} = getAppContext(context);
+
+  const csrfToken = String(formData.get('csrf') || '');
+  if (!validateCsrfToken(customerSession, csrfToken)) {
+    return Response.json({error: 'Invalid request'}, {status: 403});
+  }
+
   const variantId = String(formData.get('variantId') || '');
   const requestedQuantity = Number(formData.get('quantity'));
   const quantity = Number.isFinite(requestedQuantity)
@@ -14,7 +21,6 @@ export async function action({request, context}: ActionFunctionArgs) {
     return Response.json({error: 'Variant ID required'}, {status: 400});
   }
 
-  const {customerSession} = getAppContext(context);
   const storefront = context.storefront;
 
   if (!storefront) {

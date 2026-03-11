@@ -1,11 +1,17 @@
 import type {ActionFunctionArgs} from 'react-router';
 import {CART_REMOVE_MUTATION} from '~/lib/shopify';
-import {getAppContext} from '~/lib/session.server';
+import {getAppContext, validateCsrfToken} from '~/lib/session.server';
 
 export async function action({request, context}: ActionFunctionArgs) {
   const formData = await request.formData();
-  const lineId = String(formData.get('lineId') || '');
   const {customerSession} = getAppContext(context);
+
+  const csrfToken = String(formData.get('csrf') || '');
+  if (!validateCsrfToken(customerSession, csrfToken)) {
+    return Response.json({error: 'Invalid request'}, {status: 403});
+  }
+
+  const lineId = String(formData.get('lineId') || '');
   const storefront = context.storefront;
   const cartId = customerSession.get('cartId') as string | undefined;
   

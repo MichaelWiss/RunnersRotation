@@ -17,6 +17,7 @@ function isCustomerSession(value: unknown): value is CustomerSession {
     value !== null &&
     typeof value === 'object' &&
     typeof (value as CustomerSession).getCustomerToken === 'function' &&
+    typeof (value as CustomerSession).getCsrfToken === 'function' &&
     typeof (value as CustomerSession).get === 'function' &&
     typeof (value as CustomerSession).commitHeaders === 'function' &&
     typeof (value as CustomerSession).destroyHeaders === 'function'
@@ -28,6 +29,10 @@ function createNoopSession(): CustomerSession {
     getCustomerToken: () => undefined,
     setCustomerToken: () => {},
     clearCustomerToken: () => {},
+    isTokenExpired: () => false,
+    getTokenExpiresAt: () => undefined,
+    getCsrfToken: () => '',
+    validateCsrfToken: () => false,
     get: () => undefined,
     set: () => {},
     commit: async () => '',
@@ -66,12 +71,24 @@ export function getCustomerToken(session: CustomerSession) {
   return session.getCustomerToken();
 }
 
-export function setCustomerToken(session: CustomerSession, token: string) {
-  session.setCustomerToken(token);
+export function setCustomerToken(session: CustomerSession, token: string, expiresAt?: string) {
+  session.setCustomerToken(token, expiresAt);
 }
 
 export function clearCustomerToken(session: CustomerSession) {
   session.clearCustomerToken();
+}
+
+export function isTokenExpired(session: CustomerSession): boolean {
+  return session.isTokenExpired();
+}
+
+export function getCsrfToken(session: CustomerSession): string {
+  return session.getCsrfToken();
+}
+
+export function validateCsrfToken(session: CustomerSession, formToken: string): boolean {
+  return session.validateCsrfToken(formToken);
 }
 
 export async function commitSession(session: CustomerSession): Promise<Headers> {

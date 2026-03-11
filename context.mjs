@@ -2,6 +2,40 @@ import {createCookieSessionStorage} from 'react-router';
 import {createStorefrontClient, InMemoryCache} from '@shopify/hydrogen';
 import crypto from 'node:crypto';
 
+// ── Token encryption helpers (AES-256-GCM) ──────────────────────────────
+// Derives a 32-byte key from SESSION_SECRET using SHA-256.
+// The encrypted blob is stored as  iv:authTag:ciphertext  (all hex).
+
+function deriveEncryptionKey(secret) {
+  return crypto.createHash('sha256').update(secret).digest();
+}
+
+export function encryptToken(plaintext, secret) {
+  const key = deriveEncryptionKey(secret);
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
+  const authTag = cipher.getAuthTag();
+  return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted.toString('hex')}`;
+}
+
+export function decryptToken(blob, secret) {
+  if (!blob || typeof blob !== 'string') return undefined;
+  const parts = blob.split(':');
+  if (parts.length !== 3) return undefined;
+  try {
+    const key = deriveEncryptionKey(secret);
+    const iv = Buffer.from(parts[0], 'hex');
+    const authTag = Buffer.from(parts[1], 'hex');
+    const encrypted = Buffer.from(parts[2], 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+    decipher.setAuthTag(authTag);
+    return decipher.update(encrypted) + decipher.final('utf8');
+  } catch {
+    return undefined;
+  }
+}
+
 // Session abstraction extracted from server.mjs
 export class AppSession {
   constructor(sessionStorage, session) {
@@ -39,10 +73,12 @@ export class AppSession {
 /**
  * Session helpers for customer authentication.
  * Wraps the AppSession class with customer-specific methods.
+ * Includes CSRF token management, token encryption, and expiry checks.
  */
 export class CustomerSession {
-  constructor(session) {
+  constructor(session, sessionSecret) {
     this.session = session;
+    this._sessionSecret = sessionSecret;
   }
 
   static headersFromCookie(cookie) {
@@ -53,19 +89,58 @@ export class CustomerSession {
 
   static async init(request, secrets) {
     const appSession = await AppSession.init(request, secrets);
-    return new this(appSession);
+    return new this(appSession, secrets[0]);
   }
 
+  // ── Customer token (encrypted at rest) ─────────────────────────────
   getCustomerToken() {
-    return this.session.get('customerAccessToken');
+    const blob = this.session.get('customerAccessToken');
+    if (!blob) return undefined;
+    return decryptToken(blob, this._sessionSecret);
   }
 
-  setCustomerToken(token) {
-    this.session.set('customerAccessToken', token);
+  setCustomerToken(token, expiresAt) {
+    const encrypted = encryptToken(token, this._sessionSecret);
+    this.session.set('customerAccessToken', encrypted);
+    if (expiresAt) {
+      this.session.set('customerTokenExpiresAt', expiresAt);
+    }
   }
 
   clearCustomerToken() {
     this.session.unset('customerAccessToken');
+    this.session.unset('customerTokenExpiresAt');
+  }
+
+  // ── Token expiry ───────────────────────────────────────────────────
+  isTokenExpired() {
+    const expiresAt = this.session.get('customerTokenExpiresAt');
+    if (!expiresAt) return false; // no stored expiry — treat as valid
+    return new Date(expiresAt).getTime() <= Date.now();
+  }
+
+  getTokenExpiresAt() {
+    return this.session.get('customerTokenExpiresAt');
+  }
+
+  // ── CSRF token ─────────────────────────────────────────────────────
+  getCsrfToken() {
+    let token = this.session.get('csrfToken');
+    if (!token) {
+      token = crypto.randomBytes(32).toString('hex');
+      this.session.set('csrfToken', token);
+    }
+    return token;
+  }
+
+  validateCsrfToken(formToken) {
+    const sessionToken = this.session.get('csrfToken');
+    if (!sessionToken || !formToken || typeof formToken !== 'string') return false;
+    if (sessionToken.length !== formToken.length) return false;
+    return crypto.timingSafeEqual(
+      Buffer.from(sessionToken, 'utf8'),
+      Buffer.from(formToken, 'utf8'),
+    );
   }
 
   get(key) {

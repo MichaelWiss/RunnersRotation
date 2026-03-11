@@ -6,6 +6,8 @@ import {
   getAppContext,
   setCustomerToken,
   commitSession,
+  getCsrfToken,
+  validateCsrfToken,
 } from '~/lib/session.server';
 import { validateEmail, validatePassword, normalizeStorefrontErrors } from '~/lib/validation.server';
 import { LoginForm } from '~/components/auth';
@@ -20,14 +22,13 @@ function safeRedirectTo(value: string | null): string {
   return value;
 }
 
-export const links: LinksFunction = () => [
-  { rel: 'stylesheet', href: homepageStyles },
-];
-
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const redirectTo = safeRedirectTo(url.searchParams.get('redirectTo'));
-  return Response.json({ redirectTo });
+  const {customerSession} = getAppContext(context);
+  const csrfToken = getCsrfToken(customerSession);
+  const headers = await commitSession(customerSession);
+  return Response.json({ redirectTo, csrfToken }, { headers });
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -35,6 +36,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   const redirectTo = safeRedirectTo(formData.get('redirectTo') as string | null);
+
+  const {customerSession, env} = getAppContext(context);
+
+  // CSRF validation
+  const csrfToken = formData.get('csrf') as string;
+  if (!validateCsrfToken(customerSession, csrfToken)) {
+    return Response.json({ errors: { general: 'Invalid form submission. Please reload and try again.' } }, { status: 403 });
+  }
 
   const emailValidation = validateEmail(email);
   if (!emailValidation.isValid) {
@@ -52,7 +61,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const result = await createCustomerAccessToken(email, password, env);
 
     if (result.customerAccessToken) {
-      setCustomerToken(customerSession, result.customerAccessToken.accessToken);
+      setCustomerToken(customerSession, result.customerAccessToken.accessToken, result.customerAccessToken.expiresAt);
       const headers = await commitSession(customerSession);
       return redirect(redirectTo, { headers });
     } else {
@@ -66,7 +75,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 }
 
 export default function Login() {
-  const loaderData = useLoaderData() as { redirectTo: string };
+  const loaderData = useLoaderData() as { redirectTo: string; csrfToken: string };
   const actionData = useActionData() as { errors?: Record<string, string> } | undefined;
 
   return (
@@ -82,6 +91,7 @@ export default function Login() {
           <LoginForm
             errors={actionData?.errors}
             redirectTo={loaderData.redirectTo}
+            csrfToken={loaderData.csrfToken}
           />
         </div>
       </div>

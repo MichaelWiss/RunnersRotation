@@ -37,10 +37,12 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ 
   children, 
-  initialCart 
+  initialCart,
+  csrfToken,
 }: { 
   children: React.ReactNode; 
   initialCart: Cart | null;
+  csrfToken: string;
 }) {
   const [state, dispatch] = useReducer(cartReducer, {
     cart: initialCart,
@@ -85,7 +87,7 @@ export function CartProvider({
     dispatch({type: 'SET_ERROR', error: null});
     dispatch({ type: 'SET_LOADING', loading: true });
     addFetcher.submit(
-      { variantId, quantity: quantity.toString() },
+      { variantId, quantity: quantity.toString(), csrf: csrfToken },
       { method: 'post', action: '/cart/add' }
     );
   };
@@ -93,7 +95,7 @@ export function CartProvider({
   const removeFromCart = (lineId: string) => {
     dispatch({type: 'SET_ERROR', error: null});
     removeFetcher.submit(
-      { lineId },
+      { lineId, csrf: csrfToken },
       { method: 'post', action: '/cart/remove' }
     );
   };
@@ -101,7 +103,7 @@ export function CartProvider({
   const updateCartLine = (lineId: string, quantity: number) => {
     dispatch({type: 'SET_ERROR', error: null});
     updateFetcher.submit(
-      { lineId, quantity: quantity.toString() },
+      { lineId, quantity: quantity.toString(), csrf: csrfToken },
       { method: 'post', action: '/cart/update' }
     );
   };

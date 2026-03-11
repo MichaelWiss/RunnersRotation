@@ -3,12 +3,14 @@ import { AuthError } from './AuthError';
 interface RecoverFormProps {
   errors?: Record<string, string>;
   success?: boolean;
+  csrfToken?: string;
 }
 
-export function RecoverForm({ errors, success }: RecoverFormProps) {
+export function RecoverForm({ errors, success, csrfToken }: RecoverFormProps) {
   return (
     <form method="post" className="card" style={{ maxWidth: '400px', margin: '0 auto' }}>
       {errors && <AuthError errors={errors} />}
+      {csrfToken && <input type="hidden" name="csrf" value={csrfToken} />}
       {success && (
         <div
           style={{

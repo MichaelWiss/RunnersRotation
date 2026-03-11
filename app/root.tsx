@@ -24,6 +24,8 @@ import type {NavigationItem} from '~/types';
 import {
   getAppContext,
   getCustomerToken,
+  getCsrfToken,
+  commitSession,
 } from '~/lib/session.server';
 
 
@@ -156,19 +158,26 @@ export async function loader({context}: LoaderFunctionArgs) {
       footerPromise,
     ]);
 
-    return {
-      isLoggedIn: Boolean(customerAccessToken),
-      viewer: customerAccessToken
-        ? {
-            displayName: cart?.buyerIdentity?.customer?.displayName ?? null,
-            email: cart?.buyerIdentity?.customer?.email ?? cart?.buyerIdentity?.email ?? null,
-          }
-        : null,
-      cart,
-      layout,
-      navigationLinks: resolveSiteLinks(NAV_LINKS, navigationCollections),
-      footerLinks: resolveSiteLinks(FOOTER_LINKS, footerCollections),
-    };
+    const csrfToken = getCsrfToken(customerSession);
+    const sessionHeaders = await commitSession(customerSession);
+
+    return Response.json(
+      {
+        isLoggedIn: Boolean(customerAccessToken),
+        viewer: customerAccessToken
+          ? {
+              displayName: cart?.buyerIdentity?.customer?.displayName ?? null,
+              email: cart?.buyerIdentity?.customer?.email ?? cart?.buyerIdentity?.email ?? null,
+            }
+          : null,
+        cart,
+        layout,
+        navigationLinks: resolveSiteLinks(NAV_LINKS, navigationCollections),
+        footerLinks: resolveSiteLinks(FOOTER_LINKS, footerCollections),
+        csrfToken,
+      },
+      { headers: sessionHeaders },
+    );
   } catch (error) {
     const err = error instanceof Error ? error : new Error(typeof error === 'string' ? error : 'Unknown error');
     console.error('[root.loader] unexpected error', err);
@@ -215,7 +224,7 @@ export default function App() {
   const data = useRouteLoaderData<typeof loader>('root');
 
   return (
-    <CartProvider initialCart={data?.cart || null}>
+    <CartProvider initialCart={data?.cart || null} csrfToken={data?.csrfToken || ''}>
       <SiteLayout>
         <Outlet />
       </SiteLayout>

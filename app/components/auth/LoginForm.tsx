@@ -3,13 +3,15 @@ import { AuthError } from './AuthError';
 interface LoginFormProps {
   errors?: Record<string, string>;
   redirectTo?: string;
+  csrfToken?: string;
 }
 
-export function LoginForm({ errors, redirectTo }: LoginFormProps) {
+export function LoginForm({ errors, redirectTo, csrfToken }: LoginFormProps) {
   return (
     <form method="post" className="card" style={{ maxWidth: '400px', margin: '0 auto' }}>
       {errors && <AuthError errors={errors} />}
       {redirectTo && <input type="hidden" name="redirectTo" value={redirectTo} />}
+      {csrfToken && <input type="hidden" name="csrf" value={csrfToken} />}
 
       <div className="selectors">
         <div className="select">

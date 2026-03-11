@@ -5,10 +5,18 @@ import {
   getCustomerToken,
   clearCustomerToken,
   commitSession,
+  validateCsrfToken,
 } from '~/lib/session.server';
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const {customerSession, env} = getAppContext(context);
+
+  // CSRF validation
+  const formData = await request.formData();
+  const csrfToken = formData.get('csrf') as string;
+  if (!validateCsrfToken(customerSession, csrfToken)) {
+    return Response.json({ error: 'Invalid form submission' }, { status: 403 });
+  }
 
   const token = getCustomerToken(customerSession);
   if (token) {

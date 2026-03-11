@@ -2,12 +2,14 @@ import { AuthError } from './AuthError';
 
 interface RegisterFormProps {
   errors?: Record<string, string>;
+  csrfToken?: string;
 }
 
-export function RegisterForm({ errors }: RegisterFormProps) {
+export function RegisterForm({ errors, csrfToken }: RegisterFormProps) {
   return (
     <form method="post" className="card" style={{ maxWidth: '400px', margin: '0 auto' }}>
       {errors && <AuthError errors={errors} />}
+      {csrfToken && <input type="hidden" name="csrf" value={csrfToken} />}
 
       <div className="selectors">
         <div className="select">

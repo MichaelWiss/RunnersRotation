@@ -1,25 +1,38 @@
-import { type ActionFunctionArgs, useActionData } from 'react-router';
+import { type ActionFunctionArgs, type LoaderFunctionArgs, useActionData, useLoaderData } from 'react-router';
 import { LinksFunction } from 'react-router';
 import homepageStyles from '~/styles/homepage.css?url';
 import { recoverCustomer } from '~/lib/shopifyCustomer.server';
 import { validateEmail, normalizeStorefrontErrors } from '~/lib/validation.server';
 import { RecoverForm } from '~/components/auth';
-import { getEnv } from '~/lib/session.server';
+import { getAppContext, commitSession, getCsrfToken, validateCsrfToken } from '~/lib/session.server';
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: homepageStyles },
 ];
 
+export async function loader({ context }: LoaderFunctionArgs) {
+  const {customerSession} = getAppContext(context);
+  const csrfToken = getCsrfToken(customerSession);
+  const headers = await commitSession(customerSession);
+  return Response.json({ csrfToken }, { headers });
+}
+
 export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
   const email = formData.get('email') as string;
+
+  const {customerSession, env} = getAppContext(context);
+
+  // CSRF validation
+  const csrfToken = formData.get('csrf') as string;
+  if (!validateCsrfToken(customerSession, csrfToken)) {
+    return Response.json({ errors: { general: 'Invalid form submission. Please reload and try again.' } }, { status: 403 });
+  }
 
   const emailValidation = validateEmail(email);
   if (!emailValidation.isValid) {
     return Response.json({ errors: { email: emailValidation.error } }, { status: 400 });
   }
-
-  const env = getEnv(context);
 
   try {
     const result = await recoverCustomer(email, env);
@@ -37,6 +50,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 }
 
 export default function Recover() {
+  const loaderData = useLoaderData() as { csrfToken: string };
   const actionData = useActionData() as { errors?: Record<string, string>; success?: boolean } | undefined;
 
   return (
@@ -52,6 +66,7 @@ export default function Recover() {
           <RecoverForm
             errors={actionData?.errors}
             success={actionData?.success}
+            csrfToken={loaderData.csrfToken}
           />
         </div>
       </div>

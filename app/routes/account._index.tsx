@@ -13,6 +13,9 @@ import {
   getCustomerToken,
   clearCustomerToken,
   commitSession,
+  isTokenExpired,
+  getCsrfToken,
+  validateCsrfToken,
 } from '~/lib/session.server';
 import {
   getCustomer,
@@ -31,6 +34,7 @@ export const links: LinksFunction = () => [
 ];
 
 type LoaderData = {
+  csrfToken: string;
   customer: {
     id: string;
     displayName: string | null;
@@ -62,9 +66,13 @@ export async function loader({request, context}: LoaderFunctionArgs) {
   const token = getCustomerToken(customerSession);
   const redirectTarget = `/account/login?redirectTo=${encodeURIComponent(new URL(request.url).pathname)}`;
 
-  if (!token) {
-    throw redirect(redirectTarget);
+  if (!token || isTokenExpired(customerSession)) {
+    clearCustomerToken(customerSession);
+    const headers = await commitSession(customerSession);
+    throw redirect(redirectTarget, {headers});
   }
+
+  const csrfToken = getCsrfToken(customerSession);
 
   try {
     const customer = await getCustomer(token, env);
@@ -83,6 +91,7 @@ export async function loader({request, context}: LoaderFunctionArgs) {
     }));
 
     return Response.json({
+      csrfToken,
       customer: {
         id: customer.id,
         displayName: customer.displayName ?? null,
@@ -91,7 +100,7 @@ export async function loader({request, context}: LoaderFunctionArgs) {
         email: customer.email ?? null,
         orders,
       },
-    } satisfies LoaderData);
+    } satisfies LoaderData, { headers: await commitSession(customerSession) });
   } catch (error) {
     console.error('Account loader error:', error);
     clearCustomerToken(customerSession);
@@ -104,11 +113,20 @@ export async function action({request, context}: ActionFunctionArgs) {
   const {customerSession, env} = getAppContext(context);
   const token = getCustomerToken(customerSession);
 
-  if (!token) {
-    return redirect('/account/login?redirectTo=/account');
+  if (!token || isTokenExpired(customerSession)) {
+    clearCustomerToken(customerSession);
+    const headers = await commitSession(customerSession);
+    return redirect('/account/login?redirectTo=/account', {headers});
   }
 
   const formData = await request.formData();
+
+  // CSRF validation
+  const csrfToken = formData.get('csrf') as string;
+  if (!validateCsrfToken(customerSession, csrfToken)) {
+    return Response.json({profile: {errors: {general: 'Invalid form submission. Please reload and try again.'}}}, {status: 403});
+  }
+
   const intent = typeof formData.get('intent') === 'string' ? (formData.get('intent') as string) : '';
 
   if (intent === 'update-profile') {
@@ -229,7 +247,7 @@ function SuccessMessage({children}: {children: string}) {
 }
 
 export default function Account() {
-  const {customer} = useLoaderData<typeof loader>() as LoaderData;
+  const {csrfToken, customer} = useLoaderData<typeof loader>() as LoaderData;
   const actionData = useActionData<ActionData>() ?? {};
 
   const profileErrors = actionData.profile?.errors;
@@ -252,6 +270,7 @@ export default function Account() {
             {profileSuccess ? <SuccessMessage>{profileSuccess}</SuccessMessage> : null}
             {profileErrors ? <AuthError errors={profileErrors} /> : null}
             <form method="post">
+              <input type="hidden" name="csrf" value={csrfToken} />
               <input type="hidden" name="intent" value="update-profile" />
               <div className="selectors">
                 <div className="select">
@@ -300,6 +319,7 @@ export default function Account() {
             {passwordSuccess ? <SuccessMessage>{passwordSuccess}</SuccessMessage> : null}
             {passwordErrors ? <AuthError errors={passwordErrors} /> : null}
             <form method="post">
+              <input type="hidden" name="csrf" value={csrfToken} />
               <input type="hidden" name="intent" value="change-password" />
               <input type="hidden" name="currentEmail" value={customer.email ?? ''} />
               <div className="selectors">
